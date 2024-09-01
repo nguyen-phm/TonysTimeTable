@@ -67,19 +67,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # If you are running React locally
-    "http://127.0.0.1:3000",  # If you deploy your React app
-]
+
 ROOT_URLCONF = 'timetable_project.urls'
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -108,11 +104,11 @@ WSGI_APPLICATION = 'timetable_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tt_database',
-        'USER': 'admin',
-        'PASSWORD': 'adM1N8943',
-        'HOST': 'timetable-db.czma2s88en0g.ap-southeast-2.rds.amazonaws.com',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'tt_database'),
+        'USER': os.environ.get('DB_USER', 'admin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'adM1N8943'),
+        'HOST': os.environ.get('DB_HOST', 'timetable-db.czma2s88en0g.ap-southeast-2.rds.amazonaws.com'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
     }
 }
 AUTH_USER_MODEL = 'authentication.CustomUser'

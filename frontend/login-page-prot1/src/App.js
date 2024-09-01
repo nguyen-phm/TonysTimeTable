@@ -24,16 +24,6 @@ function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    client.get("/testtoken")
-    .then(function(res) {
-      setCurrentUser(true);
-    })
-    .catch(function(error) {
-      setCurrentUser(false);
-    });
-  }, []);
-
   function update_form_btn() {
     if (registrationToggle) {
       document.getElementById("form_btn").innerHTML = "Register";
@@ -45,9 +35,9 @@ function App() {
   }
 
   function submitRegistration(e) {
-    e.preventDefault();
+    /*e.preventDefault();
     client.post(
-      "/signup",
+      "/auth/signup",
       {
         email: email,
         username: username,
@@ -55,28 +45,28 @@ function App() {
       }
     ).then(function(res) {
       client.post(
-        "/login",
+        "/auth/login",
         {
-          email: email,
+          username: username,
           password: password
         }
       ).then(function(res) {
         setCurrentUser(true);
       });
-    });
+    });*/
   }
 
   function submitLogin(e) {
-    e.preventDefault();
+    /*e.preventDefault();
     client.post(
-      "/login",
+      "/auth/login",
       {
-        email: email,
+        username: username,
         password: password
       }
     ).then(function(res) {
       setCurrentUser(true);
-    });
+    });*/
   }
 
   function submitLogout(e) {
@@ -89,7 +79,7 @@ function App() {
     });*/
   }
 
-  if (currentUser) {
+  /*if (currentUser) {
     return (
       <div>
         <Navbar bg="dark" variant="dark">
@@ -110,7 +100,7 @@ function App() {
           </div>
         </div>
     );
-  }
+  }*/
   return (
     <div>
     <Navbar bg="dark" variant="dark">
@@ -131,9 +121,6 @@ function App() {
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Email address</Form.Label>
               <Form.Control type="email" placeholder="Enter email" value={email} onChange={e => setEmail(e.target.value)} />
-              <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicUsername">
               <Form.Label>Username</Form.Label>
@@ -151,12 +138,9 @@ function App() {
       ) : (
         <div className="center">
           <Form onSubmit={e => submitLogin(e)}>
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control type="email" placeholder="Enter email" value={email} onChange={e => setEmail(e.target.value)} />
-              <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-              </Form.Text>
+          <Form.Group className="mb-3" controlId="formBasicUsername">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicPassword">
               <Form.Label>Password</Form.Label>

@@ -35,7 +35,7 @@ function App() {
   }
 
   function submitRegistration(e) {
-    /*e.preventDefault();
+    e.preventDefault();
     client.post(
       "/auth/signup",
       {
@@ -53,11 +53,11 @@ function App() {
       ).then(function(res) {
         setCurrentUser(true);
       });
-    });*/
+    });
   }
 
   function submitLogin(e) {
-    /*e.preventDefault();
+    e.preventDefault();
     client.post(
       "/auth/login",
       {
@@ -66,41 +66,12 @@ function App() {
       }
     ).then(function(res) {
       setCurrentUser(true);
-    });*/
+    });
   }
 
   function submitLogout(e) {
-    /*e.preventDefault();
-    client.post(
-      "/logout",
-      {withCredentials: true}
-    ).then(function(res) {
-      setCurrentUser(false);
-    });*/
   }
 
-  /*if (currentUser) {
-    return (
-      <div>
-        <Navbar bg="dark" variant="dark">
-          <Container>
-            <Navbar.Brand>Authentication App</Navbar.Brand>
-            <Navbar.Toggle />
-            <Navbar.Collapse className="justify-content-end">
-              <Navbar.Text>
-                <form onSubmit={e => submitLogout(e)}>
-                  <Button type="submit" variant="light">Log out</Button>
-                </form>
-              </Navbar.Text>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
-          <div className="center">
-            <h2>You're logged in!</h2>
-          </div>
-        </div>
-    );
-  }*/
   return (
     <div>
     <Navbar bg="dark" variant="dark">

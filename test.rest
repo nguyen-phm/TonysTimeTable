@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8000/auth/signup/
+Content-Type: application/json
+
+{"username" : "tpp", "password" : "00000000", "university_email" : "tpp@unimelb.au", "personal_email" : "tpp@gmail.com"}
+
+###

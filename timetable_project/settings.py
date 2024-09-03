@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-lenf#yo91p9ceo@x2v3)5ve_56j2nhu!psyc@hn=t(l&fswe%^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -67,21 +66,41 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # If you are running React locally
-    "http://127.0.0.1:3000",  # If you deploy your React app
+    "http://localhost:3000",  # React frontend origin
 ]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 ROOT_URLCONF = 'timetable_project.urls'
-CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -107,16 +126,19 @@ WSGI_APPLICATION = 'timetable_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tt_database',
-        'USER': 'admin',
-        'PASSWORD': 'adM1N8943',
-        'HOST': 'timetable-db.czma2s88en0g.ap-southeast-2.rds.amazonaws.com',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.mysql',  # Database engine
+        'NAME': "tt_database",         # Database name (file path for SQLite)
+        'USER': "admin",
+        'PASSWORD': "adM1N8943",
+        'HOST' : 'timetable-db.czma2s88en0g.ap-southeast-2.rds.amazonaws.com',
+        'PORT' : '3306',
     }
 }
-AUTH_USER_MODEL = 'authentication.CustomUser'
 
+AUTH_USER_MODEL = 'authentication.CustomUser'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

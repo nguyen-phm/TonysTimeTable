@@ -126,8 +126,12 @@ WSGI_APPLICATION = 'timetable_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.mysql',  # Database engine
+        'NAME': "tt_database",         # Database name (file path for SQLite)
+        'USER': "admin",
+        'PASSWORD': "adM1N8943",
+        'HOST' : 'timetable-db.czma2s88en0g.ap-southeast-2.rds.amazonaws.com',
+        'PORT' : '3306',
     }
 }
 

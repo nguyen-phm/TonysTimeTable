@@ -37,7 +37,7 @@ function App() {
   function submitRegistration(e) {
     e.preventDefault();
     client.post(
-      "/auth/signup",
+      "/auth/signup/",
       {
         email: email,
         username: username,
@@ -45,7 +45,7 @@ function App() {
       }
     ).then(function (res) {
       client.post(
-        "/auth/login",
+        "/auth/login/",
         {
           username: username,
           password: password

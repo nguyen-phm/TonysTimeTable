@@ -6,8 +6,7 @@ class CustomUser(AbstractUser):
     university_email = models.EmailField(unique=True)
     personal_email = models.EmailField(unique=True)
     is_student = models.BooleanField(default=False)
-    is_lecturer = models.BooleanField(default=False)
-    is_tutor = models.BooleanField(default=False)
+    is_teacher = models.BooleanField(default=False)
 
     def clean(self):
         if not self.pk:
@@ -15,7 +14,7 @@ class CustomUser(AbstractUser):
             if self.university_email.endswith('student.sth.edu.au'):
                 self.is_student = True
             elif self.university_email.endswith('sth.edu.au'):
-                self.is_lecturer = True
+                self.is_teacher = True
             else:
                 raise ValidationError("invalid university email")
     def save(self, *args, **kwargs):

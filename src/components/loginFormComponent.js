@@ -22,51 +22,49 @@ const LoginFormComponent = () => {
         if (error) {
             setError(error.message); // Set error message if login fails
         } else {
-            navigate('/success'); // Navigate to the success page after login
+            navigate('/timetable'); // Navigate to the success page after login
         }
     };
 
     return (
         <div className="login-form-container">
-            <form onSubmit={handleLogin}>
-                <form className="login-form">
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} // update user state
-                        required
-                    />
+            <form onSubmit={handleLogin} className="login-form">
+                <label>Email:</label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)} // update user state
+                    required
+                />
 
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)} //upate pass state
-                        required
-                    />
+                <label>Password:</label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)} //upate pass state
+                    required
+                />
 
-                    <div className="checkbox-container">
-                        <label htmlFor="remember-me"> Remember me</label>
-                        <input type="checkbox" id="remember-me" />
-                    </div>
+                <div className="checkbox-container">
+                    <label htmlFor="remember-me"> Remember me</label>
+                    <input type="checkbox" id="remember-me" />
+                </div>
 
-                    <div className="login-forgot-password">
-                        <Link to="/forgot-password">
-                            {"Forgot Password?"}
-                        </Link>
-                    </div>
+                <div className="login-forgot-password">
+                    <Link to="/forgot-password">
+                        {"Forgot Password?"}
+                    </Link>
+                </div>
 
-                    <button type="submit">Login</button>
+                <button type="submit">Login</button>
 
-                    <div className="login-sign-up">
-                        <p>Don't have an account?</p>
-                        <Link to="/sign-up">
-                            {"Register"}
-                        </Link>
-                    </div>
+                <div className="login-sign-up">
+                    <p>Don't have an account?</p>
+                    <Link to="/sign-up">
+                        {"Register"}
+                    </Link>
+                </div>
 
-                </form>
             </form>
             <div className="login-hero-image">
                 <img src={VITLogo} alt="VIT Logo" />

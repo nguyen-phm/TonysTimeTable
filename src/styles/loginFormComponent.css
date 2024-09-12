@@ -34,7 +34,8 @@
 }
 
 .login-form input[type="text"],
-.login-form input[type="password"] {
+.login-form input[type="password"], 
+.login-form input[type="email"]{
     padding: 12px;
     margin-bottom: 20px;
     border: none;

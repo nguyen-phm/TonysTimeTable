@@ -2,11 +2,7 @@ import '../styles/formComponent.css';
 import VITLogo from '../assets/VITLogo.png';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-//import { supabase } from './supabaseClient';
-
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient('https://epzbzgpckybkcuujwiac.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwemJ6Z3Bja3lia2N1dWp3aWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU1NDg4MjEsImV4cCI6MjA0MTEyNDgyMX0.0BXh3GnxhLhvoEdcbaRte9s8Z3VA2937pV0A6QXMMB0');
+import { supabase } from './supabaseClient';
 
 const FormComponent = () => {
     const [email, setEmail] = useState(''); // stores email

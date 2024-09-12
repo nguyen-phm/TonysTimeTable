@@ -2,12 +2,24 @@ import '../styles/formComponent.css';
 import VITLogo from '../assets/VITLogo.png';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient';
+import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 
 const FormComponent = () => {
     const [username, setUsername] = useState(''); // stores user
     const [password, setPassword] = useState(''); // stores pass
     const navigate = useNavigate();
 
+    /*const formComponent = () => {
+
+        supabase.auth.onAuthStateChange(async (event) => {
+            if (event !== "SIGNED_OUT") {
+    
+            } else {
+    
+            }
+        })}*/
+    
     const handleLogin = (e) => {
         e.preventDefault(); // no reloading page
         // Navigate to timetable page after login
@@ -15,6 +27,7 @@ const FormComponent = () => {
     };
 
     return (
+
         <div className="form">
             <form onSubmit={handleLogin}>
                 <label>Username:</label>

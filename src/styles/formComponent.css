@@ -33,7 +33,7 @@ label {
     color: #333;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"] , input[type="email"]{
     padding: 12px;
     margin-bottom: 20px; 
     border: none;

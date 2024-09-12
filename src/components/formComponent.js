@@ -2,39 +2,42 @@ import '../styles/formComponent.css';
 import VITLogo from '../assets/VITLogo.png';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from './supabaseClient';
-import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
+//import { supabase } from './supabaseClient';
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient('https://epzbzgpckybkcuujwiac.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwemJ6Z3Bja3lia2N1dWp3aWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU1NDg4MjEsImV4cCI6MjA0MTEyNDgyMX0.0BXh3GnxhLhvoEdcbaRte9s8Z3VA2937pV0A6QXMMB0');
 
 const FormComponent = () => {
-    const [username, setUsername] = useState(''); // stores user
+    const [email, setEmail] = useState(''); // stores email
     const [password, setPassword] = useState(''); // stores pass
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    /*const formComponent = () => {
+    const handleLogin = async (e) => {
+        e.preventDefault(); // prevents page reload on form submission
 
-        supabase.auth.onAuthStateChange(async (event) => {
-            if (event !== "SIGNED_OUT") {
-    
-            } else {
-    
-            }
-        })}*/
-    
-    const handleLogin = (e) => {
-        e.preventDefault(); // no reloading page
-        // Navigate to timetable page after login
-        navigate('/timetable');
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            setError(error.message); // Set error message if login fails
+        } else {
+            navigate('/success'); // Navigate to the success page after login
+        }
     };
 
     return (
 
         <div className="form">
             <form onSubmit={handleLogin}>
-                <label>Username:</label>
+                <label>Email:</label>
                 <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)} // update user state
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)} // update user state
                     required
                 />
 

@@ -39,15 +39,33 @@ const SignupFormComponent = () => {
             </p>
 
             <div className="signup-form">
-                <form>
+                <form onSubmit={handleSignup}>
+                    {error && <p className="error-message">{error}</p>}
+                    {successMessage && <p className="success-message">{successMessage}</p>}
+
                     <label>Email:</label>
-                    <input type="text" required />
+                    <input 
+                        type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                    />
 
                     <label>Password:</label>
-                    <input type="password" required />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
 
                     <label>Confirm Password:</label>
-                    <input type="password" required />
+                    <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
 
                     <ul className="">
                         <li>Password must contain only numbers and letters.</li>

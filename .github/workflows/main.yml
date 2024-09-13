@@ -26,11 +26,3 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Deploy to Vercel
-        if: success()  # Deploy only if previous steps are successful
-        uses: amondnet/vercel-action@v22
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'

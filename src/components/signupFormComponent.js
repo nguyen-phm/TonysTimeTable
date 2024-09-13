@@ -9,18 +9,21 @@ const SignupFormComponent = () => {
 
             <div className="signup-form">
                 <form>
-                    <label>First name:</label>
-                    <input type="text" required />
-
-                    <label>Last name:</label>
-                    <input type="text" required />
-
                     <label>Email:</label>
                     <input type="text" required />
 
-                    <label>Password &#40;6 or more&#41;:</label>
+                    <label>Password:</label>
                     <input type="password" required />
 
+                    <label>Confirm Password:</label>
+                    <input type="password" required />
+
+                    <ul className="">
+                        <li>Password must contain only numbers and letters.</li>
+                        <li>Password must contain atleast one symbol</li>
+                        <li>Password must be atleast 6 characters long</li>
+                    </ul>
+    
                     <p className="signup-agreement">
                         By clicking Join now, you agree to VIT's User agreement, Privacy Policy, and Cookie Policy
                     </p>

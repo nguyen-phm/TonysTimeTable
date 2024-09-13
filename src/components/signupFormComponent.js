@@ -1,6 +1,37 @@
 import '../styles/signupFormComponent.css';
+import { useState } from 'react';
+import { supabase } from './supabaseClient';
 
 const SignupFormComponent = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            setError("Passwords do not match!");
+            return;
+        }
+
+        // Call Supabase signUp function
+        const { error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            setError(error.message);
+        } else {
+            setSuccessMessage("Signup successful! Check your email for verification.");
+            setError(null); // Clear error if signup is successful
+        }
+    };
+
     return (
         <div className="signup-form-container">
             <p className="signup-institute">

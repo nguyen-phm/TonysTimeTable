@@ -1,8 +1,23 @@
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import React from 'react';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import VITLogo from '../assets/VITLogo.png';
-import '../styles/timetablePage.css'; // Update the CSS import
+import { useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient';
+import '../styles/timetablePage.css'; 
 
 const NavbarComponent = () => {
+    const navigate = useNavigate();
+
+    const handleSignOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('Error signing out:', error.message);
+        } else {
+  
+            navigate('/'); 
+        }
+    };
+
     return (
         <Navbar expand="lg" className="navbar" fixed="top">
             <Container>
@@ -21,6 +36,7 @@ const NavbarComponent = () => {
                     <Nav className="ms-auto">
                         <Nav.Link href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Enquiry Page</Nav.Link>
                         <Nav.Link href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">View Enrollment</Nav.Link>
+                        <Button variant="outline-light" onClick={handleSignOut}>Sign Out</Button>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

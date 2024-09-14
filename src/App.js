@@ -4,6 +4,7 @@ import LoginPage from './pages/loginPage';
 import SignupPage from './pages/signupPage';
 import TimetablePage from './pages/timetablePage';
 import ForgotPasswordPage from './pages/forgotPasswordPage'
+import ProtectedRoute from './components/protectedRoute';
 
 function App() {
   return (
@@ -12,7 +13,14 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/sign-up" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/timetable" element={<TimetablePage />} />
+          <Route 
+            path="/timetable" 
+            element={
+              <ProtectedRoute>
+                <TimetablePage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </BrowserRouter>
   );

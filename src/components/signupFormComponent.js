@@ -1,6 +1,8 @@
 import '../styles/signupFormComponent.css';
+import 'boxicons'
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
+import VITLogo from '../assets/VITLogo.png'
 
 const SignupFormComponent = () => {
     const [email, setEmail] = useState('');
@@ -34,53 +36,56 @@ const SignupFormComponent = () => {
 
     return (
         <div className="signup-form-container">
-            <p className="signup-institute">
-                Victoria Institute of Technology
-            </p>
 
-            <div className="signup-form">
-                <form onSubmit={handleSignup}>
-                    {error && <p className="error-message">{error}</p>}
-                    {successMessage && <p className="success-message">{successMessage}</p>}
+            <div className='signup-logo-border'>
+                <div className="signup-hero-image">
+                    <img src={VITLogo} alt="VIT Logo" />
+                </div>
 
-                    <label>Email:</label>
-                    <input 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required 
-                    />
+                <div className="signup-form">
 
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <form onSubmit={handleSignup}>
+                        <h1>Create Your Account</h1>
 
-                    <label>Confirm Password:</label>
-                    <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                    />
+                        {error && <p className="error-message">{error}</p>}
+                        {successMessage && <p className="success-message">{successMessage}</p>}
 
-                    <ul className="">
-                        <li>Password must contain only numbers and letters.</li>
-                        <li>Password must contain atleast one symbol</li>
-                        <li>Password must be atleast 6 characters long</li>
-                    </ul>
-    
-                    <p className="signup-agreement">
-                        By clicking Join now, you agree to VIT's User agreement, Privacy Policy, and Cookie Policy
-                    </p>
+                        <label>Email:</label>
+                        <input 
+                            type="email" 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required 
+                            placeholder='Enter VIT Email'
+                        />
 
-                    <button type="submit" className="signup-button">
-                        <label htmlFor="join-now">Join Now</label>
-                    </button>
-                </form>
+                        <label>Password:</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder="Enter Password"
+                        />
+
+                        <label>Confirm Password:</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            placeholder="Enter Password"
+                        />
+        
+                        <p className="signup-agreement">
+                            By clicking Join now, you agree to VIT's User agreement, Privacy Policy, and Cookie Policy
+                        </p>
+
+                        <button type="submit" className="signup-button">
+                            CREATE ACCOUNT
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

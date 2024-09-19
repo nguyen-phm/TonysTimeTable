@@ -29,9 +29,9 @@ const LoginFormComponent = () => {
     return (
         <div className="login-form-container">
                 
-            <div className="logo-border grid-cols-2 gap-1">
+            <div className="login-logo-border grid-cols-3 gap-1">
                 <form onSubmit={handleLogin} className="login-form">
-                    <h1>Login</h1>
+                    <h1>Welcome!</h1>
 
                     <label>Email Address: </label>
                     <input
@@ -62,7 +62,7 @@ const LoginFormComponent = () => {
                         </Link>
                     </div>
 
-                    <button type="submit">Login</button>
+                    <button type="submit">SIGN IN</button>
 
                     <div className="login-sign-up">
                         <p>Don't have an account?</p>

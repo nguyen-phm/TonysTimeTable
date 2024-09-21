@@ -3,9 +3,9 @@ import LoginFormComponent from "../components/loginFormComponent";
 function loginPage() {
     return (
       <div>
-          <LoginFormComponent/>
+          <LoginFormComponent/>  
       </div>
-    );
+    ); 
   };
   
   export default loginPage;

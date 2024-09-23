@@ -29,47 +29,55 @@ const LoginFormComponent = () => {
 
     return (
         <div className="login-form-container">
-            <form onSubmit={handleLogin} className="login-form">
-                <label>Email:</label>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)} // update user state
-                    required
-                />
+                
+            <div className="login-logo-border grid-cols-3 gap-1">
+                <form onSubmit={handleLogin} className="login-form">
+                    <h1>Welcome!</h1>
 
-                <label>Password:</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)} //upate pass state
-                    required
-                />
+                    <label>Email Address: </label>
+                    <input
+                        type="email"
+                        value={email}
+                        placeholder="Enter VIT Email"
+                        onChange={(e) => setEmail(e.target.value)} // update user state
+                        required
+                    />
 
-                <div className="checkbox-container">
-                    <label htmlFor="remember-me"> Remember me</label>
-                    <input type="checkbox" id="remember-me" />
+                    <label>Password: </label>
+                    <input
+                        type="password"
+                        value={password}
+                        placeholder="Enter Password"
+                        onChange={(e) => setPassword(e.target.value)} //upate pass state
+                        required
+                    />
+
+                    <div className="forgot-remember">
+                        <div className="remember-container">
+                            <input type="checkbox" id="remember-me" />
+                            <label htmlFor="remember-me"> Remember me</label>
+                        </div>
+
+                        <Link to="/forgot-password">
+                            {"Forgot Password?"}
+                        </Link>
+                    </div>
+
+                    <button type="submit">SIGN IN</button>
+
+                    <div className="login-sign-up">
+                        <p>Don't have an account?</p>
+                        <Link to="/sign-up">
+                            {"Register"}
+                        </Link>
+                    </div>
+
+                </form>   
+                <div className="login-hero-image">
+                    <img src={VITLogo} alt="VIT Logo" />
                 </div>
-
-                <div className="login-forgot-password">
-                    <Link to="/forgot-password">
-                        {"Forgot Password?"}
-                    </Link>
-                </div>
-
-                <button type="submit">Login</button>
-
-                <div className="login-sign-up">
-                    <p>Don't have an account?</p>
-                    <Link to="/sign-up">
-                        {"Register"}
-                    </Link>
-                </div>
-
-            </form>
-            <div className="login-hero-image">
-                <img src={VITLogo} alt="VIT Logo" />
             </div>
+
         </div>
     );
 };

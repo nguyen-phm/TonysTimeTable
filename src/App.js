@@ -5,6 +5,7 @@ import SignupPage from './pages/signupPage';
 import TimetablePage from './pages/timetablePage';
 import ForgotPasswordPage from './pages/forgotPasswordPage'
 import ProtectedRoute from './components/protectedRoute';
+import RecoveryPage from './pages/recoveryPage';
 
 function App() {
   return (
@@ -18,6 +19,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TimetablePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/resetpassword" 
+            element={
+              <ProtectedRoute>
+                <RecoveryPage />
               </ProtectedRoute>
             } 
           />

@@ -1,0 +1,46 @@
+name: Deploy Supabase Edge Functions with Upstash Redis
+
+on:
+  push:
+    branches:
+      - main  # Deploy only when changes are pushed to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      # Step 3: Install Supabase CLI
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      # Step 4: Install Deno (needed for edge functions)
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      # Step 5: Log in to Supabase (using your API token)
+      - name: Supabase Login
+        run: supabase login --token ${{ secrets.SUPABASE_TOKEN }}
+        env:
+          SUPABASE_TOKEN: ${{ secrets.SUPABASE_TOKEN }}
+
+      # Step 6: Deploy Edge Functions
+      - name: Deploy Supabase Edge Functions
+        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      # Optional Step: Check deployment status (this could be omitted if unnecessary)
+      - name: Check Deployment Status
+        run: supabase functions list --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+

@@ -1,23 +1,32 @@
 import '../styles/forgotPasswordFormComponent.css'
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const ForgotPasswordFormComponent = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const navigateHome = () => navigate('/');
 
     const handlePasswordReset = async (e) => {
         e.preventDefault();
 
+        const redirectUrl = `${window.location.origin}/resetpassword`;
+
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: '/resetpassword' 
+            redirectTo: redirectUrl 
         });
 
         if (error) {
             setError(error.message);
+            setMessage('');
         } else {
             setMessage('Password reset email has been sent.');
+            setError('');
+            setEmail('');
         }
     };
 
@@ -25,6 +34,9 @@ const ForgotPasswordFormComponent = () => {
         <div className="forgot-password-container">
             <div className='forgot-password-border'>
                 <div className="forgot-password-form">
+                    <div className="box-icon-container" onClick={navigateHome}>
+                        <box-icon name='left-arrow-alt' color='#e87070' size='md'></box-icon>
+                    </div>
                     <form onSubmit={handlePasswordReset}>
                         <h1>Reset Your Password</h1>
                         <div className='recovery-requirements'>
@@ -45,8 +57,8 @@ const ForgotPasswordFormComponent = () => {
                         <button type="submit" id="forgotResetButton">
                             Reset Password
                         </button>
-                        {message && <p>{message}</p>}
-                        {error && <p style={{ color: 'red' }}>{error}</p>}
+                        {message && <p className='recovery-message'>{message}</p>}
+                        {error && <p className='recovery-error'>{error}</p>}
                     </form>
                 </div>
             </div>

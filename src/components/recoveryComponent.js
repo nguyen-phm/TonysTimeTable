@@ -1,12 +1,16 @@
 import '../styles/forgotPasswordFormComponent.css'
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const RecoveryComponent = () => {
         const [password, setPassword] = useState('');
         const [confirmPassword, setConfirmPassword] = useState('');
         const [message, setMessage] = useState('');
         const [error, setError] = useState('');
+        const navigate = useNavigate();
+
+        const navigateHome = () => navigate('/');
       
         const handlePasswordUpdate = async (e) => {
           e.preventDefault();
@@ -35,6 +39,9 @@ const RecoveryComponent = () => {
         <div className="forgot-password-container">
             <div className='forgot-password-border'>
                 <div className="forgot-password-form">
+                    <div className="box-icon-container" onClick={navigateHome}>
+                        <box-icon name='left-arrow-alt' color='#e87070' size='md'></box-icon>
+                    </div>
                     <form onSubmit={handlePasswordUpdate}>
                         <h1>Reset Your Password</h1>
                         <div className='recovery-requirements'>

@@ -17,13 +17,13 @@
 ## Screenshots
 
 #### Login Page
-![Login Page](../TonysTimeTable/src/assets/LoginPage.png)
+![Login Page](./src/assets/LoginPage.png)
 
 #### Registration Page
-![Registration Page](../TonysTimeTable/src/assets/RegistrationPage.png)
+![Registration Page](./src/assets/RegistrationPage.png)
 
 #### Display Timetable
-![TimeTable Page](../TonysTimeTable/src/assets/TimeTablePage.png)
+![TimeTable Page](./src/assets/TimeTablePage.png)
 ---
 
 ## Getting Started

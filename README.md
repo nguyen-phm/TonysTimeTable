@@ -17,6 +17,7 @@
 ## Screenshots
 
 #### Login Page
+
 ![Login Page](./src/assets/LoginPage.png)
 
 #### Registration Page

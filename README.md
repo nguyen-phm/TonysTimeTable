@@ -1,70 +1,102 @@
-# Getting Started with Create React App
+# Tony's Timetable
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<!-- [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) -->
 
-## Available Scripts
+## Description
+ This project is a **Timetable Management System** designed for teachers and administrators to efficiently create and manage timetables. The platform allows users to enter course and student details, enabling the automated generation of timetables. Built with React and leveraging Supabase for authentication and database management, this system is optimized for administrative use in educational institutions.
 
-In the project directory, you can run:
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **User Authentication:** Login and registration functionality using Supabase.
+- **Course Management:** Admins can create, update, and delete course schedules.
+- **Courses on Display** Admins can view the active timetable of ongoing courses.
+- **Responsive Design:** This is a webpage optimized for Desktop users.
 
-### `npm test`
+## Screenshots
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### Login Page
+![Login Page](../TonysTimeTable/src/assets/LoginPage.png)
 
-### `npm run build`
+#### Registration Page
+![Registration Page](../TonysTimeTable/src/assets/RegistrationPage.png)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### Display Timetable
+![TimeTable Page](../TonysTimeTable/src/assets/TimeTablePage.png)
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Getting Started
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Prerequisites
 
-### `npm run eject`
+- Node.js (v14 or later)
+- npm (v6 or later)
+- Supabase project (for authentication and database)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/your-project.git
+    cd your-project
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. Install Depdencies:
+    ```bash
+    npm install
+    ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. Set up your environment variables: Create a .env file in the root directory and add your Supabase credentials:
+    ```bash
+    REACT_APP_SUPABASE_URL=your-supabase-url
+    REACT_APP_SUPABASE_KEY=your-supabase-key
+    ```
 
-## Learn More
+### Running the Project
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. To start the development server:
+    ```bash
+    npm start
+    ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. The app will be running at http://localhost:3000.
 
-### Code Splitting
+### Building for Production
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. To create a production build:
+    ```bash
+    npm run build
+    ```
 
-### Analyzing the Bundle Size
+2. This will bundle the application into the build/ folder, ready for deployment.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Usage
 
-### Making a Progressive Web App
+Provide information on how the app works, such as:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Admin: Log in to create or update courses.
 
-### Advanced Configuration
+## Project Structuture
+* /src/assets: Contains all image assets.
+* /src/components: Contains React components.
+* /src/pages: Contains the different pages of the app.
+* /src/styles: Contains CSS files for the page layout design.
+* /src/supabaseClient.js: Configures Supabase authentication.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Contributing
+Contributions are welcome! Please follow these steps:
 
-### Deployment
+1. Fork the project.
+2. Create a new branch (git checkout -b feature/3. YourFeature).
+3. Commit your changes (git commit -m 'Add some feature').
+4. Push to the branch (git push origin feature/YourFeature).
+5. Open a Pull Request.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Authors and Contact
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Will Kang** - [juneushk@student.unimelb.edu.au](mailto:juneushk@student.unimelb.edu.au)
+- **Dave Gill** - [gillsd@student.unimelb.edu.au](mailto:gillsd@student.unimelb.edu.au)
+- **Michelle Gu** - [mmgu@student.unimelb.edu.au](mailto:mmgu@student.unimelb.edu.au)
+- **Nick Muir** - [nmuir@student.unimelb.edu.au ](mailto:nmuir@student.unimelb.edu.au )
+- **Jason Suen** - [manchits@student.unimelb.edu.au](mailto:manchits@student.unimelb.edu.au)

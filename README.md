@@ -51,7 +51,7 @@
 3. Set up your environment variables: Create a .env file in the root directory and add your Supabase credentials:
     ```bash
     REACT_APP_SUPABASE_URL=your-supabase-url
-    REACT_APP_SUPABASE_KEY=your-supabase-key
+    REACT_APP_SUPABASE_ANON_KEY=your-supabase-key
     ```
 
 ### Running the Project

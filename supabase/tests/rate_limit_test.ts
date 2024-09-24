@@ -1,4 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.131.0/testing/asserts.ts";
+//test script for rate limit
 
 async function testRateLimit() {
   const url = "http://127.0.0.1:54321/functions/v1/rate_limit";

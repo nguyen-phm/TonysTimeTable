@@ -1,7 +1,6 @@
-import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom'; // Wrap in router
+import { BrowserRouter } from 'react-router-dom';
 import AdminPage from '../pages/adminPage';
 
 describe('AdminPage', () => {
@@ -14,7 +13,6 @@ describe('AdminPage', () => {
   };
 
   beforeEach(() => {
-    // Clear all mock calls before each test
     jest.clearAllMocks();
   });
 

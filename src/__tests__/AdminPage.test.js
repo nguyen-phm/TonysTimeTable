@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom'; // Wrap in router
 import AdminPage from '../pages/adminPage';
-import { supabase } from '../components/supabaseClient'; // import mocked supabase client
 
 describe('AdminPage', () => {
   const renderWithRouter = (component) => {

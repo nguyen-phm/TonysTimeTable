@@ -29,16 +29,15 @@ describe('LoginFormComponent', () => {
         });
 
         fireEvent.change(screen.getByPlaceholderText(/enter vit email/i), {
-            target: { value: 'test@vit.ac.in' },
+            target: { value: 'test2@gmail.com' },
         });
         fireEvent.change(screen.getByPlaceholderText(/enter password/i), {
-            target: { value: 'password123' },
+            target: { value: 'password1' },
         });
         fireEvent.click(screen.getByText(/sign in/i));
 
         // Check if navigate was called with '/mfa'
         expect(supabase.auth.signInWithPassword).toHaveBeenCalled();
-        // You may need to check if a navigation mock was called if you have mocked navigate as well
     });
 
     test('displays error message on failed login', async () => {
@@ -49,10 +48,10 @@ describe('LoginFormComponent', () => {
         });
 
         fireEvent.change(screen.getByPlaceholderText(/enter vit email/i), {
-            target: { value: 'wrong@vit.ac.in' },
+            target: { value: 'wrong@vit.com' },
         });
         fireEvent.change(screen.getByPlaceholderText(/enter password/i), {
-            target: { value: 'wrongpassword' },
+            target: { value: 'password' },
         });
         fireEvent.click(screen.getByText(/sign in/i));
 

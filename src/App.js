@@ -7,6 +7,7 @@ import ForgotPasswordPage from './pages/forgotPasswordPage'
 import ProtectedRoute from './components/protectedRoute';
 import RecoveryPage from './pages/recoveryPage';
 import MFAComponent from './components/mfaComponent';
+import AdminPage from './pages/adminPage';
 
 
 function App() {
@@ -19,6 +20,13 @@ function App() {
           
           //MFA
           <Route path="/mfa" element={<MFAComponent />} />
+
+          <Route
+            path="/admin"
+            element={
+              <AdminPage />
+            }
+          />
 
           <Route 
             path="/timetable" 

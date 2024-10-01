@@ -13,6 +13,7 @@ describe('AdminPage', () => {
     );
   };
 
+  // test
   test('renders Account section by default', () => {
     renderWithRouter(<AdminPage />);
     expect(screen.getByText(/Account Details/i)).toBeInTheDocument();

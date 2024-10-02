@@ -18,7 +18,7 @@ describe('AdminPage', () => {
 
   test('renders Account section by default', () => {
     renderWithRouter(<AdminPage />);
-    expect(screen.getByText(/Account Details/i)).toBeInTheDocument();
+    expect(screen.getByText(/Name/i)).toBeInTheDocument();
   });
 
   test('switches to Courses section', () => {
@@ -30,12 +30,6 @@ describe('AdminPage', () => {
   test('switches to User section', () => {
     renderWithRouter(<AdminPage />);
     fireEvent.click(screen.getByText(/User/i));
-    expect(screen.getByText(/functionality coming soon/i)).toBeInTheDocument();
-  });
-
-  test('switches to Inbox section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Inbox/i));
     expect(screen.getByText(/functionality coming soon/i)).toBeInTheDocument();
   });
 

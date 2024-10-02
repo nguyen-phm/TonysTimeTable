@@ -5,12 +5,14 @@ import '../../styles/popup.css';
 const AddSubjectPopup = ({ onClose, onSubmit }) => {
     const [subjectName, setSubjectName] = useState('');
     const [subjectCode, setSubjectCode] = useState('');
+    const [year, setYear] = useState('');
+    const [semester, setSemester] = useState(''); // Enum: 'NULL', 'ONE', 'TWO'
 
     // Add an event listener to handle "Escape" key press
     useEffect(() => {
         const handleEsc = (event) => {
             if (event.key === 'Escape') {
-            onClose();
+                onClose();
             }
         };
 
@@ -21,14 +23,16 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
         };
     }, [onClose]);
 
-    const insertSubjectToSupabase = async (subjectName, subjectCode) => {
+    const insertSubjectToSupabase = async (subjectName, subjectCode, year, semester) => {
         try {
             const { data, error } = await supabase
-                .from('Subjects') 
+                .from('Subjects') // Ensure this table is correctly named
                 .insert([
                     {
                         name: subjectName,
                         code: subjectCode,
+                        year: year,
+                        semester: semester, // Using the enum value for semester
                     },
                 ])
                 .select();
@@ -46,12 +50,14 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (subjectName.trim() !== '' && subjectCode.trim() !== '') {
-          await insertSubjectToSupabase(subjectName, subjectCode); 
-          onSubmit(subjectName); 
-          setSubjectName(''); 
-          setSubjectCode('');
-          onClose(); 
+        if (subjectName.trim() !== '' && subjectCode.trim() !== '' && year.trim() !== '' && semester !== '') {
+            await insertSubjectToSupabase(subjectName, subjectCode, year, semester); // Pass all values to Supabase
+            onSubmit(subjectName); // Pass the subject name to the parent component (if necessary)
+            setSubjectName(''); 
+            setSubjectCode(''); 
+            setYear('');
+            setSemester('');
+            onClose(); 
         }
     };
     
@@ -79,6 +85,30 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             required
                         />
                     </label>
+
+                    <label>
+                        Year:
+                        <input
+                            type="number"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            required
+                        />
+                    </label>
+
+                    <label>
+                        Semester:
+                        <select
+                            value={semester}
+                            onChange={(e) => setSemester(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Semester</option>
+                            <option value="NULL">None</option>
+                            <option value="ONE">One</option>
+                            <option value="TWO">Two</option>
+                        </select>
+                    </label>
     
                     <div className="popup-buttons">
                         <button type="submit">Submit</button>
@@ -91,5 +121,5 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
         </div>
     );
 };
-    
+
 export default AddSubjectPopup;

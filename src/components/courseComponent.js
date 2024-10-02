@@ -9,19 +9,25 @@ import '../styles/adminPage.css';
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [showCoursePopup, setShowCoursePopup] = useState(false);
     const [showSubjectPopup, setShowSubjectPopup] = useState(false);
 
     useEffect(() => {
         const fetchSubjects = async () => {
-            const { data, error } = await supabase
-                .from('Subjects') 
-                .select('*'); 
+            try {
+                setIsLoading(true); 
+                const { data, error } = await supabase
+                    .from('Subjects') 
+                    .select('*'); 
 
-            if (error) {
-                console.error('Error fetching subjects:', error);
-            } else {
-                setSubjects(data); 
+                if (error) {
+                    console.error('Error fetching subjects:', error);
+                } else {
+                    setSubjects(data); 
+                }
+            } finally {
+                setIsLoading(false); 
             }
         };
 
@@ -40,19 +46,25 @@ const CourseComponent = () => {
         <div className="admin-section">
             <h2>Courses</h2>
 
-            <ul>
-                {courses.map((course) => (
-                    <li key={course.id}>{course}</li>
-                ))}
-            </ul>
+            {isLoading ? (
+                <p>Loading courses and subjects...</p>
+            ) : (
+                <>
+                    <ul>
+                        {courses.map((course) => (
+                            <li key={course.id}>{course}</li>
+                        ))}
+                    </ul>
 
-            <ul>
-                {subjects.map((subject) => (
-                    <li key={subject.id}>
-                        {subject.name} - {subject.code} ({subject.year}, {subject.semester})
-                    </li>
-                ))}
-            </ul>
+                    <ul>
+                        {subjects.map((subject) => (
+                            <li key={subject.id}>
+                                {subject.name} - {subject.code} ({subject.year}, {subject.semester})
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
 
             <button type="button" onClick={() => setShowCoursePopup(true)}>
                 Add Course

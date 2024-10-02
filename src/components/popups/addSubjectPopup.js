@@ -6,7 +6,26 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
     const [subjectName, setSubjectName] = useState('');
     const [subjectCode, setSubjectCode] = useState('');
     const [year, setYear] = useState('');
-    const [semester, setSemester] = useState(''); // Enum: 'NULL', 'ONE', 'TWO'
+    const [semester, setSemester] = useState(''); 
+    const [courses, setCourses] = useState([]); // To store the fetched courses
+    const [selectedCourse, setSelectedCourse] = useState(''); // To store the selected course ID
+
+    // Fetch the courses when the component mounts
+    useEffect(() => {
+        const fetchCourses = async () => {
+            const { data, error } = await supabase
+                .from('Courses') 
+                .select('*'); 
+
+            if (error) {
+                console.error('Error fetching courses:', error);
+            } else {
+                setCourses(data); 
+            }
+        };
+
+        fetchCourses(); 
+    }, []);
 
     // Add an event listener to handle "Escape" key press
     useEffect(() => {
@@ -23,16 +42,17 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
         };
     }, [onClose]);
 
-    const insertSubjectToSupabase = async (subjectName, subjectCode, year, semester) => {
+    const insertSubjectToSupabase = async (subjectName, subjectCode, year, semester, courseId) => {
         try {
             const { data, error } = await supabase
-                .from('Subjects') // Ensure this table is correctly named
+                .from('Subjects') 
                 .insert([
                     {
                         name: subjectName,
                         code: subjectCode,
                         year: year,
-                        semester: semester, // Using the enum value for semester
+                        semester: semester, 
+                        course_id: courseId, 
                     },
                 ])
                 .select();
@@ -44,20 +64,27 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
             }
 
         } catch (error) {
-            console.error('Error inserting subject to Supabase: ', error.message);
+            console.error('Error inserting subject to Supabase:', error.message);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (subjectName.trim() !== '' && subjectCode.trim() !== '' && year.trim() !== '' && semester !== '') {
-            await insertSubjectToSupabase(subjectName, subjectCode, year, semester); // Pass all values to Supabase
-            onSubmit(subjectName); // Pass the subject name to the parent component (if necessary)
-            setSubjectName(''); 
-            setSubjectCode(''); 
+        if (
+            subjectName.trim() !== '' &&
+            subjectCode.trim() !== '' &&
+            year.trim() !== '' &&
+            semester !== '' &&
+            selectedCourse !== ''
+        ) {
+            await insertSubjectToSupabase(subjectName, subjectCode, year, semester, selectedCourse); 
+            onSubmit(subjectName); 
+            setSubjectName('');
+            setSubjectCode('');
             setYear('');
             setSemester('');
-            onClose(); 
+            setSelectedCourse('');
+            onClose();
         }
     };
     
@@ -107,6 +134,22 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             <option value="NULL">None</option>
                             <option value="ONE">One</option>
                             <option value="TWO">Two</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Select Course:
+                        <select
+                            value={selectedCourse}
+                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            required
+                        >
+                            <option value="">Select a Course</option>
+                            {courses.map((course) => (
+                                <option key={course.id} value={course.id}>
+                                    {course.name}
+                                </option>
+                            ))}
                         </select>
                     </label>
     

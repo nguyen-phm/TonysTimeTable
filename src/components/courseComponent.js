@@ -1,41 +1,62 @@
 import React, { useState } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
-import '../styles/adminPage.css'; // Your existing CSS for the admin page
+import AddSubjectPopup from './popups/addSubjectPopup';
+import '../styles/adminPage.css'; 
 
 const CourseComponent = () => {
-  const [courses, setCourses] = useState([]); // Manage the list of courses
-  const [showPopup, setShowPopup] = useState(false); // Toggle popup visibility
+    const [courses, setCourses] = useState([]);
+    const [subjects, setSubjects] = useState([]);
+    const [showCoursePopup, setShowCoursePopup] = useState(false);
+    const [showSubjectPopup, setShowSubjectPopup] = useState(false);
 
-  // Handle adding a course
-  const addCourse = (courseName) => {
-    setCourses([...courses, courseName]); // Add course to the list
-  };
+    // Handle adding a course
+    const addCourse = (courseName) => {
+        setCourses([...courses, courseName]);
+    };
 
-  return (
-    <div className="admin-section">
-      <h2>Courses</h2>
+    const addSubject = (subjectName) => {
+        setSubjects([...subjects, subjectName]);
+    };
 
-      {/* Display the list of courses */}
-      <ul>
-        {courses.map((course, index) => (
-          <li key={index}>{course}</li>
-        ))}
-      </ul>
+    return (
+        <div className="admin-section">
+            <h2>Courses</h2>
 
-      {/* Add button */}
-      <button type="button" onClick={() => setShowPopup(true)}>
-        Add Course
-      </button>
+            <ul>
+                {courses.map((course) => (
+                    <li key={course.id}>{course}</li>
+                ))}
+            </ul>
 
-      {/* Render the popup when showPopup is true */}
-      {showPopup && (
-        <AddCoursePopup
-          onClose={() => setShowPopup(false)} // Close the popup
-          onSubmit={addCourse}               // Submit the new course
-        />
-      )}
-    </div>
-  );
+            <ul>
+                {subjects.map((subject) => (
+                    <li key={subject.id}>{subject}</li>
+                ))}
+            </ul>
+
+            <button type="button" onClick={() => setShowCoursePopup(true)}>
+                Add Course
+            </button>
+
+            {showCoursePopup && (
+                <AddCoursePopup
+                    onClose={() => setShowCoursePopup(false)}
+                    onSubmit={addCourse}
+                />
+            )}
+
+            <button type="button" onClick={() => setShowSubjectPopup(true)}>
+                Add Subject
+            </button>
+
+            {showSubjectPopup && (
+                <AddSubjectPopup
+                    onClose={() => setShowSubjectPopup(false)}
+                    onSubmit={addSubject}
+                />
+            )}
+        </div>
+    );
 };
 
 export default CourseComponent;

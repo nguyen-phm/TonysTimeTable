@@ -91,7 +91,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <h2>Add a New Subject</h2>
+                <div className='popup-h2'>Add New Subject</div>
                 <form onSubmit={handleSubmit}>
                     <label>
                         Subject Name:
@@ -100,6 +100,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={subjectName}
                             onChange={(e) => setSubjectName(e.target.value)}
                             required
+                            placeholder="Enter Subject Name"
                         />
                     </label>
 
@@ -110,6 +111,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={subjectCode}
                             onChange={(e) => setSubjectCode(e.target.value)}
                             required
+                            placeholder="Enter Subject Code"
                         />
                     </label>
 
@@ -120,6 +122,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={year}
                             onChange={(e) => setYear(e.target.value)}
                             required
+                            placeholder='Enter Year'
                         />
                     </label>
 
@@ -129,6 +132,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={semester}
                             onChange={(e) => setSemester(e.target.value)}
                             required
+                            placeholder='Select Semester'
                         >
                             <option value="">Select Semester</option>
                             <option value="NULL">None</option>

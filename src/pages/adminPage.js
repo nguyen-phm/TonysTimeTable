@@ -26,7 +26,6 @@ const AdminPage = () => {
 
   return (
     <div className="admin-container">
-      <NavbarComponent />
       <div className="admin-main-layout">
         {/* Sidebar */}
         <div className="admin-sidebar">

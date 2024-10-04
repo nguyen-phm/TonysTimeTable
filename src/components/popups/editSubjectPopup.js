@@ -129,7 +129,7 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
                     </label>
 
                     <div className="popup-buttons">
-                        <button type="submit">Save Changes</button>
+                        <button type="submit">Save</button>
                         <button type="button" onClick={onClose}>
                             Cancel
                         </button>

@@ -1,36 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
 import AddSubjectPopup from './popups/addSubjectPopup';
+import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
 import { supabase } from './supabaseClient';
-import '../styles/adminPage.css'; 
+import '../styles/adminPage.css';
 
-
-//Add loading indicator 
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCoursePopup, setShowCoursePopup] = useState(false);
     const [showSubjectPopup, setShowSubjectPopup] = useState(false);
+    const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false); // For editing subjects
+    const [selectedSubject, setSelectedSubject] = useState(null); // Store the selected subject for editing
 
     useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setIsLoading(true);
+                const { data, error } = await supabase
+                    .from('Courses')
+                    .select('*');
+
+                if (error) {
+                    console.error('Error fetching courses:', error);
+                } else {
+                    setCourses(data);
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         const fetchSubjects = async () => {
             try {
-                setIsLoading(true); 
                 const { data, error } = await supabase
                     .from('Subjects')
-                    .select('*'); 
+                    .select('*');
 
                 if (error) {
                     console.error('Error fetching subjects:', error);
                 } else {
-                    setSubjects(data); 
+                    setSubjects(data);
                 }
-            } finally {
-                setIsLoading(false); 
+            } catch (error) {
+                console.error('Error fetching subjects:', error);
             }
         };
 
+        fetchCourses();
         fetchSubjects();
     }, []);
 
@@ -60,7 +78,7 @@ const CourseComponent = () => {
             const { error } = await supabase
                 .from('Subjects')
                 .delete()
-                .eq('id', subjectId); 
+                .eq('id', subjectId);
 
             if (error) {
                 console.error('Error deleting subject:', error);
@@ -72,27 +90,29 @@ const CourseComponent = () => {
         }
     };
 
+    const handleEditSubject = (subject) => {
+        setSelectedSubject(subject); // Store the selected subject for editing
+        setShowEditSubjectPopup(true); // Show the edit popup
+    };
+
+    const updateSubject = (updatedSubject) => {
+        setSubjects(subjects.map((subject) => (subject.id === updatedSubject.id ? updatedSubject : subject)));
+    };
+
     return (
         <div className="admin-section">
-            <h2>Courses</h2>
+            <h2>Courses and Subjects</h2>
 
             {isLoading ? (
                 <p>Loading courses and subjects...</p>
             ) : (
                 <>
                     <ul>
-                        {courses.map((course) => (
-                            <li key={course.id}>{course}</li>
-                        ))}
-                    </ul>
-
-                    <ul>
                         {subjects.map((subject) => (
                             <li key={subject.id}>
                                 {subject.name} - {subject.code} ({subject.year}, {subject.semester})
-                                <button onClick={() => handleDeleteSubject(subject.id)}>
-                                    Remove
-                                </button>
+                                <button onClick={() => handleEditSubject(subject)}>Edit</button> {/* Edit Button */}
+                                <button onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
                             </li>
                         ))}
                     </ul>
@@ -102,7 +122,7 @@ const CourseComponent = () => {
             <button type="button" onClick={() => setShowCoursePopup(true)}>
                 Add Course
             </button>
-            
+
             {showCoursePopup && (
                 <AddCoursePopup
                     onClose={() => setShowCoursePopup(false)}
@@ -120,6 +140,14 @@ const CourseComponent = () => {
                 <AddSubjectPopup
                     onClose={() => setShowSubjectPopup(false)}
                     onSubmit={addSubject}
+                />
+            )}
+
+            {showEditSubjectPopup && selectedSubject && (
+                <EditSubjectPopup
+                    subject={selectedSubject}
+                    onClose={() => setShowEditSubjectPopup(false)}
+                    onSubmit={updateSubject}
                 />
             )}
         </div>

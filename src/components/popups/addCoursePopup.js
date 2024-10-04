@@ -94,7 +94,7 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
                             onChange={(e) => setSelectedCampus(e.target.value)}
                             required
                         >
-                            <option value="">Select a campus</option>
+                            <option value="" disabled hidden className="placeholder-option">Select a Campus</option>
                             {campuses.map((campus) => (
                                 <option key={campus.id} value={campus.id}>
                                     {campus.name}

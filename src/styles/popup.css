@@ -37,7 +37,7 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 20px;
-    border-bottom: 2px solid #e87070;
+    border-bottom: 1.5px solid #e87070;
     font-family: 'Poppins', sans-serif;
     padding-bottom: 10px;
 }
@@ -70,7 +70,7 @@
 .popup-buttons {
     margin-top: 20px;
     padding-top: 10px;
-    border-top: 2px solid #e87070;
+    border-top: 1.5px solid #e87070;
     justify-content: center;
     display: flex;
 }
@@ -88,5 +88,9 @@
     font-family: 'Poppins', sans-serif;
     margin: 10px;
     font-weight: 500;
+}
+
+.popup-buttons button:hover {
+    background-color: #c95353;
 }
   

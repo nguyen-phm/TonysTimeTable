@@ -1,97 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '.././supabaseClient'; 
-import '../../styles/popup.css'; 
+import { supabase } from '../supabaseClient';
+import '../../styles/popup.css';
 
-const AddSubjectPopup = ({ onClose, onSubmit }) => {
-    const [subjectName, setSubjectName] = useState('');
-    const [subjectCode, setSubjectCode] = useState('');
-    const [year, setYear] = useState('');
-    const [semester, setSemester] = useState(''); 
-    const [courses, setCourses] = useState([]); // To store the fetched courses
-    const [selectedCourse, setSelectedCourse] = useState(''); // To store the selected course ID
+const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
+    const [subjectName, setSubjectName] = useState(subject.name);
+    const [subjectCode, setSubjectCode] = useState(subject.code);
+    const [year, setYear] = useState(subject.year);
+    const [semester, setSemester] = useState(subject.semester);
+    const [courses, setCourses] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(subject.course_id); 
 
-    // Fetch the courses when the component mounts
     useEffect(() => {
         const fetchCourses = async () => {
             const { data, error } = await supabase
-                .from('Courses') 
-                .select('*'); 
+                .from('Courses')
+                .select('*');
 
             if (error) {
                 console.error('Error fetching courses:', error);
             } else {
-                setCourses(data); 
+                setCourses(data);
             }
         };
 
-        fetchCourses(); 
+        fetchCourses();
     }, []);
-
-    // Add an event listener to handle "Escape" key press
-    useEffect(() => {
-        const handleEsc = (event) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-
-        window.addEventListener('keydown', handleEsc);
-
-        return () => {
-            window.removeEventListener('keydown', handleEsc);
-        };
-    }, [onClose]);
-
-    const insertSubjectToSupabase = async (subjectName, subjectCode, year, semester, courseId) => {
-        try {
-            const { data, error } = await supabase
-                .from('Subjects') 
-                .insert([
-                    {
-                        name: subjectName,
-                        code: subjectCode,
-                        year: year,
-                        semester: semester, 
-                        course_id: courseId, 
-                    },
-                ])
-                .select();
-    
-            if (error) {
-                console.error('Error inserting subject: ', error);
-            } else {
-                console.log('Subject added: ', data);
-            }
-
-        } catch (error) {
-            console.error('Error inserting subject to Supabase:', error.message);
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (
             subjectName.trim() !== '' &&
             subjectCode.trim() !== '' &&
-            year.trim() !== '' &&
+            String(year).trim() !== '' &&
             semester !== '' &&
             selectedCourse !== ''
         ) {
-            await insertSubjectToSupabase(subjectName, subjectCode, year, semester, selectedCourse); 
-            onSubmit(subjectName); 
-            setSubjectName('');
-            setSubjectCode('');
-            setYear('');
-            setSemester('');
-            setSelectedCourse('');
+            try {
+                const { data, error } = await supabase
+                    .from('Subjects')
+                    .update({
+                        name: subjectName,
+                        code: subjectCode,
+                        year: year,
+                        semester: semester,
+                        course_id: selectedCourse,
+                    })
+                    .eq('id', subject.id) 
+                    .select();
+
+                if (error) {
+                    console.error('Error updating subject: ', error);
+                } else {
+                    console.log('Subject updated: ', data);
+                    onSubmit(data[0]); 
+                }
+            } catch (error) {
+                console.error('Error updating subject in Supabase:', error.message);
+            }
             onClose();
         }
     };
-    
+
     return (
         <div className="popup-container">
             <div className="popup">
-                <div className='popup-h2'>Add New Subject</div>
+                <div className='popup-h2'>Edit Subject</div>
                 <form onSubmit={handleSubmit}>
                     <label>
                         Subject Name:
@@ -122,7 +95,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={year}
                             onChange={(e) => setYear(e.target.value)}
                             required
-                            placeholder='Enter Year'
+                            placeholder="Enter Year"
                         />
                     </label>
 
@@ -132,7 +105,6 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={semester}
                             onChange={(e) => setSemester(e.target.value)}
                             required
-                            placeholder='Select Semester'
                         >
                             <option value="" disabled hidden className="placeholder-option">Select Semester</option>
                             <option value="ONE">One</option>
@@ -155,9 +127,9 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             ))}
                         </select>
                     </label>
-    
+
                     <div className="popup-buttons">
-                        <button type="submit">Submit</button>
+                        <button type="submit">Save Changes</button>
                         <button type="button" onClick={onClose}>
                             Cancel
                         </button>
@@ -168,4 +140,4 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
     );
 };
 
-export default AddSubjectPopup;
+export default EditSubjectPopup;

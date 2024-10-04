@@ -5,6 +5,7 @@ import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
 import VITLogo from '../assets/VITLogo.png';
 
+
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('courses');
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const AdminPage = () => {
   };
 
   return (
+    
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="sidebar w-64 flex flex-col">

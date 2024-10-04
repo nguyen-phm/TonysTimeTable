@@ -36,14 +36,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/resetpassword" 
-            element={
-              <ProtectedRoute>
-                <RecoveryPage />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/resetpassword" element={<RecoveryPage />} />
         </Routes>
       </BrowserRouter>
   );

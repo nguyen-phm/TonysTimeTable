@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, BookOpen, User, Inbox, Clock } from 'lucide-react';
 import NavbarComponent from '../components/navbarComponent';
+import CourseComponent from '../components/courseComponent';
 import '../styles/adminPage.css'; // Import the new CSS file
 
 const AdminPage = () => {
@@ -11,7 +12,7 @@ const AdminPage = () => {
       case 'account':
         return <AccountContent />;
       case 'courses':
-        return <CoursesContent />;
+        return <CourseComponent />;
       case 'user':
         return <UserContent />;
       case 'inbox':
@@ -25,7 +26,6 @@ const AdminPage = () => {
 
   return (
     <div className="admin-container">
-      <NavbarComponent />
       <div className="admin-main-layout">
         {/* Sidebar */}
         <div className="admin-sidebar">
@@ -66,18 +66,6 @@ const AccountContent = () => (
     <p>Role: Administrator</p>
     <p>Last Login: 2023-09-24 14:30:00</p>
     <p>Account Status: Active</p>
-  </div>
-);
-
-const CoursesContent = () => (
-  <div className="admin-section">
-    <h2>Courses</h2>
-    <ul>
-      <li>IT Project COMP30022</li>
-      <li>Models of Computation COMP30026</li>
-      <li>Web Information Technologies COMP30023</li>
-      <li>Artificial Intelligence COMP30024</li>
-    </ul>
   </div>
 );
 

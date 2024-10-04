@@ -16,26 +16,39 @@ describe('AdminPage', () => {
     jest.clearAllMocks();
   });
 
-  test('renders Account section by default', () => {
+  test('renders Courses section by default', () => {
     renderWithRouter(<AdminPage />);
-    expect(screen.getByText(/Name/i)).toBeInTheDocument();
+    expect(screen.getByText(/BITS/i)).toBeInTheDocument();
   });
 
-  test('switches to Courses section', () => {
+  test('switches to Account section', () => {
     renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Courses/i));
-    expect(screen.getByText(/IT Project COMP30022/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Account/i));
+    expect(screen.getByText(/Email/i)).toBeInTheDocument();
   });
 
-  test('switches to User section', () => {
+  test('switches to Home section', () => {
     renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/User/i));
-    expect(screen.getByText(/functionality coming soon/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Home/i));
+    expect(screen.getByText(/Home dashboard/i)).toBeInTheDocument();
+  });
+  
+  test('switches to Classrooms section', () => {
+    renderWithRouter(<AdminPage />);
+    fireEvent.click(screen.getByText(/Classrooms/i));
+    expect(screen.getByText(/Classrooms functionality/i)).toBeInTheDocument();
   });
 
-  test('switches to History section', () => {
+  test('switches to Students section', () => {
     renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/History/i));
-    expect(screen.getByText(/functionality coming soon/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Students/i));
+    expect(screen.getByText(/Students functionality/i)).toBeInTheDocument();
   });
+
+  test('switches to Staff section', () => {
+    renderWithRouter(<AdminPage />);
+    fireEvent.click(screen.getByText(/Staff/i));
+    expect(screen.getByText(/Staff functionality/i)).toBeInTheDocument();
+  });
+
 });

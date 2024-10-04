@@ -132,8 +132,10 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             value={semester}
                             onChange={(e) => setSemester(e.target.value)}
                             required
+                            placeholder='Select Semester'
                         >
-                            <option value="" disabled hidden className="placeholder-option">Select Semester</option>
+                            <option value="">Select Semester</option>
+                            <option value="NULL">None</option>
                             <option value="ONE">One</option>
                             <option value="TWO">Two</option>
                         </select>
@@ -146,7 +148,7 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             onChange={(e) => setSelectedCourse(e.target.value)}
                             required
                         >
-                            <option value="" disabled hidden className="placeholder-option">Select a Course</option>
+                            <option value="">Select a Course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
                                     {course.name}

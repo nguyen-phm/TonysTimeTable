@@ -23,7 +23,8 @@ const LoginFormComponent = () => {
             setError(error.message); // Set error message if login fails
         } else {
             // navigate('/timetable'); // Navigate to the success page after login
-            navigate('/mfa');
+            // navigate('/mfa'); // Navigate to MFA page (disabled)
+            navigate('/admin');
         }
     };
 

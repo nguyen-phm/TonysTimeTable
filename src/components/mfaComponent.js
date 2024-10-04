@@ -1,3 +1,5 @@
+// MFA Function disabled for now.
+
 import '../styles/mfa.css'
 import React, { useState } from 'react';
 import {QRCodeCanvas} from 'qrcode.react';

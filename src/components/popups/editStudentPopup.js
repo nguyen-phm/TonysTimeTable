@@ -49,7 +49,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <h2>Edit Student</h2>
+                <div className='popup-h2'>Edit Student</div>
                 <form onSubmit={handleSubmit}>
                     <label>
                         Name:
@@ -90,7 +90,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                     </label>
 
                     <div className="popup-buttons">
-                        <button type="submit">Save Changes</button>
+                        <button type="submit">Save</button>
                         <button type="button" onClick={onClose}>
                             Cancel
                         </button>

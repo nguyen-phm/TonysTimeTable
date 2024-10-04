@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, BookOpen, User, Inbox, Clock } from 'lucide-react';
 import NavbarComponent from '../components/navbarComponent';
+import StudentComponent from '../components/studentComponent';
 import CourseComponent from '../components/courseComponent';
 import '../styles/adminPage.css'; // Import the new CSS file
 
@@ -14,7 +15,7 @@ const AdminPage = () => {
       case 'courses':
         return <CourseComponent />;
       case 'user':
-        return <UserContent />;
+        return <StudentComponent />;
       case 'inbox':
         return <InboxContent />;
       case 'history':

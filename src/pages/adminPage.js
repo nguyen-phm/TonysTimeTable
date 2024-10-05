@@ -42,8 +42,8 @@ const AdminPage = () => {
     return (
         <div className="flex h-screen">
             {/* Sidebar */}
-            <div className='sidebar wrapper'>
-                <div className="sidebar w-64 flex flex-col">
+            <div className='sidebar-wrapper'>
+                <div className="sidebar">
                     {/* Logo section */}
                     <div className="sidebar-logo">
                         <img src={VITLogo} alt="VIT Logo" className="h-15" />
@@ -55,7 +55,7 @@ const AdminPage = () => {
                     </div>
 
                     {/* Main navigation links */}
-                    <nav className="flex-grow py-4">
+                    <nav className="flex-grow pb-5 pt-2">
                         <div className="nav-section">
                             <SidebarLink Icon={BookOpen} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
@@ -72,11 +72,13 @@ const AdminPage = () => {
                     </button>
                 </div>
             </div>
-
+            
             {/* Main content area */}
             <div className="flex-grow flex flex-col">
-                <div className="top-nav">
-                    <h1 className="top-nav-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+                <div className='top-nav-wrapper'>
+                    <div className="top-nav">
+                        <h1 className="top-nav-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+                    </div>
                 </div>
 
                 <div className="flex flex-grow">

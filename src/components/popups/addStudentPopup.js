@@ -5,8 +5,10 @@ import '../../styles/popup.css';
 const AddStudentPopup = ({ onClose, onSubmit }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [selectedCourse, setSelectedCourse] = useState(''); // For selecting a course
+    const [selectedCourse, setSelectedCourse] = useState(''); // Selected course
     const [courses, setCourses] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState(''); // Selected subject
+    const [subjects, setSubjects] = useState([]); // Subjects for the selected course
 
     // Fetch the courses from the database
     useEffect(() => {
@@ -23,20 +25,51 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
         fetchCourses();
     }, []);
 
+    // Fetch subjects when a course is selected
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            if (selectedCourse) {
+                const { data, error } = await supabase
+                    .from('Subjects') // Assuming the table is "Subjects"
+                    .select('*')
+                    .eq('course_id', selectedCourse); // Filter subjects by selected course
+
+                if (error) {
+                    console.error('Error fetching subjects:', error);
+                } else {
+                    setSubjects(data);
+                }
+            }
+        };
+
+        fetchSubjects();
+    }, [selectedCourse]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '') {
+        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubject !== '') {
             try {
-                const { data, error } = await supabase
+                const { data: studentData, error: studentError } = await supabase
                     .from('Students') // Assuming "Students" is the table for students
                     .insert([{ name, university_email: email, course_id: selectedCourse }])
                     .select();
 
-                if (error) {
-                    console.error('Error adding student:', error);
+                if (studentError) {
+                    console.error('Error adding student:', studentError);
                 } else {
-                    console.log('Student added:', data);
-                    onSubmit(data[0]); // Send back the new student to update the state
+                    const studentId = studentData[0].id;
+
+                    // Insert into StudentSubject table
+                    const { error: studentSubjectError } = await supabase
+                        .from('StudentSubject')
+                        .insert([{ student_id: studentId, subject_id: selectedSubject }]);
+
+                    if (studentSubjectError) {
+                        console.error('Error adding student-subject relation:', studentSubjectError);
+                    } else {
+                        console.log('Student added and subject assigned:', studentData);
+                        onSubmit(studentData[0]); // Send back the new student to update the state
+                    }
                 }
             } catch (error) {
                 console.error('Error adding student:', error.message);
@@ -48,7 +81,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <h2>Add New Student</h2>
+                <div className='popup-h2'>Add New Student</div>
                 <form onSubmit={handleSubmit}>
                     <label>
                         Name:
@@ -73,13 +106,13 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                     </label>
 
                     <label>
-                        Course:
+                        Select Course:
                         <select
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
                             required
                         >
-                            <option value="" disabled hidden className="placeholder-option">Select a Course</option>
+                            <option disabled hidden value="">Select a course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
                                     {course.name}
@@ -87,6 +120,24 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                             ))}
                         </select>
                     </label>
+
+                    {selectedCourse && (
+                        <label>
+                            Select Subject:
+                            <select
+                                value={selectedSubject}
+                                onChange={(e) => setSelectedSubject(e.target.value)}
+                                required
+                            >
+                                <option disabled hidden value="">Select a subject</option>
+                                {subjects.map((subject) => (
+                                    <option key={subject.id} value={subject.id}>
+                                        {subject.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
 
                     <div className="popup-buttons">
                         <button type="submit">Submit</button>

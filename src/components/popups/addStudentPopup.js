@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { MultiSelect } from 'primereact/multiselect'; // Import PrimeReact MultiSelect
 import { supabase } from '../supabaseClient';
 import '../../styles/popup.css';
+import 'primereact/resources/themes/saga-blue/theme.css'; // Import the PrimeReact theme
+import 'primereact/resources/primereact.min.css';         // Core CSS for PrimeReact components
+import 'primeicons/primeicons.css';       
+        
 
 const AddStudentPopup = ({ onClose, onSubmit }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [selectedCourse, setSelectedCourse] = useState(''); // Selected course
+    const [selectedCourse, setSelectedCourse] = useState('');
     const [courses, setCourses] = useState([]);
-    const [selectedSubject, setSelectedSubject] = useState(''); // Selected subject
-    const [subjects, setSubjects] = useState([]); // Subjects for the selected course
+    const [selectedSubjects, setSelectedSubjects] = useState([]);
+    const [subjects, setSubjects] = useState([]);
 
     // Fetch the courses from the database
     useEffect(() => {
@@ -18,7 +23,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
             if (error) {
                 console.error('Error fetching courses:', error);
             } else {
-                setCourses(data);
+                setCourses(data || []);
             }
         };
 
@@ -30,14 +35,14 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
         const fetchSubjects = async () => {
             if (selectedCourse) {
                 const { data, error } = await supabase
-                    .from('Subjects') // Assuming the table is "Subjects"
+                    .from('Subjects')
                     .select('*')
-                    .eq('course_id', selectedCourse); // Filter subjects by selected course
+                    .eq('course_id', selectedCourse);
 
                 if (error) {
                     console.error('Error fetching subjects:', error);
                 } else {
-                    setSubjects(data);
+                    setSubjects(data || []);
                 }
             }
         };
@@ -45,29 +50,35 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
         fetchSubjects();
     }, [selectedCourse]);
 
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubject !== '') {
+        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubjects.length > 0) {
             try {
                 const { data: studentData, error: studentError } = await supabase
-                    .from('Students') // Assuming "Students" is the table for students
+                    .from('Students')
                     .insert([{ name, university_email: email, course_id: selectedCourse }])
                     .select();
 
                 if (studentError) {
                     console.error('Error adding student:', studentError);
                 } else {
-                    const studentId = studentData[0].id;
+                    const studentId = studentData[0]?.id;
 
-                    // Insert into StudentSubject table
+                    // Insert multiple records into StudentSubject table
+                    const studentSubjectEntries = selectedSubjects.map(subject => ({
+                        student_id: studentId,
+                        subject_id: subject.id // Use the subject ID
+                    }));
+
                     const { error: studentSubjectError } = await supabase
                         .from('StudentSubject')
-                        .insert([{ student_id: studentId, subject_id: selectedSubject }]);
+                        .insert(studentSubjectEntries);
 
                     if (studentSubjectError) {
-                        console.error('Error adding student-subject relation:', studentSubjectError);
+                        console.error('Error adding student-subject relations:', studentSubjectError);
                     } else {
-                        console.log('Student added and subject assigned:', studentData);
+                        console.log('Student added and subjects assigned:', studentData);
                         onSubmit(studentData[0]); // Send back the new student to update the state
                     }
                 }
@@ -113,9 +124,9 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                             required
                         >
                             <option disabled hidden value="">Select a course</option>
-                            {courses.map((course) => (
-                                <option key={course.id} value={course.id}>
-                                    {course.name}
+                            {courses?.map((course) => (
+                                <option key={course?.id} value={course?.id}>
+                                    {course?.name || 'Unnamed Course'}
                                 </option>
                             ))}
                         </select>
@@ -123,21 +134,24 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
 
                     {selectedCourse && (
                         <label>
-                            Select Subject:
-                            <select
-                                value={selectedSubject}
-                                onChange={(e) => setSelectedSubject(e.target.value)}
-                                required
-                            >
-                                <option disabled hidden value="">Select a subject</option>
-                                {subjects.map((subject) => (
-                                    <option key={subject.id} value={subject.id}>
-                                        {subject.name}
-                                    </option>
-                                ))}
-                            </select>
+                            Select Subjects:
+                            <MultiSelect
+                                value={selectedSubjects}
+                                options={subjects.map(subject => ({
+                                    id: subject.id,
+                                    name: subject.name || 'Unnamed Subject'
+                                }))}
+                                onChange={(e) => setSelectedSubjects(e.value)}
+                                optionLabel="name"  // Display the subject name
+                                placeholder="Select subjects"
+                                display="chip"
+                                filter
+                                className="multiselect-custom" // Apply custom styles
+                                //virtualScrollerOptions={{itemSize: 40}}
+                            />
                         </label>
                     )}
+
 
                     <div className="popup-buttons">
                         <button type="submit">Submit</button>
@@ -152,3 +166,5 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddStudentPopup;
+
+

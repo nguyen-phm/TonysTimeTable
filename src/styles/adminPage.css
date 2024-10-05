@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 * {
   font-family: 'Poppins', sans-serif;
 }
@@ -15,8 +15,8 @@
 .sidebar {
   background-color: #C86C6C;
   color: white;
-  border-right: 8px solid #DB8686;
-
+  border-right: 6px solid #EDEDED;
+  outline: 10px solid #000000;
 }
 
 .vit-logo {
@@ -25,14 +25,13 @@
 }
 
 .sidebar-logo {
-  padding: 1rem;
   height: 120px;
-  border-bottom: 3px solid #DB8686;
+  border-bottom: 2px solid #DB8686;
 }
 
 .nav-section {
   padding: 1rem 0;
-  border-bottom: 3px solid #DB8686;
+  border-bottom: 2px solid #DB8686;
 }
 
 .sidebar-link {
@@ -43,9 +42,14 @@
   text-align: left;
 }
 
-.sidebar-link:hover,
+.sidebar-link:hover {
+  background-color: #b46666;
+  border-radius: 4px;
+}
+
 .sidebar-link.active {
   background-color: #DB8686;
+  border-radius: 3px;
 }
 
 .sidebar-link-icon {

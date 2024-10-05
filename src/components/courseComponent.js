@@ -101,23 +101,33 @@ const CourseComponent = () => {
 
     return (
         <div className="admin-section">
-            <h2>Courses and Subjects</h2>
 
             {isLoading ? (
                 <p>Loading courses and subjects...</p>
             ) : (
                 <>
-                    <ul>
-                        {subjects.map((subject) => (
-                            <li key={subject.id}>
-                                {subject.name} - {subject.code} ({subject.year}, {subject.semester})
-                                <button onClick={() => handleEditSubject(subject)}>Edit</button> {/* Edit Button */}
-                                <button onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
-                            </li>
+                    <div className="courses-list">
+                        {subjects.map((subject, index) => (
+                            <div key={index} className="course-row">
+                                <div className="course-info">
+                                    <div className="course-name">{subject.name}</div>
+                                    <div className="course-code">{subject.code}</div>
+                                </div>
+                                <div className="course-details">
+                                    <div className="delivery-mode">Year: {subject.year}</div>
+                                    <div className="campus">Semester: {subject.semester}</div>
+                                </div>
+                                <div className="subject-actions">
+                                    <button className="edit-button" onClick={() => handleEditSubject(subject)}>Edit</button>
+                                    <button className="delete-button" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </>
             )}
+
+            <br />
 
             <button type="button" onClick={() => setShowCoursePopup(true)}>
                 Add Course

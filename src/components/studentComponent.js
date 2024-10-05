@@ -69,23 +69,29 @@ const StudentComponent = () => {
 
     return (
         <div className="admin-section">
-            <h2>Students</h2>
 
             {isLoading ? (
                 <p>Loading students...</p>
             ) : (
                 <>
-                    <ul>
-                        {students.map((student) => (
-                            <li key={student.id}>
-                                {student.name} - {student.university_email}
-                                <button onClick={() => handleEditStudent(student)}>Edit</button>
-                                <button onClick={() => handleDeleteStudent(student.id)}>Remove</button>
-                            </li>
+                    <div className="courses-list">
+                        {students.map((student, index) => (
+                            <div key={index} className="course-row">
+                                <div className="course-info">
+                                    <div className="course-name">{student.name}</div>
+                                    <div className="course-code">{student.university_email}</div>
+                                </div>
+                                <div className="student-actions">
+                                    <button className="edit-button" onClick={() => handleEditStudent(student)}>Edit</button>
+                                    <button className="delete-button" onClick={() => handleDeleteStudent(student.id)}>Remove</button>
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </>
             )}
+
+            <br />
 
             <button type="button" onClick={() => setShowStudentPopup(true)}>
                 Add Student

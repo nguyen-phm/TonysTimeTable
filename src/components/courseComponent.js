@@ -4,6 +4,7 @@ import AddSubjectPopup from './popups/addSubjectPopup';
 import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
+import '../styles/courseComponent.css';
 
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);
@@ -118,8 +119,8 @@ const CourseComponent = () => {
                                     <div className="campus">Semester: {subject.semester}</div>
                                 </div>
                                 <div className="subject-actions">
-                                    <button className="edit-button" onClick={() => handleEditSubject(subject)}>Edit</button>
-                                    <button className="delete-button" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
+                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>
+                                    <button className="more-options" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
                                 </div>
                             </div>
                         ))}
@@ -129,7 +130,7 @@ const CourseComponent = () => {
 
             <br />
 
-            <button type="button" onClick={() => setShowCoursePopup(true)}>
+            <button className='more-options' type="more" onClick={() => setShowCoursePopup(true)}>
                 Add Course
             </button>
 
@@ -140,9 +141,7 @@ const CourseComponent = () => {
                 />
             )}
 
-            <br />
-
-            <button type="button" onClick={() => setShowSubjectPopup(true)}>
+            <button className='more-options' type="button" onClick={() => setShowSubjectPopup(true)}>
                 Add Subject
             </button>
 

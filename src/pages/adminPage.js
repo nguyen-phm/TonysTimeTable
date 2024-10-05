@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Home, BookOpen, User, Presentation, Users, Settings, MoreVertical } from 'lucide-react';
+import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-react';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
+import '../styles/filterComponent.css';
 import VITLogo from '../assets/VIT_White.png';
 
 const AdminPage = () => {
@@ -88,14 +89,18 @@ const AdminPage = () => {
                     </div>
 
                     {/* Filters sidebar */}
-                    <div className="filters-sidebar w-72 p-6">
-                        <h2 className="text-xl font-semibold mb-4">FILTERS</h2>
-                        <FilterSection label="Course Name" />
-                        <FilterSection label="Course ID" />
-                        <FilterSection label="Unit Name" />
-                        <FilterSection label="Unit ID" />
-                        <FilterSection label="Campus" />
-                        <button className="apply-button">Apply</button>
+                    <div className="filters-sidebar">
+                        <div className='filters-border'>
+                            <div className="filters-title">FILTERS</div>
+                            <hr className="filters-divider" />
+                            <FilterSection label="Course Name" />
+                            <FilterSection label="Course ID" />
+                            <FilterSection label="Unit Name" />
+                            <FilterSection label="Unit ID" />
+                            <FilterSection label="Campus" />
+                            <hr className="filters-divider" />
+                            <button className="apply-button">Apply</button>
+                        </div>
                     </div>
                 </div>
             </div>

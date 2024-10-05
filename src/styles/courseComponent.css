@@ -1,25 +1,57 @@
-/* Popup.css */
-.popup-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .popup {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+.courses-list {
     background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Apply backdrop blur effect */
-  .popup-container {
-    backdrop-filter: blur(5px);
-  }
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid #d1d6db;
+}
+
+.course-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #d1d6db;
+}
+
+.course-row:last-child {
+    border-bottom: none;
+}
+
+.course-info {
+    flex-grow: 1;
+}
+
+.course-title {
+    font-weight: 500;
+    color: #1a202c;
+}
+
+.course-code {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.course-details {
+    display: flex;
+    gap: 2rem;
+    color: #4A5568;
+    margin-right: 1rem;
+}
+
+.more-options {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.more-options:hover {
+    background-color: #f7fafc;
+    border-radius: 4px;
+}

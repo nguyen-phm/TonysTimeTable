@@ -75,7 +75,7 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <h2>Add a New Course</h2>
+                <div className='popup-h2'>Add a New Course</div>
                 <form onSubmit={handleSubmit}>
                     <label>
                         Course Name:

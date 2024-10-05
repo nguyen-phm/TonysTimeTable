@@ -4,6 +4,7 @@ import AddSubjectPopup from './popups/addSubjectPopup';
 import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
+import '../styles/courseComponent.css';
 
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);
@@ -101,25 +102,35 @@ const CourseComponent = () => {
 
     return (
         <div className="admin-section">
-            <h2>Courses and Subjects</h2>
 
             {isLoading ? (
                 <p>Loading courses and subjects...</p>
             ) : (
                 <>
-                    <ul>
-                        {subjects.map((subject) => (
-                            <li key={subject.id}>
-                                {subject.name} - {subject.code} ({subject.year}, {subject.semester})
-                                <button onClick={() => handleEditSubject(subject)}>Edit</button> {/* Edit Button */}
-                                <button onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
-                            </li>
+                    <div className="courses-list">
+                        {subjects.map((subject, index) => (
+                            <div key={index} className="course-row">
+                                <div className="course-info">
+                                    <div className="course-name">{subject.name}</div>
+                                    <div className="course-code">{subject.code}</div>
+                                </div>
+                                <div className="course-details">
+                                    <div className="delivery-mode">Year: {subject.year}</div>
+                                    <div className="campus">Semester: {subject.semester}</div>
+                                </div>
+                                <div className="subject-actions">
+                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>
+                                    <button className="more-options" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </>
             )}
 
-            <button type="button" onClick={() => setShowCoursePopup(true)}>
+            <br />
+
+            <button className='more-options' type="more" onClick={() => setShowCoursePopup(true)}>
                 Add Course
             </button>
 
@@ -130,9 +141,7 @@ const CourseComponent = () => {
                 />
             )}
 
-            <br />
-
-            <button type="button" onClick={() => setShowSubjectPopup(true)}>
+            <button className='more-options' type="button" onClick={() => setShowSubjectPopup(true)}>
                 Add Subject
             </button>
 

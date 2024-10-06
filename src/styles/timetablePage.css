@@ -33,7 +33,7 @@
     margin-top: 5px;
 }
 
-/* timetablePage.css */
+/* Timetable Page Layout */
 .timetable-container {
     display: flex;
     flex-direction: column;
@@ -46,7 +46,7 @@
     height: 100%;
 }
 
-/* Sidebar for Courses */
+/* Sidebar Styles */
 .sidebar {
     width: 20%;
     background-color: #f8f9fa;
@@ -76,11 +76,37 @@
     color: #6c757d;
 }
 
-/* Timetable */
+/* Generate Button */
+.generate-button {
+    padding: 10px 20px;
+    background-color: #efc3c3;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+}
+
+.generate-button:hover {
+    background-color: #e6a9a9;
+}
+
+.generate-button:disabled {
+    background-color: #f1d5d5;
+    cursor: not-allowed;
+}
+
+/* Timetable Styles */
 .timetable {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .header {
@@ -99,10 +125,8 @@
     background-color: #f1f1f1;
 }
 
-
-/* dummy space to fix alignment issues */
 .dummy-space {
-    width: 10%; /* Width should match the .times width */
+    width: 10%;
 }
 
 .main-content {
@@ -110,14 +134,11 @@
     flex: 1;
 }
 
-/* Times on the left */
+/* Times Column */
 .times {
     width: 10%;
-    padding: 20px;
     background-color: #f1f1f1;
     border-right: 1px solid #dee2e6;
-    display: flex;
-    flex-direction: column;
 }
 
 .time-slot {
@@ -128,29 +149,91 @@
     justify-content: center;
     font-size: 14px;
     border-bottom: 1px solid #dee2e6;
-    margin-bottom: 5px;
-
 }
 
-/* Days columns */
+/* Days Columns */
 .days {
     display: flex;
     flex: 1;
-    flex-direction: row;
 }
 
 .day-column {
     flex: 1;
+    border-right: 1px solid #dee2e6;
+}
+
+.day-column:last-child {
+    border-right: none;
+}
+
+.hour-slot {
+    height: 60px;
+    border-bottom: 1px solid #dee2e6;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* Class Slots */
+.class-slot {
+    background-color: #efc3c3;
     padding: 10px;
-    background-color: #fff;
-    border-left: 1px solid #dee2e6;
-    display: flex;
-    flex-direction: column;
+    margin: 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.class-slot.online-class {
+    background-color: #c3efdd;
+    border-color: #a9e6c7;
+}
+
+.class-type {
+    font-weight: bold;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.class-details {
+    font-size: 10px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .empty-slot {
-    height: 60px;
-    border-bottom: 1px solid #dee2e6;
+    height: 100%;
     background-color: #f9f9f9;
-    margin-bottom: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 25%;
+    }
+    
+    .times {
+        width: 15%;
+    }
+    
+    .dummy-space {
+        width: 15%;
+    }
+}
+
+@media (max-width: 768px) {
+    .timetable-container {
+        padding-top: 100px;
+    }
+    
+    .main-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+    }
 }

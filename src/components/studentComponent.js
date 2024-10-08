@@ -39,13 +39,23 @@ const StudentComponent = () => {
 
     const handleDeleteStudent = async (studentId) => {
         try {
-            const { error } = await supabase
+            const { error: joinTableError } = await supabase
+                .from('StudentSubject') 
+                .delete()
+                .eq('student_id', studentId);   
+    
+            if (joinTableError) {
+                console.error('Error deleting from join table:', joinTableError);
+                return;
+            }
+    
+            const { error: studentError } = await supabase
                 .from('Students')
                 .delete()
-                .eq('id', studentId); 
-
-            if (error) {
-                console.error('Error deleting student:', error);
+                .eq('id', studentId);
+    
+            if (studentError) {
+                console.error('Error deleting student:', studentError);
             } else {
                 setStudents(students.filter((student) => student.id !== studentId));
             }
@@ -53,7 +63,7 @@ const StudentComponent = () => {
             console.error('Error deleting student:', error);
         }
     };
-
+    
     const handleEditStudent = (student) => {
         setSelectedStudent(student); 
         setShowEditStudentPopup(true); 

@@ -76,13 +76,23 @@ const CourseComponent = () => {
 
     const handleDeleteSubject = async (subjectId) => {
         try {
-            const { error } = await supabase
+            const { error: subjectRelationError } = await supabase
+                .from('StudentSubject')
+                .delete()
+                .eq('subject_id', subjectId);
+    
+            if (subjectRelationError) {
+                console.error('Error deleting from StudentSubject:', subjectRelationError);
+                return;
+            }
+    
+            const { error: subjectError } = await supabase
                 .from('Subjects')
                 .delete()
                 .eq('id', subjectId);
-
-            if (error) {
-                console.error('Error deleting subject:', error);
+    
+            if (subjectError) {
+                console.error('Error deleting subject:', subjectError);
             } else {
                 setSubjects(subjects.filter((subject) => subject.id !== subjectId));
             }
@@ -92,8 +102,8 @@ const CourseComponent = () => {
     };
 
     const handleEditSubject = (subject) => {
-        setSelectedSubject(subject); // Store the selected subject for editing
-        setShowEditSubjectPopup(true); // Show the edit popup
+        setSelectedSubject(subject);
+        setShowEditSubjectPopup(true);
     };
 
     const updateSubject = (updatedSubject) => {

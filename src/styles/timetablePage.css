@@ -138,7 +138,7 @@
     flex-direction: column;
 }
 
-.class-type {
+.class-code {
     font-weight: 600;
     font-size: 0.65rem;
     margin-bottom: 2px;
@@ -147,7 +147,7 @@
     text-overflow: ellipsis;
 }
 
-.class-location, .class-time {
+.class-type, .class-location {
     font-size: 0.6rem;
     color: #495057;
     white-space: nowrap;

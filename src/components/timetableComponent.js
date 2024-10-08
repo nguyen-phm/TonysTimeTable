@@ -14,10 +14,12 @@ const TimetableComponent = () => {
                 .select(`
                     id,
                     class_type,
+                    subject_id,
                     is_online,
                     location_id,
                     start_time,
-                    duration_30mins
+                    duration_30mins,
+                    Subjects (code)
                 `)
                 .order('start_time');
             if (error) throw error;
@@ -37,7 +39,7 @@ const TimetableComponent = () => {
     const colorMap = {};
     const getClassColor = (id) => {
         if (!colorMap[id]) {
-            // Generate colours based on  class id
+            // Generate colours based on class id
             const hue = id * 137.508;
             colorMap[id] = `hsl(${hue % 400}, 70%, 85%)`; // Light pastelish colours
         }
@@ -62,12 +64,13 @@ const TimetableComponent = () => {
                     }}
                 >
                     <div className="class-content">
-                        <div className="class-type">{classItem.class_type}</div>
+                        <div className="class-code">{classItem.Subjects?.code || 'N/A'}</div>
+                        <div className="class-type">
+                            {classItem.class_type || 'Class Type N/A'}
+                        </div>
                         <div className="class-location">
                             {classItem.is_online ? 'Online' : `Room ${classItem.location_id}`}
-                        </div>
-                        <div className="class-time">
-                            {`${hour}:00 - ${hour + durationInHours}:00`}
+                            {/* {`${hour}:00 - ${hour + durationInHours}:00`} */}
                         </div>
                     </div>
                 </div>
@@ -114,4 +117,3 @@ const TimetableComponent = () => {
 };
 
 export default TimetableComponent;
-

@@ -1,9 +1,9 @@
+// DELETE THIS
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import VITLogo from '../assets/VITLogo.png';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import '../styles/timetablePage.css'; 
 
 const NavbarComponent = () => {
     const navigate = useNavigate();

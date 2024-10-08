@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-react';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
+import TimetableComponent from '../components/timetableComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/filterComponent.css';
+import '../styles/timetablePage.css';
 import VITLogo from '../assets/VIT_White.png';
 
 const AdminPage = () => {
@@ -34,7 +36,7 @@ const AdminPage = () => {
             case 'classrooms':
                 return <ClassroomsContent />;
             case 'home':
-                return <HomeContent />;
+                return <TimetableComponent />;
             default:
                 return null;
         }
@@ -147,10 +149,5 @@ const ClassroomsContent = () => (
     </div>
 );
 
-const HomeContent = () => (
-    <div className="admin-section">
-        <p>Home dashboard coming soon... d-(^_^)z</p>
-    </div>
-);
 
 export default AdminPage;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
+import '../styles/timetablePage.css';
+
 
 const TimetableComponent = () => {
     const [classes, setClasses] = useState([]);

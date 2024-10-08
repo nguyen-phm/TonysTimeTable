@@ -33,13 +33,14 @@ const TimetableComponent = () => {
         fetchTimetableData();
     }, []);
 
-    // map to store colors for each class id
+    // map to store colours for each class id
     const colorMap = {};
     const getClassColor = (id) => {
         if (!colorMap[id]) {
             // Generate colours based on  class id
             const hue = id * 137.508;
             colorMap[id] = `hsl(${hue % 400}, 70%, 85%)`; // Light pastelish colours
+        }
         return colorMap[id];
     };
 

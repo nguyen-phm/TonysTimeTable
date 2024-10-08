@@ -15,6 +15,21 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [subjects, setSubjects] = useState([]);
 
+    // Add an event listener to handle "Escape" key press
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+            onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, [onClose]);
+    
     // Fetch the courses from the database
     useEffect(() => {
         const fetchCourses = async () => {

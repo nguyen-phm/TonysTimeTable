@@ -10,6 +10,21 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(subject.course_id); 
 
+    // Add an event listener to handle "Escape" key press
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, [onClose]);
+
     useEffect(() => {
         const fetchCourses = async () => {
             const { data, error } = await supabase

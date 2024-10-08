@@ -51,23 +51,24 @@ async function generateExcelFile(course_id) {
 
     // Add the timetable data
     const timetableData = await getTimetableData(course_id);
-    timetableData.forEach((row, rowIndex) => {
+    
+    timetableData.forEach(row => {
     const dataRow = worksheet.addRow(row);
     dataRow.eachCell({ includeEmpty: true }, (cell) => {
         cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'DEEAF6' }
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'DEEAF6' }
         };
         cell.font = {
-        size: 10,
-        font: 'Tahoma',
+            size: 10,
+            font: 'Tahoma',
         };
-        cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+            cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
         };  
         cell.alignment = { horizontal: 'center' };
     });
@@ -94,27 +95,29 @@ async function generateExcelFile(course_id) {
 
 async function getTimetableData(course_id) {
     const { data: classes, error } = await supabase
-    .from('Classes')
-    .select(`
-    id, start_time, duration_30mins, class_type, is_online,
-    Subjects ( name, code, course_id ),
-    Locations ( name ),
-    Staff ( name )
-    `)
-    .eq('Subjects.course_id', course_id)
-    .order('start_time');
-    if (error) throw new Error(error.message);
-
-    const timetableData = Array.from({ length: classes.length }, () => new Array(5)); 
-
-    classes.forEach((cls, row) => {
-    timetableData[row][0] = getDayString(cls);
-    timetableData[row][1] = getTimeString(cls); 
-    timetableData[row][2] = `${cls.Subjects.code} - ${cls.Subjects.name} (${cls.class_type === 'LECTURE' ? 'Lecture' : 'Tutorial'})`;
-    timetableData[row][3] = cls.Locations.name;
-    timetableData[row][4] = cls.Staff.name;
-    timetableData[row][5] = cls.is_online ? 'Online' : 'Face to Face'; 
-    });
+        .from('Classes')
+        .select(`
+        id, start_time, duration_30mins, class_type, is_online,
+        Subjects!inner(course_id, name, code), 
+        Locations ( name ),
+        Staff ( name )
+        `)
+        .eq('Subjects.course_id', course_id)
+        .order('start_time');
+    if (error) {
+        console.log('Error reading Classes: ' + error.message);
+        return [];
+    }
+    const timetableData = Array.from(Array(classes.length), () => new Array(6))
+    for (let i = 0; i < classes.length; i++) {
+        timetableData[i][0] = getDayString(classes[i]);
+        timetableData[i][1] = getTimeString(classes[i]); 
+        timetableData[i][2] = `${classes[i].Subjects.code} - ${classes[i].Subjects.name} (${classes[i].class_type === 'LECTURE' ? 'Lecture' : 'Tutorial'})`;
+        timetableData[i][3] = classes[i].Locations.name;
+        timetableData[i][4] = classes[i].Staff.name;
+        timetableData[i][5] = classes[i].is_online ? 'Online' : 'Face to Face';
+    };
+    
     return timetableData;
 }
 

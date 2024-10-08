@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import '../styles/timetablePage.css';
 
-
 const TimetableComponent = () => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -21,12 +20,8 @@ const TimetableComponent = () => {
                     duration_30mins
                 `)
                 .order('start_time');
-
             if (error) throw error;
-            
-            console.log("Fetched data: ", data);  // Log fetched data to ensure it's coming through
             setClasses(data || []);
-
         } catch (error) {
             console.error('Error fetching timetable data:', error);
         } finally {
@@ -38,39 +33,41 @@ const TimetableComponent = () => {
         fetchTimetableData();
     }, []);
 
-    const renderTimeSlot = (hour) => {
-        console.log("Rendering time slot for hour:", hour);
+    // map to store colors for each class id
+    const colorMap = {};
+    const getClassColor = (id) => {
+        if (!colorMap[id]) {
+            // Generate colours based on  class id
+            const hue = id * 137.508;
+            colorMap[id] = `hsl(${hue % 400}, 70%, 85%)`; // Light pastelish colours
+        return colorMap[id];
+    };
 
-        classes.forEach((classItem) => {
-            console.log(`Class start_time: ${classItem.start_time}`);
-        });
-
+    const renderTimeSlot = (hour, day) => {
         const classesInSlot = classes.filter(c => c.start_time === hour);
-
-        console.log(`Classes for ${hour}:00`, classesInSlot);
-
-        if (classesInSlot.length === 0) return <div className="empty-slot" >Empty</div>;
+        if (classesInSlot.length === 0) return null;
 
         return classesInSlot.map((classItem, index) => {
             const durationInHours = classItem.duration_30mins / 2;
-
+            const backgroundColor = getClassColor(classItem.id); // Use class id for color
 
             return (
-                <div 
-                    key={index} 
+                <div
+                    key={index}
                     className={`class-slot ${classItem.is_online ? 'online-class' : ''}`}
                     style={{
-                        height: `${durationInHours * 60}px`,
-                        backgroundColor: 'lightblue',
-                        border: '1px solid black',
-                        margin: '5px'
+                        height: `${durationInHours * 50 - 5}px `,
+                        backgroundColor,
                     }}
                 >
-                    <div className="class-type">
-                        {classItem.class_type}
-                    </div>
-                    <div className="class-details">
-                        {classItem.is_online ? 'Online' : `Location: ${classItem.location_id}`}
+                    <div className="class-content">
+                        <div className="class-type">{classItem.class_type}</div>
+                        <div className="class-location">
+                            {classItem.is_online ? 'Online' : `Room ${classItem.location_id}`}
+                        </div>
+                        <div className="class-time">
+                            {`${hour}:00 - ${hour + durationInHours}:00`}
+                        </div>
                     </div>
                 </div>
             );
@@ -78,43 +75,37 @@ const TimetableComponent = () => {
     };
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
 
     return (
         <div className="timetable-section">
-            <button 
+            <button
                 onClick={fetchTimetableData}
                 disabled={isLoading}
                 className="generate-button"
             >
-                {isLoading ? 'Loading...' : 'Generate Timetable'}
+                {isLoading ? 'Loading...' : 'Refresh Timetable'}
             </button>
-
             <div className="timetable">
-                <div className="header">
-                    <div className="dummy-space"></div>
+                <div className="timetable-header">
+                    <div className="time-header">Time</div>
                     {daysOfWeek.map((day) => (
                         <div key={day} className="day-header">{day}</div>
                     ))}
                 </div>
-                <div className="main-content">
-                    <div className="times">
-                        {Array.from({ length: 10 }, (_, i) => i + 8).map((hour) => (
-                            <div key={hour} className="time-slot">
+                <div className="timetable-body">
+                    {timeSlots.map((hour) => (
+                        <div key={hour} className="time-row">
+                            <div className="time-label">
                                 {`${hour.toString().padStart(2, '0')}:00`}
                             </div>
-                        ))}
-                    </div>
-                    <div className="days">
-                        {daysOfWeek.map((day) => (
-                            <div key={day} className="day-column">
-                                {Array.from({ length: 10 }, (_, i) => i + 8).map((hour) => (
-                                    <div key={hour} className="hour-slot">
-                                        {renderTimeSlot(hour)} {/* Classes only rendered for Monday nvm this isn't working */}
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
+                            {daysOfWeek.map((day) => (
+                                <div key={`${day}-${hour}`} className="day-cell">
+                                    {renderTimeSlot(hour, day)}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -122,3 +113,4 @@ const TimetableComponent = () => {
 };
 
 export default TimetableComponent;
+

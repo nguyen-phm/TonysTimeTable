@@ -79,7 +79,7 @@ const StudentComponent = () => {
             {isLoading ? (
                 <div className='courses-list'>   
                     <div className='course-row'>
-                        <p>Loading students...</p>
+                        <p>Loading Students</p>
                     </div>
                 </div>
             ) : (

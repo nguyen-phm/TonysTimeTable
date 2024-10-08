@@ -116,7 +116,7 @@ const CourseComponent = () => {
             {isLoading ? (
                 <div className='courses-list'>   
                     <div className='course-row'>
-                        <p>Loading courses and subjects...</p>
+                        <p>Loading Subjects</p>
                     </div>
                 </div>
             ) : (

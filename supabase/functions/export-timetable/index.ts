@@ -1,9 +1,10 @@
 // File: supabase/functions/export-timetable/index.ts
-// Export the timetable for a given course as a .xlsx file
+// Edge function to export the timetable for a given course as a .xlsx file
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 import ExcelJS from 'npm:exceljs@4.4.0';
+import { corsHeaders } from '../_shared/cors.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!, 
@@ -11,25 +12,32 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
+  // Needed to invoke from browser
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     // Attempt to read course_id from req
     const { course_id } = await req.json();
     if (!course_id || typeof course_id !== 'number' || !Number.isInteger(course_id)) {
-      return new Response('Invalid or missing course_id. It should be an integer.', { status: 400 });
+      return new Response('Invalid or missing course_id', { 
+        status: 400,
+        headerRow: corsHeaders
+      });
     }
 
     const excelFile = await generateExcelFile(course_id);
+
     return new Response(excelFile, {
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': 'attachment; filename="timetable.xlsx"'
-      }
+      status: 200,
+      headers: corsHeaders
     });
 
   } catch (error) {
     return new Response(JSON.stringify({ success: false, error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

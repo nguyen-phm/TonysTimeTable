@@ -20,7 +20,6 @@ Deno.serve(async (req) => {
         for (const campus of campuses) { 
             const data = await fetchData(campus.id);
             const timetable = await getInitialState(data);
-            console.log(timetable);
             await updateDatabase(timetable, data);
         }
     }
@@ -71,20 +70,33 @@ async function fetchData(campusId) {
         .order('duration_30mins', { ascending: false });
     console.log(classes);
 
-    if (classesError) throw new Error('Error fetching classes: ' + classesError.message);
+    const { data: enrolments, enrolmentsError } = await supabase
+        .from('StudentSubject')
+        .select(`student_id, subject_id`);
+    console.log(enrolments);
+
+    if (enrolmentsError) throw new Error('Error fetching classes: ' + classesError.message);
     
     const clashes = new Set();
+    // Teaching staff clash
     for (let i = 0; i < classes.length; i++) {
-        for (let j = 1; j < classes.length; j++) {
+        for (let j = i + 1; j < classes.length; j++) {
             if (classes[i].staff_id == classes[j].staff_id) {
-                // Teaching staff clash
                 clashes.add(`${i}-${j}`)
                 clashes.add(`${j}-${i}`);
-                continue;
             }
         }
     }
-    
+    // Student clash
+    for (let i = 0; i < enrolments.length; i++) {
+        for (let j = i + 1; j < enrolments.length; j++) {
+            if (enrolments[i].student_id == enrolments[j].student_id) {
+                clashes.add(`${i}-${j}`)
+                clashes.add(`${j}-${i}`);
+            }
+        }
+    }
+
     return { rooms: rooms, classes: classes, clashes: clashes }
 }
 

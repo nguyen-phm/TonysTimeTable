@@ -2,8 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { corsHeaders } from '../_shared/cors.ts'
 
-const MIN_HOUR = 7-1; // earliest a class can start (0-23)
-const MAX_HOUR = 19-1; // latest a class can finish
+const MIN_HOUR = 8-1; // earliest a class can start (0-23)
+const MAX_HOUR = 20-1; // latest a class can finish
 const IDEAL_HOUR = 13-1;
 
 const supabase = createClient(
@@ -28,9 +28,10 @@ Deno.serve(async (req) => {
         // This ensures that classes are only assigned rooms in the correct campus
         if (campuses) {
             for (const campus of campuses) { 
+                console.log('NEW CAMPUS  -----')
                 const data = await fetchData(campus.id);
                 let timetable = await getInitialState(data);
-                timetable = optimizeTimetable(timetable, data);
+                timetable = runSimulatedAnnealing(timetable, data);
                 await updateDatabase(timetable, data);
             }
         }
@@ -128,7 +129,6 @@ function getInitialState(data) {
     data.classes.forEach((clazz, classIndex) => {
         while (true) {
             const time = randomInt(0, 5) * 24*2 + randomInt(2*MIN_HOUR, 2*MAX_HOUR);
-            console.log(time, time % 48, time / 48);
             const roomIndex = randomInt(0, data.rooms.length);
             if (canAllocate(classIndex, roomIndex, time, timetable, data)) {
                 for (let i = 0; i < clazz.duration_30mins; i++) {
@@ -198,34 +198,51 @@ function getNeighbour(timetable, data) {
     return neighbour;
 }
 
-function getFitness(timetable, data) {
-    let fitness = 0;
+function getEnergy(timetable, data) {
+    let energy = 0;
     for (let roomIndex = 0; roomIndex < data.rooms.length; roomIndex++) {
         for (let time = 0; time < timetable.length; time++) {
             const classIndex = timetable[time][roomIndex];
             if (classIndex === null) continue;
-            if (time % 2 == 0) fitness += 50;
-            fitness -= Math.abs(time % 48 - IDEAL_HOUR*2);
+            if (time % 2 == 1) energy += 100;
+            energy += Math.abs(time % 48 - IDEAL_HOUR*2);
             time += data.classes[classIndex].duration_30mins - 1;
         }
     }
-    return fitness;
+    return energy;
 }
 
-function optimizeTimetable(initialTimetable, data) {
-    const K = Math.ceil(data.classes.length * 0.2)
-    let bestTimetable = initialTimetable;
-    let bestFitness = getFitness(initialTimetable, data);
-    for (let iter = 0; iter < 10; iter++) {
-        const currTimetable = getNeighbour(bestTimetable, data);
-        const currFitness = getFitness(currTimetable, data);
-        if (currFitness > bestFitness) {
-            bestTimetable = currTimetable;
-            bestFitness = currFitness;
+const K_MAX = 1000;
+function runSimulatedAnnealing(initialState, data) {
+    let currState = initialState;
+    let currEnergy = getEnergy(currState, data);
+    for (let k = 0; k < K_MAX; k++) {
+        const temperature = 100 * (1 - (k+1)/K_MAX);
+        const newState = getNeighbour(currState, data);
+        const newEnergy = getEnergy(newState, data);
+        // console.log('temp', temperature);
+        // console.log('curr energy', currEnergy)
+        // console.log('new energy', newEnergy)
+        // console.log('P=', acceptanceProbaility(currEnergy, newEnergy, temperature));
+        if (acceptanceProbaility(currEnergy, newEnergy, temperature) > Math.random()) {
+            // console.log('accepted move');
+            currState = newState;
+            currEnergy = newEnergy;
+        } else {
+            // console.log('rejected move');
         }
     }
-    return bestTimetable;
+    return currState;
 }
+
+function acceptanceProbaility(currEnergy, newEnergy, temperature) {
+    if (newEnergy < currEnergy) {
+        // Always move to a lower energy state
+        return 1;
+    }
+    return Math.exp(-(newEnergy - currEnergy) / temperature);
+}
+
 
 
 

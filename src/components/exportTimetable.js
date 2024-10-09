@@ -21,37 +21,98 @@ async function generateExcelFile(course_id) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Timetable');
 
-    // worksheet.mergeCells('A1:F1'); 
-    // const topRow = worksheet.getRow(1); 
-    // topRow.getCell(1).value = "Victorian Institute of Technology Pty Ltd";
-    // topRow.getCell(1).alignment = { horizontal: 'center' }; // Center the text
+    let boilerplateLineCount = 0;
+    const addBoilerplateLine = (text, color, center, size, bold) =>  {
+        boilerplateLineCount++;
+        worksheet.mergeCells(`A${boilerplateLineCount}:F${boilerplateLineCount}`);
+        const cell = worksheet.getRow(boilerplateLineCount).getCell(1);
+        cell.value = text;
+        cell.font = {
+            size: size,
+            name: 'Tahoma',
+            color: { argb: color },
+            bold: bold
+        }
+        if (center) {
+            cell.alignment = { horizontal: 'center'};
+        }
+    }
+
+    addBoilerplateLine(
+        'Victorian Institute of Technology Pty Ltd', 
+        '0000FF', true, 9, true
+    );
+    addBoilerplateLine(
+        'ABN: 41 085 128 525 RTO No: 20829 TEQSA ID: PRV14007 CRICOS Provider Code: 02044E', 
+        '0000FF', true, 9, false
+    );
+    const { data: course } = await supabase
+        .from('Courses')
+        .select(`id, name`)
+        .eq('id', course_id);
+    addBoilerplateLine(
+        course[0].name,
+        '000000', true, 9, true
+    );
+    addBoilerplateLine(
+        'Venue: 123 & 235 Queens Street, Melbourne',
+        '000000', true, 9, true
+    );
+    addBoilerplateLine(
+        'Timetable:',
+        '000000', false, 9, true
+    );
+    addBoilerplateLine(
+        'Note: (a) This is a Master Timetable. You are required to refer to your Unit Allocation (i.e., your enrolled units) to know which units/sessions are applicable to you.',
+        'C00000', false, 9, true
+    );
+    addBoilerplateLine(
+        '(b) Time Table may change in the event of some exigencies.',						
+        'C00000', false, 9, true
+    );
+    addBoilerplateLine(
+        '(c) Units have additional consulting sessions (based on unit requirements) which is not reflected below including online guided learning.',
+        'C00000', false, 9, true
+    );
+
+    // Add VIT logo
+    const response =  await fetch('/logoExcel_upscaled.png');
+    const logo = workbook.addImage({
+        buffer: response.arrayBuffer(),
+        extension: 'png', 
+    });
+    worksheet.addImage(logo, {
+        tl: { col: 0, row: 0 },
+        ext: { width: 150, height: 75 },
+        editAs: 'oneCell'
+    });
+    
 
     // Add headers
     const headers = ['Day', 'Time', 'Unit', 'Classroom', 'Teaching Staff', 'Delivery Mode'];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell({ includeEmpty: true }, (cell) => {
-    cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'D9D9D9' }
-    };
-    cell.font = {
-        size: 10,
-        font: 'Tahoma',
-        bold: true,
-    };
-    cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
-    };
-    cell.alignment = { horizontal: 'center' };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'D9D9D9' }
+        };
+        cell.font = {
+            size: 10,
+            name: 'Tahoma',
+            bold: true,
+        };
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+        cell.alignment = { horizontal: 'center' };
     });
 
     // Add the timetable data
     const timetableData = await getTimetableData(course_id);
-    
     timetableData.forEach(row => {
     const dataRow = worksheet.addRow(row);
     dataRow.eachCell({ includeEmpty: true }, (cell) => {
@@ -62,7 +123,7 @@ async function generateExcelFile(course_id) {
         };
         cell.font = {
             size: 10,
-            font: 'Tahoma',
+            name: 'Tahoma',
         };
             cell.border = {
             top: { style: 'thin' },
@@ -76,16 +137,17 @@ async function generateExcelFile(course_id) {
 
     // Adjust column widths to fit content (including headers and data)
     worksheet.columns.forEach(column => {
-    let maxLength = 0;
-    const cells = column.values;
-    for (let i = 0; i < cells.length; i++) {
-        const cell = cells[i];
-        const columnLength = cell ? cell.toString().length : 10; // Default to 10 if no value
-        if (columnLength > maxLength) {
-        maxLength = columnLength;
+        let maxLength = 0;
+        const cells = column.values;
+        console.log(column.values);
+        for (let i = boilerplateLineCount + 1; i < cells.length; i++) {
+            const cell = cells[i];
+            const columnLength = cell ? cell.toString().length : 10; // Default to 10 if no value
+            if (columnLength > maxLength) {
+                maxLength = columnLength;
+            }
         }
-    }
-    column.width = maxLength + 2; // Add some padding
+        column.width = maxLength + 6;
     });
 
     // Generate the Excel file as a buffer

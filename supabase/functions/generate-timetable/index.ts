@@ -148,7 +148,7 @@ async function updateDatabase(timetable, data) {
             if (classIndex !== null) { 
                 const { error } = await supabase
                     .from("Classes")
-                    .update({start_time: time + MIN_HOUR*2, location_id: data.rooms[roomIndex].id})
+                    .update({start_time: time, location_id: data.rooms[roomIndex].id})
                     .eq("id", data.classes[classIndex].id);
                 if (error) throw new Error(`Error writing to database: ${error.message}`);
                 time += data.classes[classIndex].duration_30mins - 1;

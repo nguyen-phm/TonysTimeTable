@@ -40,161 +40,58 @@ const StudentComponent = () => {
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
-    
+
         if (file) {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
                 complete: async (results) => {
                     console.log('Parsed Results: ', results);
-    
+
                     if (results && results.data && results.data.length > 0) {
                         for (const student of results.data) {
-                            // Change to match the new CSV column names
                             const studentId = student['StudentID'] || null;
                             const name = student['Student Name'] || null;
                             const university_email = student['University Email'] || null;
                             const courseName = student['Course Name'] || null;
-                            const campusName = student['Campus'] ? student['Campus'].trim() : null; // Trim campus name from CSV
-    
-                            if (!studentId || !name || !courseName || !campusName) {
-                                console.error('Missing required student data:', { studentId, name, university_email, courseName, campusName });
+                            const campusName = student['Campus'] ? student['Campus'].trim() : null;
+
+                            if (!validateStudentData({ studentId, name, courseName, campusName })) {
+                                console.error('Missing or invalid student data:', { studentId, name, courseName, campusName });
                                 continue;
                             }
-    
+
                             try {
-                                // Step 1: Check if the student already exists in the 'Students' table based on 'student_id'
-                                const { data: existingStudentData, error: existingStudentError } = await supabase
-                                    .from('Students')
-                                    .select('*')
-                                    .eq('student_id', studentId)
-                                    .single();
-    
-                                if (existingStudentError && existingStudentError.code !== 'PGRST116') { // Ignore "No Rows Found" error
-                                    console.error(`Error checking if student exists for student_id ${studentId}:`, existingStudentError);
-                                    continue;
-                                }
-    
-                                // If the student already exists, skip adding the student or update them if necessary
-                                if (existingStudentData) {
-                                    console.log(`Student with student_id ${studentId} already exists. Skipping insertion or updating...`);
-                                    continue; // Skip or implement update logic here if you want to update the existing record
-                                }
-    
-                                // Step 2: Fetch the course along with the campus it is associated with
-                                const { data: courseData, error: courseError } = await supabase
-                                    .from('Courses')
-                                    .select('id, campus_id')
-                                    .eq('name', courseName)
-                                    .single();
-    
-                                if (courseError || !courseData) {
-                                    console.error(`Error fetching course for ${courseName}:`, courseError);
-                                    continue;
-                                }
-    
-                                const courseId = courseData.id;
-                                const campusId = courseData.campus_id;
-    
-                                // Step 3: Fetch the campus name using the campus_id
-                                const { data: campusData, error: campusError } = await supabase
-                                    .from('Campuses')
-                                    .select('name')
-                                    .eq('id', campusId)
-                                    .single();
-    
-                                if (campusError || !campusData) {
-                                    console.error(`Error fetching campus for campus_id ${campusId}:`, campusError);
-                                    continue;
-                                }
-    
-                                const fetchedCampusName = campusData.name.trim(); // Trim the fetched campus name
-    
-                                // Check if the campus names match case-insensitively
-                                if (fetchedCampusName.toLowerCase() !== campusName.toLowerCase()) {
+                                const existingStudent = await checkIfStudentExists(studentId);
+                                const courseData = await fetchCourseAndCampus(courseName, campusName);
+
+                                if (!courseData) continue;
+
+                                const { courseId, campusId, fetchedCampusName } = courseData;
+
+                                if (!validateCampusName(fetchedCampusName, campusName)) {
                                     console.error(`Campus mismatch: expected ${campusName}, but found ${fetchedCampusName}`);
                                     continue;
                                 }
-    
-                                // Step 4: Now check for columns that have numbers in the column name (for subjects)
-                                const subjectCodes = Object.keys(student).filter(key => /\d/.test(key)); // Check if the key contains numbers
-                                let allSubjectsExist = true; // Flag to check if all subjects exist
-    
-                                for (const subjectCode of subjectCodes) {
-                                    const enrollmentStatus = student[subjectCode];
-    
-                                    if (enrollmentStatus === 'ENRL') {
-                                        // Check if the subject exists in the Subjects table
-                                        const { data: subjectData, error: subjectError } = await supabase
-                                            .from('Subjects')
-                                            .select('id')
-                                            .eq('code', subjectCode)
-                                            .single();
-    
-                                        if (subjectError || !subjectData) {
-                                            console.error(`Error: Subject with code ${subjectCode} does not exist for ${name}.`);
-                                            allSubjectsExist = false; // Mark that a subject does not exist
-                                            break; // Exit loop if any subject is not found
-                                        }
-                                    }
-                                }
-    
-                                // If any of the subjects don't exist, skip adding the student
-                                if (!allSubjectsExist) {
+
+                                const subjectsExist = await checkSubjectsExist(student);
+                                if (!subjectsExist) {
                                     console.error(`Aborting adding student ${name}: One or more subjects do not exist.`);
                                     continue;
                                 }
-    
-                                // Step 5: If all subjects and course-campus match, insert the student data into the Students table
-                                const { data: studentData, error: studentError } = await supabase
-                                    .from('Students')
-                                    .insert([
-                                        {
-                                            student_id: studentId, // Insert the 'student_id' from CSV
-                                            name,
-                                            university_email,
-                                            course_id: courseId
-                                        }
-                                    ])
-                                    .select();
-    
-                                if (studentError) {
-                                    console.error(`Error inserting student ${name}:`, studentError);
-                                    continue;
+
+                                let studentIdDb;
+
+                                if (existingStudent) {
+                                    console.log(`Updating existing student with student_id ${studentId}.`);
+                                    studentIdDb = await updateStudent(existingStudent.id, { name, university_email, courseId });
+                                } else {
+                                    console.log(`Inserting new student with student_id ${studentId}.`);
+                                    studentIdDb = await insertStudent({ studentId, name, university_email, courseId });
                                 }
-    
-                                const studentIdDb = studentData[0].id;
-    
-                                // Step 6: Insert into the StudentSubject table for each valid subject
-                                for (const subjectCode of subjectCodes) {
-                                    const enrollmentStatus = student[subjectCode];
-    
-                                    if (enrollmentStatus === 'ENRL') {
-                                        const { data: subjectData } = await supabase
-                                            .from('Subjects')
-                                            .select('id')
-                                            .eq('code', subjectCode)
-                                            .single();
-    
-                                        const subjectId = subjectData.id;
-    
-                                        const { error: studentSubjectError } = await supabase
-                                            .from('StudentSubject')
-                                            .insert([
-                                                {
-                                                    student_id: studentIdDb,
-                                                    subject_id: subjectId
-                                                }
-                                            ]);
-    
-                                        if (studentSubjectError) {
-                                            console.error(`Error inserting into StudentSubject for ${name} and ${subjectCode}:`, studentSubjectError);
-                                        } else {
-                                            console.log(`Inserted ${name} into StudentSubject for subject ${subjectCode}`);
-                                        }
-                                    }
-                                }
-    
+
+                                await insertStudentSubjects(student, studentIdDb);
+
                             } catch (error) {
                                 console.error('Error processing student:', error);
                             }
@@ -209,7 +106,146 @@ const StudentComponent = () => {
             });
         }
     };
-    
+
+    // Helper function to validate the basic student data
+    const validateStudentData = ({ studentId, name, courseName, campusName }) => {
+        return studentId && name && courseName && campusName;
+    };
+
+    // Helper function to check if the student already exists
+    const checkIfStudentExists = async (studentId) => {
+        const { data: existingStudentData, error: existingStudentError } = await supabase
+            .from('Students')
+            .select('*')
+            .eq('student_id', studentId)
+            .single();
+
+        if (existingStudentError && existingStudentError.code !== 'PGRST116') {
+            console.error(`Error checking if student exists for student_id ${studentId}:`, existingStudentError);
+            return null;
+        }
+
+        return existingStudentData;
+    };
+
+    // Helper function to fetch course and campus information
+    const fetchCourseAndCampus = async (courseName, campusName) => {
+        const { data: courseData, error: courseError } = await supabase
+            .from('Courses')
+            .select('id, campus_id')
+            .eq('name', courseName)
+            .single();
+
+        if (courseError || !courseData) {
+            console.error(`Error fetching course for ${courseName}:`, courseError);
+            return null;
+        }
+
+        const { data: campusData, error: campusError } = await supabase
+            .from('Campuses')
+            .select('name')
+            .eq('id', courseData.campus_id)
+            .single();
+
+        if (campusError || !campusData) {
+            console.error(`Error fetching campus for campus_id ${courseData.campus_id}:`, campusError);
+            return null;
+        }
+
+        return { courseId: courseData.id, campusId: courseData.campus_id, fetchedCampusName: campusData.name.trim() };
+    };
+
+    // Helper function to validate the campus name
+    const validateCampusName = (fetchedCampusName, campusName) => {
+        return fetchedCampusName.toLowerCase() === campusName.toLowerCase();
+    };
+
+    // Helper function to check if all the subjects exist
+    const checkSubjectsExist = async (student) => {
+        const subjectCodes = Object.keys(student).filter(key => /\d/.test(key)); // Find columns that contain subject codes
+        let allSubjectsExist = true;
+
+        for (const subjectCode of subjectCodes) {
+            const enrollmentStatus = student[subjectCode];
+
+            if (enrollmentStatus === 'ENRL') {
+                const { data: subjectData, error: subjectError } = await supabase
+                    .from('Subjects')
+                    .select('id')
+                    .eq('code', subjectCode)
+                    .single();
+
+                if (subjectError || !subjectData) {
+                    console.error(`Error: Subject with code ${subjectCode} does not exist.`);
+                    allSubjectsExist = false;
+                    break;
+                }
+            }
+        }
+
+        return allSubjectsExist;
+    };
+
+    // Helper function to insert a new student
+    const insertStudent = async ({ studentId, name, university_email, courseId }) => {
+        const { data: studentData, error: studentError } = await supabase
+            .from('Students')
+            .insert([{ student_id: studentId, name, university_email, course_id: courseId }])
+            .select();
+
+        if (studentError) {
+            console.error(`Error inserting student ${name}:`, studentError);
+            return null;
+        }
+
+        return studentData[0].id;
+    };
+
+    // Helper function to update an existing student
+    const updateStudent = async (studentIdDb, { name, university_email, courseId }) => {
+        const { data: updatedStudentData, error: updateError } = await supabase
+            .from('Students')
+            .update({ name, university_email, course_id: courseId })
+            .eq('id', studentIdDb)
+            .select();
+
+        if (updateError) {
+            console.error(`Error updating student with id ${studentIdDb}:`, updateError);
+            return null;
+        }
+
+        return updatedStudentData[0].id;
+    };
+
+    // Helper function to insert subjects for the student
+    const insertStudentSubjects = async (student, studentIdDb) => {
+        const subjectCodes = Object.keys(student).filter(key => /\d/.test(key));
+
+        for (const subjectCode of subjectCodes) {
+            const enrollmentStatus = student[subjectCode];
+
+            if (enrollmentStatus === 'ENRL') {
+                const { data: subjectData } = await supabase
+                    .from('Subjects')
+                    .select('id')
+                    .eq('code', subjectCode)
+                    .single();
+
+                const subjectId = subjectData.id;
+
+                const { error: studentSubjectError } = await supabase
+                    .from('StudentSubject')
+                    .insert([{ student_id: studentIdDb, subject_id: subjectId }]);
+
+                if (studentSubjectError) {
+                    console.error(`Error inserting into StudentSubject for subject ${subjectCode}:`, studentSubjectError);
+                } else {
+                    console.log(`Inserted student into StudentSubject for subject ${subjectCode}`);
+                }
+            }
+        }
+    };
+
     const handleUploadButtonClick = () => {
         document.getElementById('file-input').click();
     };
@@ -246,7 +282,7 @@ const StudentComponent = () => {
         setShowEditStudentPopup(true); 
     };
 
-    const updateStudent = (updatedStudent) => {
+    const updateStudentList = (updatedStudent) => {
         setStudents(students.map((student) => (student.id === updatedStudent.id ? updatedStudent : student)));
     };
 
@@ -307,7 +343,7 @@ const StudentComponent = () => {
                 <EditStudentPopup
                     student={selectedStudent}
                     onClose={() => setShowEditStudentPopup(false)}
-                    onSubmit={updateStudent}
+                    onSubmit={updateStudentList}
                 />
             )}
         </div>

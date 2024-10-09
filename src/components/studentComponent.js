@@ -51,18 +51,37 @@ const StudentComponent = () => {
                     if (results && results.data && results.data.length > 0) {
                         for (const student of results.data) {
                             // Change to match the new CSV column names
+                            const studentId = student['StudentID'] || null;
                             const name = student['Student Name'] || null;
                             const university_email = student['University Email'] || null;
                             const courseName = student['Course Name'] || null;
                             const campusName = student['Campus'] ? student['Campus'].trim() : null; // Trim campus name from CSV
     
-                            if (!name || !courseName || !campusName) {
-                                console.error('Missing required student data:', { name, university_email, courseName, campusName });
+                            if (!studentId || !name || !courseName || !campusName) {
+                                console.error('Missing required student data:', { studentId, name, university_email, courseName, campusName });
                                 continue;
                             }
     
                             try {
-                                // Fetch the course along with the campus it is associated with
+                                // Step 1: Check if the student already exists in the 'Students' table based on 'student_id'
+                                const { data: existingStudentData, error: existingStudentError } = await supabase
+                                    .from('Students')
+                                    .select('*')
+                                    .eq('student_id', studentId)
+                                    .single();
+    
+                                if (existingStudentError && existingStudentError.code !== 'PGRST116') { // Ignore "No Rows Found" error
+                                    console.error(`Error checking if student exists for student_id ${studentId}:`, existingStudentError);
+                                    continue;
+                                }
+    
+                                // If the student already exists, skip adding the student or update them if necessary
+                                if (existingStudentData) {
+                                    console.log(`Student with student_id ${studentId} already exists. Skipping insertion or updating...`);
+                                    continue; // Skip or implement update logic here if you want to update the existing record
+                                }
+    
+                                // Step 2: Fetch the course along with the campus it is associated with
                                 const { data: courseData, error: courseError } = await supabase
                                     .from('Courses')
                                     .select('id, campus_id')
@@ -77,7 +96,7 @@ const StudentComponent = () => {
                                 const courseId = courseData.id;
                                 const campusId = courseData.campus_id;
     
-                                // Fetch the campus name using the campus_id
+                                // Step 3: Fetch the campus name using the campus_id
                                 const { data: campusData, error: campusError } = await supabase
                                     .from('Campuses')
                                     .select('name')
@@ -97,7 +116,7 @@ const StudentComponent = () => {
                                     continue;
                                 }
     
-                                // Now check for columns that have numbers in the column name (for subjects)
+                                // Step 4: Now check for columns that have numbers in the column name (for subjects)
                                 const subjectCodes = Object.keys(student).filter(key => /\d/.test(key)); // Check if the key contains numbers
                                 let allSubjectsExist = true; // Flag to check if all subjects exist
     
@@ -126,11 +145,12 @@ const StudentComponent = () => {
                                     continue;
                                 }
     
-                                // If all subjects and course-campus match, insert the student data into the Students table
+                                // Step 5: If all subjects and course-campus match, insert the student data into the Students table
                                 const { data: studentData, error: studentError } = await supabase
                                     .from('Students')
                                     .insert([
                                         {
+                                            student_id: studentId, // Insert the 'student_id' from CSV
                                             name,
                                             university_email,
                                             course_id: courseId
@@ -143,9 +163,9 @@ const StudentComponent = () => {
                                     continue;
                                 }
     
-                                const studentId = studentData[0].id;
+                                const studentIdDb = studentData[0].id;
     
-                                // Insert into the StudentSubject table for each valid subject
+                                // Step 6: Insert into the StudentSubject table for each valid subject
                                 for (const subjectCode of subjectCodes) {
                                     const enrollmentStatus = student[subjectCode];
     
@@ -162,7 +182,7 @@ const StudentComponent = () => {
                                             .from('StudentSubject')
                                             .insert([
                                                 {
-                                                    student_id: studentId,
+                                                    student_id: studentIdDb,
                                                     subject_id: subjectId
                                                 }
                                             ]);

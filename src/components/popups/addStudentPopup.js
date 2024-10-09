@@ -5,11 +5,12 @@ import '../../styles/popup.css';
 import 'primereact/resources/themes/saga-blue/theme.css'; // Import the PrimeReact theme
 import 'primereact/resources/primereact.min.css';         // Core CSS for PrimeReact components
 import 'primeicons/primeicons.css';       
-        
+
 
 const AddStudentPopup = ({ onClose, onSubmit }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [studentId, setStudentId] = useState(''); // New state for student ID
     const [selectedCourse, setSelectedCourse] = useState('');
     const [courses, setCourses] = useState([]);
     const [selectedSubjects, setSelectedSubjects] = useState([]);
@@ -29,7 +30,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
             window.removeEventListener('keydown', handleEsc);
         };
     }, [onClose]);
-    
+
     // Fetch the courses from the database
     useEffect(() => {
         const fetchCourses = async () => {
@@ -68,11 +69,18 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Ensure that the studentId is a 4-digit number
+        if (!/^\d{4}$/.test(studentId)) {
+            alert('Please enter a valid 4-digit student ID.');
+            return;
+        }
+
         if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubjects.length > 0) {
             try {
                 const { data: studentData, error: studentError } = await supabase
                     .from('Students')
-                    .insert([{ name, university_email: email, course_id: selectedCourse }])
+                    .insert([{ student_id: studentId, name, university_email: email, course_id: selectedCourse }])
                     .select();
 
                 if (studentError) {
@@ -131,6 +139,21 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                         />
                     </label>
 
+                    {/* New field for 4-digit student ID */}
+                    <label>
+                        Student ID:
+                        <input
+                            type="text"
+                            value={studentId}
+                            onChange={(e) => setStudentId(e.target.value)}
+                            required
+                            placeholder="Enter 4-digit Student ID"
+                            maxLength={4} // Restrict input to 4 characters
+                            pattern="\d{4}" // Ensure only digits
+                            title="Please enter exactly 4 digits"
+                        />
+                    </label>
+
                     <label>
                         Select Course:
                         <select
@@ -162,7 +185,6 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                                 display="chip"
                                 filter
                                 className="multiselect-custom" // Apply custom styles
-                                //virtualScrollerOptions={{itemSize: 40}}
                             />
                         </label>
                     )}
@@ -181,5 +203,6 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddStudentPopup;
+
 
 

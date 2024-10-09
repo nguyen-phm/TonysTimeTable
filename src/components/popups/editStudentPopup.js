@@ -7,6 +7,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     const [name, setName] = useState(student.name);
     const [email, setEmail] = useState(student.university_email);
     const [selectedCourse, setSelectedCourse] = useState(student.course_id);
+    const [studentId, setStudentId] = useState(student.student_id); // New state for student ID
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [selectedSubjects, setSelectedSubjects] = useState([]); // Store selected subjects
@@ -71,12 +72,19 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Ensure the student ID is valid (4 digits)
+        if (!/^\d{4}$/.test(studentId)) {
+            alert('Please enter a valid 4-digit Student ID.');
+            return;
+        }
+
         if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubjects.length > 0) {
             try {
-                // Step 1: Update the student's basic info
+                // Step 1: Update the student's basic info including the student ID
                 const { data, error } = await supabase
                     .from('Students')
-                    .update({ name, university_email: email, course_id: selectedCourse })
+                    .update({ name, university_email: email, course_id: selectedCourse, student_id: studentId }) // Include student_id in the update
                     .eq('id', student.id)
                     .select();
 
@@ -143,6 +151,21 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             placeholder="Enter Student Email"
+                        />
+                    </label>
+
+                    {/* New field for Student ID */}
+                    <label>
+                        Student ID:
+                        <input
+                            type="text"
+                            value={studentId}
+                            onChange={(e) => setStudentId(e.target.value)}
+                            required
+                            placeholder="Enter 4-digit Student ID"
+                            maxLength={4} // Restrict input to 4 characters
+                            pattern="\d{4}" // Ensure only digits
+                            title="Please enter exactly 4 digits"
                         />
                     </label>
 

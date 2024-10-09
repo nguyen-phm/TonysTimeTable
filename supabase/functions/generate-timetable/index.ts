@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 
-const MIN_HOUR = 6; // earliest a class can start (0-23)
-const MAX_HOUR = 18; // latest a class can finish
+const MIN_HOUR = 7-1; // earliest a class can start (0-23)
+const MAX_HOUR = 19-1; // latest a class can finish
 
 const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!, 
@@ -10,16 +10,24 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
-    const data = await fetchData();
+    const { data: campuses, error } = await supabase
+        .from('Campuses')
+        .select('id');
+    if (error) throw new Error('Error fetching campuses: ' + error.message);
+    console.log(campuses);
 
-    let timetable = getInitialState(data);
-
-    await updateDatabase(timetable, data);
+    if (campuses) {
+        for (const campus of campuses) { 
+            const data = await fetchData(campus.id);
+            const timetable = await getInitialState(data);
+            console.log(timetable);
+            await updateDatabase(timetable, data);
+        }
+    }
 
     return new Response(
-        JSON.stringify({timetable}),
         { headers: { "Content-Type": "application/json" } }
-      );
+    );
 });
 
 function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
@@ -39,18 +47,31 @@ function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
     return true;
 }
 
-async function fetchData() {
+
+async function fetchData(campusId) {
     const { data: rooms, roomsError } = await supabase
-        .from("Locations")
-        .select(`id`);
-    if (roomsError) throw new Error("Error fetching rooms: " + roomsError.message);
+        .from('Locations')
+        .select(`id, campus_id`)
+        .eq('campus_id', campusId);
+    console.log(rooms);
 
+    if (roomsError) throw new Error('Error fetching rooms: ' + roomsError.message);
+
+    // don't neeed subject and course name 
     const { data: classes, classesError } = await supabase
-        .from("Classes")
-        .select(`id, duration_30mins, staff_id`)
+        .from('Classes')
+        .select(`
+            id, start_time, duration_30mins, class_type,
+            Subjects!inner(
+                name,
+                Courses!inner(name, campus_id)
+            )
+        `)
+        .eq('Subjects.Courses.campus_id', campusId)
         .order('duration_30mins', { ascending: false });
-    if (classesError) throw new Error("Error fetching classes: " + classesError.message);
+    console.log(classes);
 
+    if (classesError) throw new Error('Error fetching classes: ' + classesError.message);
     
     const clashes = new Set();
     for (let i = 0; i < classes.length; i++) {
@@ -69,7 +90,8 @@ async function fetchData() {
 
 function getInitialState(data) {
     const timetable = Array.from({ length: 24*2*5 }, () => new Array(data.rooms.length).fill(null));
-
+    // Attempt to randomly allocate each class.
+    // TO DO: attempt limit.
     data.classes.forEach((clazz, classIndex) => {
         while (true) {
             const hour = 2*randomInt(MIN_HOUR, MAX_HOUR);
@@ -82,13 +104,8 @@ function getInitialState(data) {
                 }
                 break;
             }
-            // timetable[0][classIndex] = time;
-            // timetable[1][classIndex] = roomIndex;
-            // timetable[2][classIndex] = canAllocate(classIndex, roomIndex, time, timetable, data);
-            // break;
       }
     });
-
     return timetable;
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import AddStudentPopup from './popups/addStudentPopup'; 
 import EditStudentPopup from './popups/editStudentPopup'; 
+import ErrorPopup from './popups/errorPopup'; // Import the ErrorPopup component
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
@@ -11,7 +12,9 @@ const StudentComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showStudentPopup, setShowStudentPopup] = useState(false);
     const [showEditStudentPopup, setShowEditStudentPopup] = useState(false);
-    const [selectedStudent, setSelectedStudent] = useState(null); 
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [showErrorPopup, setShowErrorPopup] = useState(false); // State for ErrorPopup visibility
+    const [errorMessages, setErrorMessages] = useState([]); // State for storing error messages
 
     useEffect(() => {
         const fetchStudents = async () => {
@@ -40,6 +43,7 @@ const StudentComponent = () => {
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
+        const errors = []; // Array to store errors
 
         if (file) {
             Papa.parse(file, {
@@ -57,7 +61,9 @@ const StudentComponent = () => {
                             const campusName = student['Campus'] ? student['Campus'].trim() : null;
 
                             if (!validateStudentData({ studentId, name, courseName, campusName })) {
-                                console.error('Missing or invalid student data:', { studentId, name, courseName, campusName });
+                                const errorMessage = `Missing required data for student ${name || 'Unknown'}.`;
+                                console.error(errorMessage);
+                                errors.push(errorMessage); // Add error to the array
                                 continue;
                             }
 
@@ -65,43 +71,62 @@ const StudentComponent = () => {
                                 const existingStudent = await checkIfStudentExists(studentId);
                                 const courseData = await fetchCourseAndCampus(courseName, campusName);
 
-                                if (!courseData) continue;
+                                if (!courseData) {
+                                    errors.push(`Error fetching course or campus for ${name}.`);
+                                    continue;
+                                }
 
-                                const { courseId, campusId, fetchedCampusName } = courseData;
+                                const { courseId, fetchedCampusName } = courseData;
 
                                 if (!validateCampusName(fetchedCampusName, campusName)) {
-                                    console.error(`Campus mismatch: expected ${campusName}, but found ${fetchedCampusName}`);
+                                    const errorMessage = `Campus mismatch for student ${name}. Expected ${campusName}, but found ${fetchedCampusName}.`;
+                                    console.error(errorMessage);
+                                    errors.push(errorMessage);
                                     continue;
                                 }
 
                                 const subjectsExist = await checkSubjectsExist(student);
                                 if (!subjectsExist) {
-                                    console.error(`Aborting adding student ${name}: One or more subjects do not exist.`);
+                                    const errorMessage = `One or more subjects do not exist for student ${name}.`;
+                                    console.error(errorMessage);
+                                    errors.push(errorMessage);
                                     continue;
                                 }
 
-                                let studentIdDb;
-
                                 if (existingStudent) {
-                                    console.log(`Updating existing student with student_id ${studentId}.`);
-                                    studentIdDb = await updateStudent(existingStudent.id, { name, university_email, courseId });
+                                    await updateStudentInDatabase(existingStudent.id, { name, university_email, courseId });
+                                    console.log(`Student ${name} updated successfully.`);
                                 } else {
-                                    console.log(`Inserting new student with student_id ${studentId}.`);
-                                    studentIdDb = await insertStudent({ studentId, name, university_email, courseId });
+                                    await insertStudent({ studentId, name, university_email, courseId });
+                                    console.log(`Student ${name} inserted successfully.`);
                                 }
 
-                                await insertStudentSubjects(student, studentIdDb);
-
                             } catch (error) {
-                                console.error('Error processing student:', error);
+                                const errorMessage = `Error processing student ${name}: ${error.message}`;
+                                console.error(errorMessage);
+                                errors.push(errorMessage);
                             }
                         }
+
+                        // If there are any errors, show the error popup
+                        if (errors.length > 0) {
+                            setErrorMessages(errors);
+                            setShowErrorPopup(true);
+                        }
                     } else {
-                        console.error('Error: Parsed data is not in the expected format.');
+                        const errorMessage = 'Error: Parsed data is not in the expected format.';
+                        console.error(errorMessage);
+                        errors.push(errorMessage);
+                        setErrorMessages(errors);
+                        setShowErrorPopup(true);
                     }
                 },
                 error: (error) => {
-                    console.error('Error parsing CSV file: ', error);
+                    const errorMessage = `Error parsing CSV file: ${error.message}`;
+                    console.error(errorMessage);
+                    errors.push(errorMessage);
+                    setErrorMessages(errors);
+                    setShowErrorPopup(true);
                 }
             });
         }
@@ -201,8 +226,8 @@ const StudentComponent = () => {
         return studentData[0].id;
     };
 
-    // Helper function to update an existing student
-    const updateStudent = async (studentIdDb, { name, university_email, courseId }) => {
+    // Function to update student data in the database
+    const updateStudentInDatabase = async (studentIdDb, { name, university_email, courseId }) => {
         const { data: updatedStudentData, error: updateError } = await supabase
             .from('Students')
             .update({ name, university_email, course_id: courseId })
@@ -214,36 +239,12 @@ const StudentComponent = () => {
             return null;
         }
 
-        return updatedStudentData[0].id;
+        return updatedStudentData[0];
     };
 
-    // Helper function to insert subjects for the student
-    const insertStudentSubjects = async (student, studentIdDb) => {
-        const subjectCodes = Object.keys(student).filter(key => /\d/.test(key));
-
-        for (const subjectCode of subjectCodes) {
-            const enrollmentStatus = student[subjectCode];
-
-            if (enrollmentStatus === 'ENRL') {
-                const { data: subjectData } = await supabase
-                    .from('Subjects')
-                    .select('id')
-                    .eq('code', subjectCode)
-                    .single();
-
-                const subjectId = subjectData.id;
-
-                const { error: studentSubjectError } = await supabase
-                    .from('StudentSubject')
-                    .insert([{ student_id: studentIdDb, subject_id: subjectId }]);
-
-                if (studentSubjectError) {
-                    console.error(`Error inserting into StudentSubject for subject ${subjectCode}:`, studentSubjectError);
-                } else {
-                    console.log(`Inserted student into StudentSubject for subject ${subjectCode}`);
-                }
-            }
-        }
+    // Function to update student list in the UI
+    const updateStudentList = (updatedStudent) => {
+        setStudents(students.map((student) => (student.id === updatedStudent.id ? updatedStudent : student)));
     };
 
     const handleUploadButtonClick = () => {
@@ -282,8 +283,9 @@ const StudentComponent = () => {
         setShowEditStudentPopup(true); 
     };
 
-    const updateStudentList = (updatedStudent) => {
-        setStudents(students.map((student) => (student.id === updatedStudent.id ? updatedStudent : student)));
+    const closeErrorPopup = () => {
+        setShowErrorPopup(false);
+        setErrorMessages([]); // Clear errors when popup is closed
     };
 
     return (
@@ -346,8 +348,16 @@ const StudentComponent = () => {
                     onSubmit={updateStudentList}
                 />
             )}
+
+            {showErrorPopup && (
+                <ErrorPopup
+                    errors={errorMessages} // Pass the error messages to the ErrorPopup
+                    onClose={closeErrorPopup} // Function to close the popup
+                />
+            )}
         </div>
     );
 };
 
 export default StudentComponent;
+

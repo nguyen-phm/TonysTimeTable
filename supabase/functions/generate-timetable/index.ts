@@ -17,37 +17,33 @@ Deno.serve(async (req) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
-    const { data: campuses, error } = await supabase
-        .from('Campuses')
-        .select('id');
+    try {
+        // Attempt to fetch campuses
+        const { data: campuses, error } = await supabase
+            .from('Campuses')
+            .select('id');
+        if (error) throw new Error(error.message);
 
-    if (error) {
-        return new Response('AAAA', { 
-            status: 400,
-            headers: corsHeaders
-          });
-    }
-
-    if (campuses) {
-        for (const campus of campuses) { 
-            if (campus.id != 1) continue;
-            try {
+        // Generate timetable for each campus seperately
+        // This ensures that classes are only assigned rooms in the correct campus
+        if (campuses) {
+            for (const campus of campuses) { 
                 const data = await fetchData(campus.id);
                 let timetable = await getInitialState(data);
                 timetable = optimizeTimetable(timetable, data);
-                await updateDatabase(timetable, data)
-            } catch (error) {
-                return new Response('AAAA', { 
-                    status: 400,
-                    headers: corsHeaders
-                  });
-            };
+                await updateDatabase(timetable, data);
+            }
         }
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), { 
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
     }
 
-    return new Response('Success', {
+    return new Response(JSON.stringify({ message: 'Timetable generated successfully' }), {
         status: 200,
-        headers: corsHeaders
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
 });
 
@@ -77,30 +73,29 @@ async function fetchData(campusId) {
         .from('Locations')
         .select(`id, campus_id`)
         .eq('campus_id', campusId);
-    console.log(rooms);
 
-    if (roomsError) throw new Error('Error fetching rooms: ' + roomsError.message);
+    if (roomsError) throw new Error(`Error fetching rooms: ${roomsError.message}`);
 
-    // don't neeed subject and course name 
     const { data: classes, classesError } = await supabase
         .from('Classes')
         .select(`
             id, start_time, duration_30mins, class_type,
-            Subjects!inner(
-                name,
-                Courses!inner(name, campus_id)
-            )
+            Subjects!inner(Courses!inner(campus_id))
         `)
         .eq('Subjects.Courses.campus_id', campusId)
         .order('duration_30mins', { ascending: false });
-    console.log(classes);
 
-    const { data: enrolments, enrolmentsError } = await supabase
-        .from('StudentSubject')
-        .select(`student_id, subject_id`);
-    console.log(enrolments);
+    if (classesError) throw new Error(`Error fetching classes: ${classesError.message}`);
 
-    if (enrolmentsError) throw new Error('Error fetching classes: ' + classesError.message);
+    if (rooms.length == 0 && classes.length > 0) throw new Error(`Campus with id ${campusId} has no rooms but at least one class.`);
+    
+
+    // const { data: enrolments, enrolmentsError } = await supabase
+    //     .from('StudentSubject')
+    //     .select(`student_id, subject_id`);
+    // console.log(enrolments);
+
+    // if (enrolmentsError) throw new Error('Error fetching classes: ' + classesError.message);
     
     const clashes = new Set();
     // Teaching staff clash
@@ -112,15 +107,16 @@ async function fetchData(campusId) {
             }
         }
     }
-    // Student clash
-    for (let i = 0; i < enrolments.length; i++) {
-        for (let j = i + 1; j < enrolments.length; j++) {
-            if (enrolments[i].student_id == enrolments[j].student_id) {
-                clashes.add(`${i}-${j}`)
-                clashes.add(`${j}-${i}`);
-            }
-        }
-    }
+
+    // // Student clash
+    // for (let i = 0; i < enrolments.length; i++) {
+    //     for (let j = i + 1; j < enrolments.length; j++) {
+    //         if (enrolments[i].student_id == enrolments[j].student_id) {
+    //             clashes.add(`${i}-${j}`)
+    //             clashes.add(`${j}-${i}`);
+    //         }
+    //     }
+    // }
 
     return { rooms: rooms, classes: classes, clashes: clashes }
 }
@@ -131,9 +127,8 @@ function getInitialState(data) {
     // TO DO: attempt limit.
     data.classes.forEach((clazz, classIndex) => {
         while (true) {
-            const hour = randomInt(2*MIN_HOUR, 2*MAX_HOUR);
-            const day = randomInt(0, 4);
-            const time = day * 48 + hour;
+            const time = randomInt(0, 5) * 24*2 + randomInt(2*MIN_HOUR, 2*MAX_HOUR);
+            console.log(time, time % 48, time / 48);
             const roomIndex = randomInt(0, data.rooms.length);
             if (canAllocate(classIndex, roomIndex, time, timetable, data)) {
                 for (let i = 0; i < clazz.duration_30mins; i++) {
@@ -151,9 +146,11 @@ async function updateDatabase(timetable, data) {
         for (let time = 0; time < timetable.length; time++) {
             const classIndex = timetable[time][roomIndex];
             if (classIndex !== null) { 
-                await supabase.from("Classes")
+                const { error } = await supabase
+                    .from("Classes")
                     .update({start_time: time + MIN_HOUR*2, location_id: data.rooms[roomIndex].id})
                     .eq("id", data.classes[classIndex].id);
+                if (error) throw new Error(`Error writing to database: ${error.message}`);
                 time += data.classes[classIndex].duration_30mins - 1;
           }
         }
@@ -187,7 +184,7 @@ function getNeighbour(timetable, data) {
     toDeallocate.forEach(classIndex => {
         const clazz = data.classes[classIndex];
         while (true) {
-            const time = randomInt(0, 4) * 48 + randomInt(2*MIN_HOUR, 2*MAX_HOUR);
+            const time = randomInt(0, 5) * 24*2 + randomInt(2*MIN_HOUR, 2*MAX_HOUR);
             const roomIndex = randomInt(0, data.rooms.length);
             if (canAllocate(classIndex, roomIndex, time, timetable, data)) {
                 for (let i = 0; i < clazz.duration_30mins; i++) {
@@ -217,19 +214,16 @@ function getFitness(timetable, data) {
 
 function optimizeTimetable(initialTimetable, data) {
     const K = Math.ceil(data.classes.length * 0.2)
-    console.log('K=',K)
     let bestTimetable = initialTimetable;
     let bestFitness = getFitness(initialTimetable, data);
-    for (let iter = 0; iter < 1000; iter++) {
+    for (let iter = 0; iter < 10; iter++) {
         const currTimetable = getNeighbour(bestTimetable, data);
         const currFitness = getFitness(currTimetable, data);
-        console.log(currFitness);
         if (currFitness > bestFitness) {
             bestTimetable = currTimetable;
             bestFitness = currFitness;
         }
     }
-    console.log('BEST', bestFitness)
     return bestTimetable;
 }
 

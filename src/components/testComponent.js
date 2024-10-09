@@ -9,10 +9,10 @@ const TestComponent = () => {
 };
 
 async function myFunction() {
-    console.log('My function');
     const { data, error } = await supabase.functions.invoke('generate-timetable');
-    if (error) console.log(error.message);
-    console.log('Done????');
+    if (error) console.error(error.message);
+    else if (data.error) console.error(data.error);
+    else console.log(data.message);
 }
 
 export default TestComponent;

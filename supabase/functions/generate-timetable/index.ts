@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 
 const MIN_HOUR = 7-1; // earliest a class can start (0-23)
 const MAX_HOUR = 19-1; // latest a class can finish
+const IDEAL_HOUR = 13-1;
 
 const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!, 
@@ -18,8 +19,10 @@ Deno.serve(async (req) => {
 
     if (campuses) {
         for (const campus of campuses) { 
+            if (campus.id != 1) continue;
             const data = await fetchData(campus.id);
-            const timetable = await getInitialState(data);
+            let timetable = await getInitialState(data);
+            timetable = optimizeTimetable(timetable, data);
             await updateDatabase(timetable, data);
         }
     }
@@ -30,14 +33,17 @@ Deno.serve(async (req) => {
 });
 
 function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
+    // Make sure class isn't allocated too early
     if (time % 48 < MIN_HOUR*2) return false;
 
     for (let i = 0; i < data.classes[classIndex].duration_30mins; i++) {
+        // Make sure class isn't allocated too late
         if ((time + i) % 48 >= MAX_HOUR*2) return false;
 
+        // Check if another class is already allocated to this room at this time
         if (timetable[time + i][roomIndex] !== null) return false;
 
-        // Check for clash
+        // Check if the class clashes with another class allocated at this time
         for (let j = 0; j < data.rooms.length; j++) {
             if (timetable[time + i][j] === null) continue;
             if (data.clashes.has(`${classIndex}-${timetable[time + i][j]}`)) return false;
@@ -106,7 +112,7 @@ function getInitialState(data) {
     // TO DO: attempt limit.
     data.classes.forEach((clazz, classIndex) => {
         while (true) {
-            const hour = 2*randomInt(MIN_HOUR, MAX_HOUR);
+            const hour = randomInt(2*MIN_HOUR, 2*MAX_HOUR);
             const day = randomInt(0, 4);
             const time = day * 48 + hour;
             const roomIndex = randomInt(0, data.rooms.length);
@@ -135,70 +141,78 @@ async function updateDatabase(timetable, data) {
     }
 }
 
+// Utility function to generate a random integer between min and max (exclusive)
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-// // Generates a neighbouring state by randomly deallocating and then reallocating K classes.
-// function getNeighbour(timetable, K, data) {
-//     const neighbour = JSON.parse(JSON.stringify(timetable));
+// Generates a neighbouring state by randomly deallocating and then reallocating K classes
+function getNeighbour(timetable, data) {
+    const K = Math.ceil(data.classes.length * 0.2)
+    const neighbour = JSON.parse(JSON.stringify(timetable));
 
-//     const toDeallocate = new Set<number>();
-//     while (toDeallocate.size < K) {
-//         toDeallocate.add(randomInt(0, data.classes.length - 1));
-//     }
+    // Randomly select K classes to deallocate
+    const toDeallocate = new Set<number>();
+    while (toDeallocate.size < K) {
+        toDeallocate.add(randomInt(0, data.classes.length - 1));
+    }
 
-//     for (let room = 0; room < data.rooms.length; room++) {
-//         for (let time = 0; time < neighbour.length; time++) {
-//             if (toDeallocate.has(neighbour[time][room])) neighbour[time][room] = null;
-//         }
-//     }
+    // Deallocate the classes
+    for (let room = 0; room < data.rooms.length; room++) {
+        for (let time = 0; time < neighbour.length; time++) {
+            if (toDeallocate.has(neighbour[time][room])) neighbour[time][room] = null;
+        }
+    }
 
-//     toDeallocate.forEach(classIndex => {
-//         const clazz = data.classes[classIndex];
-//         while (true) {
-//             const time = randomInt(0, neighbour.length);
-//             const roomIndex = randomInt(0, data.rooms.length);
+    // Reallocate the classes
+    toDeallocate.forEach(classIndex => {
+        const clazz = data.classes[classIndex];
+        while (true) {
+            const time = randomInt(0, 4) * 48 + randomInt(2*MIN_HOUR, 2*MAX_HOUR);
+            const roomIndex = randomInt(0, data.rooms.length);
+            if (canAllocate(classIndex, roomIndex, time, timetable, data)) {
+                for (let i = 0; i < clazz.duration_30mins; i++) {
+                    neighbour[time + i][roomIndex] = classIndex;
+                }
+                break;
+            }
+        }
+    });
 
-//             const canAllocate = [...Array(clazz.duration_30mins)].every((_, i) => {
-//                 return (time + i) < timetable.length 
-//                     && (time % HOURS_PER_DAY*2 <= (time + i) % HOURS_PER_DAY*2) 
-//                     && neighbour[time + i][roomIndex] === null;
-//             });
+    return neighbour;
+}
 
-//             if (canAllocate) {
-//                 for (let i = 0; i < clazz.duration_30mins; i++) {
-//                     neighbour[time + i][roomIndex] = classIndex;
-//                 }
-//                 break;
-//             }
-//         }
-//     });
+function getFitness(timetable, data) {
+    let fitness = 0;
+    for (let roomIndex = 0; roomIndex < data.rooms.length; roomIndex++) {
+        for (let time = 0; time < timetable.length; time++) {
+            const classIndex = timetable[time][roomIndex];
+            if (classIndex === null) continue;
+            if (time % 2 == 0) fitness += 50;
+            fitness -= Math.abs(time % 48 - IDEAL_HOUR*2);
+            time += data.classes[classIndex].duration_30mins - 1;
+        }
+    }
+    return fitness;
+}
 
-//     return neighbour;
-// }
-
-// function getFitness(timetable, data) {
-//     let fitness = 0;
-
-//     for (let roomIndex = 0; roomIndex < data.rooms.length; roomIndex++) {
-//         for (let time = 0; time < timetable.length; time++) {
-//             const classIndex = timetable[time][roomIndex];
-//             if (classIndex !== null) {
-            
-//                 if (time % 4 == 0) fitness += 10;
-//                 if (time % 4 == 2) fitness += 5;
-
-//                 fitness -= Math.abs(time % HOURS_PER_DAY*2 + MIN_HOUR*2 - 13*2);
-
-//                 time += data.classes[classIndex].duration_30mins - 1;
-//             }
-//         }
-     
-//     }
-
-//     return fitness;
-// }
+function optimizeTimetable(initialTimetable, data) {
+    const K = Math.ceil(data.classes.length * 0.2)
+    console.log('K=',K)
+    let bestTimetable = initialTimetable;
+    let bestFitness = getFitness(initialTimetable, data);
+    for (let iter = 0; iter < 1000; iter++) {
+        const currTimetable = getNeighbour(bestTimetable, data);
+        const currFitness = getFitness(currTimetable, data);
+        console.log(currFitness);
+        if (currFitness > bestFitness) {
+            bestTimetable = currTimetable;
+            bestFitness = currFitness;
+        }
+    }
+    console.log('BEST', bestFitness)
+    return bestTimetable;
+}
 
 
 

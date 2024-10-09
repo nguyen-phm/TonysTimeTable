@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
+import { corsHeaders } from '../_shared/cors.ts'
 
 const MIN_HOUR = 7-1; // earliest a class can start (0-23)
 const MAX_HOUR = 19-1; // latest a class can finish
@@ -11,25 +12,43 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
+    // Needed to invoke from browser
+    if (req.method === 'OPTIONS') {
+        return new Response('ok', { headers: corsHeaders })
+    }
+
     const { data: campuses, error } = await supabase
         .from('Campuses')
         .select('id');
-    if (error) throw new Error('Error fetching campuses: ' + error.message);
-    console.log(campuses);
+
+    if (error) {
+        return new Response('AAAA', { 
+            status: 400,
+            headers: corsHeaders
+          });
+    }
 
     if (campuses) {
         for (const campus of campuses) { 
             if (campus.id != 1) continue;
-            const data = await fetchData(campus.id);
-            let timetable = await getInitialState(data);
-            timetable = optimizeTimetable(timetable, data);
-            await updateDatabase(timetable, data);
+            try {
+                const data = await fetchData(campus.id);
+                let timetable = await getInitialState(data);
+                timetable = optimizeTimetable(timetable, data);
+                await updateDatabase(timetable, data)
+            } catch (error) {
+                return new Response('AAAA', { 
+                    status: 400,
+                    headers: corsHeaders
+                  });
+            };
         }
     }
 
-    return new Response(
-        { headers: { "Content-Type": "application/json" } }
-    );
+    return new Response('Success', {
+        status: 200,
+        headers: corsHeaders
+      });
 });
 
 function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {

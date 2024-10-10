@@ -6,8 +6,6 @@ import '../../styles/popup.css';
 const AddSubjectPopup = ({ onClose, onSubmit }) => {
     const [subjectName, setSubjectName] = useState('');
     const [subjectCode, setSubjectCode] = useState('');
-    const [year, setYear] = useState('');
-    const [semester, setSemester] = useState('');
     const [courses, setCourses] = useState([]); // To store the fetched courses
     const [campuses, setCampuses] = useState([]); // To store the fetched campuses
     const [selectedCourses, setSelectedCourses] = useState([]); // To store the selected courses
@@ -37,11 +35,8 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                 if (campusesError) {
                     console.error('Error fetching campuses:', campusesError);
                 } else {
-                    console.log('Campuses fetched from Supabase:', campusesData); // Log for debugging
                     setCampuses(campusesData); // Store campuses in state
-
-                    // After fetching campuses, fetch courses
-                    fetchCourses(campusesData);
+                    fetchCourses(campusesData); // After fetching campuses, fetch courses
                 }
             } catch (error) {
                 console.error('Error while fetching campuses:', error);
@@ -57,9 +52,6 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                 if (coursesError) {
                     console.error('Error fetching courses:', coursesError);
                 } else {
-                    console.log('Courses fetched from Supabase:', coursesData); // Log the fetched courses for debugging
-
-                    // Map campus IDs to campus names
                     const mappedCourses = coursesData.map((course) => {
                         const campusName = campuses.find((campus) => campus.id === course.campus_id)?.name || 'Unknown Campus';
                         return {
@@ -74,18 +66,14 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
             }
         };
 
-        // Fetch campuses first, then courses
-        fetchCampuses();
+        fetchCampuses(); // Fetch campuses first, then courses
     }, []);
 
-    const insertSubjectToSupabase = async (subjectName, subjectCode, year, semester, selectedCourses) => {
+    const insertSubjectToSupabase = async (subjectName, subjectCode, selectedCourses) => {
         try {
-            // Insert a new subject for each selected course
             const subjectEntries = selectedCourses.map((courseId) => ({
                 name: subjectName,
                 code: subjectCode,
-                year: year,
-                semester: semester,
                 course_id: courseId, // Associate the subject with the course
             }));
 
@@ -106,19 +94,11 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (
-            subjectName.trim() !== '' &&
-            subjectCode.trim() !== '' &&
-            year.trim() !== '' &&
-            semester !== '' &&
-            selectedCourses.length > 0
-        ) {
-            await insertSubjectToSupabase(subjectName, subjectCode, year, semester, selectedCourses);
+        if (subjectName.trim() !== '' && subjectCode.trim() !== '' && selectedCourses.length > 0) {
+            await insertSubjectToSupabase(subjectName, subjectCode, selectedCourses);
             onSubmit(subjectName);
             setSubjectName('');
             setSubjectCode('');
-            setYear('');
-            setSemester('');
             setSelectedCourses([]);
             onClose();
         }
@@ -149,31 +129,6 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
                             required
                             placeholder="Enter Subject Code"
                         />
-                    </label>
-
-                    <label>
-                        Year:
-                        <input
-                            type="number"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            required
-                            placeholder='Enter Year'
-                        />
-                    </label>
-
-                    <label>
-                        Semester:
-                        <select
-                            value={semester}
-                            onChange={(e) => setSemester(e.target.value)}
-                            required
-                            placeholder='Select Semester'
-                        >
-                            <option value="" disabled hidden className="placeholder-option">Select Semester</option>
-                            <option value="ONE">One</option>
-                            <option value="TWO">Two</option>
-                        </select>
                     </label>
 
                     <label>

@@ -38,7 +38,7 @@ const StudentComponent = () => {
     }, []);
 
     const addStudent = (studentData) => {
-        setStudents([...students, studentData]); 
+        setStudents(prevStudents => [...prevStudents, studentData]); // Ensure state is updated properly
     };
 
     const handleFileUpload = (event) => {

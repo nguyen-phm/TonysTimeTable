@@ -5,8 +5,6 @@ import '../../styles/popup.css';
 const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
     const [subjectName, setSubjectName] = useState(subject.name);
     const [subjectCode, setSubjectCode] = useState(subject.code);
-    const [year, setYear] = useState(subject.year);
-    const [semester, setSemester] = useState(subject.semester);
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(subject.course_id); 
 
@@ -43,21 +41,13 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (
-            subjectName.trim() !== '' &&
-            subjectCode.trim() !== '' &&
-            String(year).trim() !== '' &&
-            semester !== '' &&
-            selectedCourse !== ''
-        ) {
+        if (subjectName.trim() !== '' && subjectCode.trim() !== '' && selectedCourse !== '') {
             try {
                 const { data, error } = await supabase
                     .from('Subjects')
                     .update({
                         name: subjectName,
                         code: subjectCode,
-                        year: year,
-                        semester: semester,
                         course_id: selectedCourse,
                     })
                     .eq('id', subject.id) 
@@ -101,30 +91,6 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
                             required
                             placeholder="Enter Subject Code"
                         />
-                    </label>
-
-                    <label>
-                        Year:
-                        <input
-                            type="number"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            required
-                            placeholder="Enter Year"
-                        />
-                    </label>
-
-                    <label>
-                        Semester:
-                        <select
-                            value={semester}
-                            onChange={(e) => setSemester(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled hidden className="placeholder-option">Select Semester</option>
-                            <option value="ONE">One</option>
-                            <option value="TWO">Two</option>
-                        </select>
                     </label>
 
                     <label>

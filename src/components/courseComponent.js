@@ -67,7 +67,8 @@ const CourseComponent = () => {
             if (error) {
                 console.error('Error adding subject:', error);
             } else if (data && data.length > 0) {
-                setSubjects([...subjects, data[0]]);
+                // Use functional form to ensure state is correctly updated
+                setSubjects((prevSubjects) => [...prevSubjects, data[0]]);
             }
         } catch (error) {
             console.error('Error adding subject:', error);
@@ -127,10 +128,6 @@ const CourseComponent = () => {
                                 <div className="course-info">
                                     <div className="course-name">{subject.name}</div>
                                     <div className="course-code">{subject.code}</div>
-                                </div>
-                                <div className="course-details">
-                                    <div className="delivery-mode">Year: {subject.year}</div>
-                                    <div className="campus">Semester: {subject.semester}</div>
                                 </div>
                                 <div className="subject-actions">
                                     <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>

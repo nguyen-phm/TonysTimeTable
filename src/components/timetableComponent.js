@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import '../styles/timetablePage.css';
+import GenerateTimetablePopup from './popups/generateTimetablePopup'; // Import the popup
 
 const TimetableComponent = () => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPopup, setShowPopup] = useState(false); // State for showing popup
 
     // Fetch timetable data without generating new timetable
     const fetchTimetableData = async () => {
@@ -40,8 +42,9 @@ const TimetableComponent = () => {
         setIsLoading(true);
         try {
             // Generate the new timetable
-            const { error } = await supabase.functions.invoke('generate-timetable');
+            const { data, error } = await supabase.functions.invoke('generate-timetable');
             if (error) throw error;
+            if (data.error) throw data.error;
 
             // Fetch the updated timetable data after generation
             await fetchTimetableData();
@@ -56,6 +59,17 @@ const TimetableComponent = () => {
     useEffect(() => {
         fetchTimetableData();
     }, []);
+
+    // Handle confirming generation
+    const handleConfirmGenerate = () => {
+        generateAndFetchTimetable();
+        setShowPopup(false); // Close the popup after confirming
+    };
+
+    // Open popup when button clicked
+    const handleGenerateClick = () => {
+        setShowPopup(true);
+    };
 
     const colorMap = {};
     const getClassColor = (subjectCode) => {
@@ -113,12 +127,21 @@ const TimetableComponent = () => {
     return (
         <div className="timetable-section">
             <button
-                onClick={generateAndFetchTimetable}
+                onClick={handleGenerateClick}
                 disabled={isLoading}
                 className="generate-button"
             >
                 {isLoading ? 'Loading...' : 'Generate New Timetable'}
             </button>
+
+            {/* Render the popup */}
+            {showPopup && (
+                <GenerateTimetablePopup
+                    onClose={() => setShowPopup(false)}
+                    onConfirm={handleConfirmGenerate}
+                />
+            )}
+
             <div className="timetable">
                 <div className="timetable-header">
                     <div className="time-header">Time</div>

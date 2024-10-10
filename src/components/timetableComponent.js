@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import '../styles/timetablePage.css';
-import GenerateTimetablePopup from './popups/generateTimetablePopup'; // Import the popup
+import GenerateTimetablePopup from './popups/generateTimetablePopup';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const TimetableComponent = () => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [showPopup, setShowPopup] = useState(false); // State for showing popup
+    const [showPopup, setShowPopup] = useState(false);
+    const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const timetableRef = useRef(null);
 
-    // Fetch timetable data without generating new timetable
     const fetchTimetableData = async () => {
         setIsLoading(true);
         try {
@@ -37,16 +40,11 @@ const TimetableComponent = () => {
         }
     };
 
-    // Generate new timetable and then fetch data
     const generateAndFetchTimetable = async () => {
         setIsLoading(true);
         try {
-            // Generate the new timetable
             const { data, error } = await supabase.functions.invoke('generate-timetable');
             if (error) throw error;
-            if (data.error) throw data.error;
-
-            // Fetch the updated timetable data after generation
             await fetchTimetableData();
         } catch (error) {
             console.error('Error generating timetable:', error);
@@ -55,21 +53,92 @@ const TimetableComponent = () => {
         }
     };
 
-    // Fetch timetable when component loads
     useEffect(() => {
         fetchTimetableData();
     }, []);
 
-    // Handle confirming generation
     const handleConfirmGenerate = () => {
         generateAndFetchTimetable();
-        setShowPopup(false); // Close the popup after confirming
+        setShowPopup(false);
     };
 
-    // Open popup when button clicked
     const handleGenerateClick = () => {
         setShowPopup(true);
     };
+
+    // Export as CSV
+    const handleExportCSV = async () => {
+        try {
+            const { data, error } = await supabase.functions.invoke('export-timetable');
+            if (error) throw error;
+
+            const blob = new Blob([data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'timetable.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+        }
+    };
+
+// Export as PDF
+const handleExportPDF = async () => {
+    if (timetableRef.current) {
+        const timetableClone = timetableRef.current.cloneNode(true);
+        document.body.appendChild(timetableClone);
+        timetableClone.classList.add('pdf-export');
+
+        // Force recalculation of class slot heights
+        const classSlots = timetableClone.getElementsByClassName('class-slot');
+        Array.from(classSlots).forEach(slot => {
+            const duration = parseInt(slot.style.height);
+            slot.style.height = `${Math.max(duration, 60)}px`; // Minimum 60px height
+        });
+
+        try {
+            const canvas = await html2canvas(timetableClone, {
+                scale: 2, // resolution
+                useCORS: true,
+                logging: false,
+                windowWidth: timetableClone.offsetWidth, //  use the actual tt width
+                windowHeight: timetableClone.scrollHeight, // and the height
+                onclone: (clonedDoc) => {
+                    const clonedElement = clonedDoc.body.firstChild;
+                    clonedElement.style.transform = 'scale(1)';
+                    clonedElement.style.transformOrigin = 'top left';
+                }
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+                        
+            const pdfWidth = timetableClone.offsetWidth * 0.75;
+            const pdfHeight = timetableClone.scrollHeight * 0.75;
+            
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'pt',
+                format: [pdfWidth, pdfHeight] // Custom dimensions
+            });
+            
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+            
+            const imgX = (pdfWidth - imgWidth * ratio) / 2;
+            const imgY = (pdfHeight - imgHeight * ratio) / 2; // Center vertically
+
+            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+            pdf.save('timetable.pdf');
+        } finally {
+            document.body.removeChild(timetableClone);
+        }
+    }
+};
 
     const colorMap = {};
     const getClassColor = (subjectCode) => {
@@ -126,15 +195,31 @@ const TimetableComponent = () => {
 
     return (
         <div className="timetable-section">
-            <button
-                onClick={handleGenerateClick}
-                disabled={isLoading}
-                className="generate-button"
-            >
-                {isLoading ? 'Loading...' : 'Generate New Timetable'}
-            </button>
+            <div className="button-container">
+                <button
+                    onClick={handleGenerateClick}
+                    disabled={isLoading}
+                    className="generate-button"
+                >
+                    {isLoading ? 'Loading...' : 'Generate New Timetable'}
+                </button>
 
-            {/* Render the popup */}
+                <div className="export-dropdown">
+                    <button
+                        onClick={() => setShowExportDropdown(!showExportDropdown)}
+                        className="export-button"
+                    >
+                        Export
+                    </button>
+                    {showExportDropdown && (
+                        <div className="export-dropdown-content">
+                            <button onClick={handleExportPDF}>Export as PDF</button>
+                            <button onClick={handleExportCSV}>Export as CSV</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {showPopup && (
                 <GenerateTimetablePopup
                     onClose={() => setShowPopup(false)}
@@ -142,27 +227,19 @@ const TimetableComponent = () => {
                 />
             )}
 
-            <div className="timetable">
-                <div className="timetable-header">
-                    <div className="time-header">Time</div>
-                    {daysOfWeek.map((day) => (
-                        <div key={day} className="day-header">{day}</div>
-                    ))}
-                </div>
-                <div className="timetable-body">
-                    {timeSlots.map((halfHourIndex) => (
-                        <div key={halfHourIndex} className="time-row">
-                            <div className="time-label">
-                                {formatTimeLabel(halfHourIndex)}
-                            </div>
-                            {daysOfWeek.map((day, dayIndex) => (
-                                <div key={`${day}-${halfHourIndex}`} className="day-cell">
-                                    {renderTimeSlot(halfHourIndex, dayIndex)}
-                                </div>
-                            ))}
+            <div className="timetable" ref={timetableRef}>
+                {timeSlots.map((halfHourIndex) => (
+                    <div key={halfHourIndex} className="time-row">
+                        <div className="time-label">
+                            {formatTimeLabel(halfHourIndex)}
                         </div>
-                    ))}
-                </div>
+                        {daysOfWeek.map((day, dayIndex) => (
+                            <div key={`${day}-${halfHourIndex}`} className="day-cell">
+                                {renderTimeSlot(halfHourIndex, dayIndex)}
+                            </div>
+                        ))}
+                    </div>
+                ))}
             </div>
         </div>
     );

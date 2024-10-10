@@ -228,18 +228,26 @@ const handleExportPDF = async () => {
             )}
 
             <div className="timetable" ref={timetableRef}>
-                {timeSlots.map((halfHourIndex) => (
-                    <div key={halfHourIndex} className="time-row">
-                        <div className="time-label">
-                            {formatTimeLabel(halfHourIndex)}
-                        </div>
-                        {daysOfWeek.map((day, dayIndex) => (
-                            <div key={`${day}-${halfHourIndex}`} className="day-cell">
-                                {renderTimeSlot(halfHourIndex, dayIndex)}
+                <div className="timetable-header">
+                    <div className="time-header">Time</div>
+                    {daysOfWeek.map((day) => (
+                        <div key={day} className="day-header">{day}</div>
+                    ))}
+                </div>
+                <div className="timetable-body">
+                    {timeSlots.map((halfHourIndex) => (
+                        <div key={halfHourIndex} className="time-row">
+                            <div className="time-label">
+                                {formatTimeLabel(halfHourIndex)}
                             </div>
-                        ))}
-                    </div>
-                ))}
+                            {daysOfWeek.map((day, dayIndex) => (
+                                <div key={`${day}-${halfHourIndex}`} className="day-cell">
+                                    {renderTimeSlot(halfHourIndex, dayIndex)}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

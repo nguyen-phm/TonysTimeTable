@@ -143,7 +143,7 @@ async function fetchClassData(course) {
     for (let i = 0; i < classes.length; i++) {
         classData[i][0] = timeToDayString(classes[i].start_time);
         classData[i][1] = `${timeToTimeString(classes[i].start_time)} to ${timeToTimeString(classes[i].start_time + classes[i].duration_30mins)}`; 
-        classData[i][2] = `${classes[i].Subjects.code} - ${classes[i].Subjects.name} (${classes[i].class_type === 'LECTURE' ? 'Lecture' : 'Tutorial'})`;
+        classData[i][2] = `${classes[i].Subjects.code} - ${classes[i].Subjects.name} (${classes[i].class_type})`;
         classData[i][3] = classes[i].Locations.name;
         classData[i][4] = classes[i].Staff.name;
         classData[i][5] = classes[i].is_online ? 'Online' : 'Face to Face';

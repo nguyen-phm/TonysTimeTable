@@ -6,6 +6,7 @@ const TimetableComponent = () => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Fetch timetable data without generating new timetable
     const fetchTimetableData = async () => {
         setIsLoading(true);
         try {
@@ -34,6 +35,24 @@ const TimetableComponent = () => {
         }
     };
 
+    // Generate new timetable and then fetch data
+    const generateAndFetchTimetable = async () => {
+        setIsLoading(true);
+        try {
+            // Generate the new timetable
+            const { error } = await supabase.functions.invoke('generate-timetable');
+            if (error) throw error;
+
+            // Fetch the updated timetable data after generation
+            await fetchTimetableData();
+        } catch (error) {
+            console.error('Error generating timetable:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch timetable when component loads
     useEffect(() => {
         fetchTimetableData();
     }, []);
@@ -46,34 +65,32 @@ const TimetableComponent = () => {
         }
         return colorMap[subjectCode];
     };
-    
+
     const renderTimeSlot = (halfHourIndex, dayIndex) => {
-        // Convert visual time slot to database time
-        // 8am = 16 half-hour slots from midnight
         const dbTime = dayIndex * 48 + halfHourIndex + 16;
-        
+
         const classesInSlot = classes.filter(c => c.start_time === dbTime);
         if (classesInSlot.length === 0) return null;
-    
+
         return classesInSlot.map((classItem, index) => {
             const subjectCode = classItem.Subjects?.code || 'N/A';
             const classLocation = classItem.Locations?.name || 'N/A';
             const backgroundColor = getClassColor(subjectCode);
             const staffName = classItem.Staff?.name;
-    
+
             return (
                 <div
                     key={index}
                     className={`class-slot ${classItem.is_online ? 'online-class' : ''}`}
                     style={{
-                        height: `${classItem.duration_30mins * 25 - 5}px`,
+                        height: `${classItem.duration_30mins * 25 - 3 * classItem.duration_30mins}px`,
                         backgroundColor,
                     }}
                 >
                     <div className="class-content">
                         <div className="class-code">{subjectCode}</div>
                         <div className="class-type">
-                            {`${classItem.class_type} - ${staffName}`|| 'Class Type N/A'}
+                            {`${classItem.class_type} - ${staffName}` || 'Class Type N/A'}
                         </div>
                         <div className="class-location">
                             {classItem.is_online ? 'Online' : `${classLocation}`}
@@ -85,7 +102,6 @@ const TimetableComponent = () => {
     };
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    // Generate time slots from 8am (0) to 8pm (24 half-hour slots)
     const timeSlots = Array.from({ length: 25 }, (_, i) => i);
 
     const formatTimeLabel = (halfHourIndex) => {
@@ -97,11 +113,11 @@ const TimetableComponent = () => {
     return (
         <div className="timetable-section">
             <button
-                onClick={fetchTimetableData}
+                onClick={generateAndFetchTimetable}
                 disabled={isLoading}
                 className="generate-button"
             >
-                {isLoading ? 'Loading...' : 'Refresh Timetable'}
+                {isLoading ? 'Loading...' : 'Generate New Timetable'}
             </button>
             <div className="timetable">
                 <div className="timetable-header">

@@ -66,79 +66,59 @@ const TimetableComponent = () => {
         setShowPopup(true);
     };
 
-    // Export as CSV
-    const handleExportCSV = async () => {
-        try {
-            const { data, error } = await supabase.functions.invoke('export-timetable');
-            if (error) throw error;
+    // Export as PDF
+    const handleExportPDF = async () => {
+        if (timetableRef.current) {
+            const timetableClone = timetableRef.current.cloneNode(true);
+            document.body.appendChild(timetableClone);
+            timetableClone.classList.add('pdf-export');
 
-            const blob = new Blob([data], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'timetable.csv';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Error exporting CSV:', error);
+            // Force recalculation of class slot heights
+            const classSlots = timetableClone.getElementsByClassName('class-slot');
+            Array.from(classSlots).forEach(slot => {
+                const duration = parseInt(slot.style.height);
+                slot.style.height = `${Math.max(duration, 60)}px`; // Minimum 60px height
+            });
+
+            try {
+                const canvas = await html2canvas(timetableClone, {
+                    scale: 2, // resolution
+                    useCORS: true,
+                    logging: false,
+                    windowWidth: timetableClone.offsetWidth, //  use the actual tt width
+                    windowHeight: timetableClone.scrollHeight, // and the height
+                    onclone: (clonedDoc) => {
+                        const clonedElement = clonedDoc.body.firstChild;
+                        clonedElement.style.transform = 'scale(1)';
+                        clonedElement.style.transformOrigin = 'top left';
+                    }
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                
+                const pdfWidth = timetableClone.offsetWidth * 0.75;
+                const pdfHeight = timetableClone.scrollHeight * 0.75;
+                
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'pt',
+                    format: [pdfWidth, pdfHeight] // Custom dimensions
+                });
+                
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = (pdfHeight - imgHeight * ratio) / 2; // Center vertically
+
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.save('timetable.pdf');
+            } finally {
+                document.body.removeChild(timetableClone);
+            }
         }
     };
-
-// Export as PDF
-const handleExportPDF = async () => {
-    if (timetableRef.current) {
-        const timetableClone = timetableRef.current.cloneNode(true);
-        document.body.appendChild(timetableClone);
-        timetableClone.classList.add('pdf-export');
-
-        // Force recalculation of class slot heights
-        const classSlots = timetableClone.getElementsByClassName('class-slot');
-        Array.from(classSlots).forEach(slot => {
-            const duration = parseInt(slot.style.height);
-            slot.style.height = `${Math.max(duration, 60)}px`; // Minimum 60px height
-        });
-
-        try {
-            const canvas = await html2canvas(timetableClone, {
-                scale: 2, // resolution
-                useCORS: true,
-                logging: false,
-                windowWidth: timetableClone.offsetWidth, //  use the actual tt width
-                windowHeight: timetableClone.scrollHeight, // and the height
-                onclone: (clonedDoc) => {
-                    const clonedElement = clonedDoc.body.firstChild;
-                    clonedElement.style.transform = 'scale(1)';
-                    clonedElement.style.transformOrigin = 'top left';
-                }
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-                        
-            const pdfWidth = timetableClone.offsetWidth * 0.75;
-            const pdfHeight = timetableClone.scrollHeight * 0.75;
-            
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'pt',
-                format: [pdfWidth, pdfHeight] // Custom dimensions
-            });
-            
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = (pdfHeight - imgHeight * ratio) / 2; // Center vertically
-
-            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-            pdf.save('timetable.pdf');
-        } finally {
-            document.body.removeChild(timetableClone);
-        }
-    }
-};
 
     const colorMap = {};
     const getClassColor = (subjectCode) => {
@@ -214,7 +194,7 @@ const handleExportPDF = async () => {
                     {showExportDropdown && (
                         <div className="export-dropdown-content">
                             <button onClick={handleExportPDF}>Export as PDF</button>
-                            <button onClick={handleExportCSV}>Export as CSV</button>
+                            {/* CSV export option removed */}
                         </div>
                     )}
                 </div>

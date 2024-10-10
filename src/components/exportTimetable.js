@@ -6,22 +6,23 @@ async function exportTimetable(course_id) {
     // Attempt to fetch course
     const { data: course, error } = await supabase
         .from('Courses')
-        .select(`id, name`)
+        .select(`
+            id, name,
+            Campuses(venue_name)
+        `)
         .eq('id', course_id)
         .limit(1)
         .single();
     
-    if (error | !course) {
-        console.error('Error fetching course');
-        return;
+    if (error) {
+        throw new Error('Error fetching course: ', error.message);
     }
 
     // Attempt to export timetable to excel
     const excelBuffer = await generateExcelFile(course);
 
     if (!excelBuffer) {
-        console.error('Failed to export timetable');
-        return;
+        throw new Error('Failed to export timetable');
     }
     
     // Force download
@@ -29,7 +30,7 @@ async function exportTimetable(course_id) {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `timetable - ${course.name}.xlsx`);
+    link.setAttribute('download', `${course.name}.xlsx`);
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);
@@ -58,7 +59,7 @@ async function generateExcelFile(course) {
     addBoilerplateLine('Victorian Institute of Technology Pty Ltd', '0000FF', true, 9, true);
     addBoilerplateLine('ABN: 41 085 128 525 RTO No: 20829 TEQSA ID: PRV14007 CRICOS Provider Code: 02044E', '0000FF', true, 9, false);
     addBoilerplateLine(course.name, '000000', true, 9, true);
-    addBoilerplateLine('Venue: 123 & 235 Queens Street, Melbourne', '000000', true, 9, true);
+    addBoilerplateLine(`Venue: ${course.Campuses.venue_name}`, '000000', true, 9, true);
     addBoilerplateLine('Timetable:', '000000', false, 9, true);
     addBoilerplateLine('Note: (a) This is a Master Timetable. You are required to refer to your Unit Allocation (i.e., your enrolled units) to know which units/sessions are applicable to you.', 'C00000', false, 9, true);
     addBoilerplateLine('(b) Time Table may change in the event of some exigencies.', 'C00000', false, 9, true);
@@ -126,14 +127,14 @@ async function fetchClassData(course) {
         .select(`
             id, start_time, duration_30mins, class_type, is_online,
             Subjects!inner(course_id, name, code), 
-            Locations ( name ),
-            Staff ( name )
+            Locations(name),
+            Staff(name)
         `)
         .eq('Subjects.course_id', course.id)
         .order('start_time');
 
-    if (error | !classes) {
-        console.error('Failed to fetch classes');
+    if (error) {
+        throw new Error('Failed to fetch classes: ', error.message);
         return [];
     }
 

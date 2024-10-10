@@ -35,42 +35,43 @@ const TimetableComponent = () => {
         fetchTimetableData();
     }, []);
 
-    // map to store colours for each class id
     const colorMap = {};
-    const getClassColor = (id) => {
-        if (!colorMap[id]) {
-            // Generate colours based on class id
-            const hue = id * 137.508;
-            colorMap[id] = `hsl(${hue % 400}, 70%, 85%)`; // Light pastelish colours
+    const getClassColor = (subjectCode) => {
+        if (!colorMap[subjectCode]) {
+            const hue = subjectCode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 137.508;
+            colorMap[subjectCode] = `hsl(${hue % 360}, 70%, 85%)`;
         }
-        return colorMap[id];
+        return colorMap[subjectCode];
     };
-
-    const renderTimeSlot = (hour, day) => {
-        const classesInSlot = classes.filter(c => c.start_time === hour);
+    
+    const renderTimeSlot = (halfHourIndex, dayIndex) => {
+        // Convert visual time slot to database time
+        // 8am = 16 half-hour slots from midnight
+        const dbTime = dayIndex * 48 + halfHourIndex + 16;
+        
+        const classesInSlot = classes.filter(c => c.start_time === dbTime);
         if (classesInSlot.length === 0) return null;
-
+    
         return classesInSlot.map((classItem, index) => {
-            const durationInHours = classItem.duration_30mins / 2;
-            const backgroundColor = getClassColor(classItem.id); // Use class id for color
-
+            const subjectCode = classItem.Subjects?.code || 'N/A';
+            const backgroundColor = getClassColor(subjectCode);
+    
             return (
                 <div
                     key={index}
                     className={`class-slot ${classItem.is_online ? 'online-class' : ''}`}
                     style={{
-                        height: `${durationInHours * 50 - 5}px `,
+                        height: `${classItem.duration_30mins * 25 - 5}px`,
                         backgroundColor,
                     }}
                 >
                     <div className="class-content">
-                        <div className="class-code">{classItem.Subjects?.code || 'N/A'}</div>
+                        <div className="class-code">{subjectCode}</div>
                         <div className="class-type">
                             {classItem.class_type || 'Class Type N/A'}
                         </div>
                         <div className="class-location">
                             {classItem.is_online ? 'Online' : `Room ${classItem.location_id}`}
-                            {/* {`${hour}:00 - ${hour + durationInHours}:00`} */}
                         </div>
                     </div>
                 </div>
@@ -79,7 +80,14 @@ const TimetableComponent = () => {
     };
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
+    // Generate time slots from 8am (0) to 8pm (24 half-hour slots)
+    const timeSlots = Array.from({ length: 25 }, (_, i) => i);
+
+    const formatTimeLabel = (halfHourIndex) => {
+        const hour = Math.floor(halfHourIndex / 2) + 8;
+        const minute = halfHourIndex % 2 === 0 ? '00' : '30';
+        return `${hour.toString().padStart(2, '0')}:${minute}`;
+    };
 
     return (
         <div className="timetable-section">
@@ -98,14 +106,14 @@ const TimetableComponent = () => {
                     ))}
                 </div>
                 <div className="timetable-body">
-                    {timeSlots.map((hour) => (
-                        <div key={hour} className="time-row">
+                    {timeSlots.map((halfHourIndex) => (
+                        <div key={halfHourIndex} className="time-row">
                             <div className="time-label">
-                                {`${hour.toString().padStart(2, '0')}:00`}
+                                {formatTimeLabel(halfHourIndex)}
                             </div>
-                            {daysOfWeek.map((day) => (
-                                <div key={`${day}-${hour}`} className="day-cell">
-                                    {renderTimeSlot(hour, day)}
+                            {daysOfWeek.map((day, dayIndex) => (
+                                <div key={`${day}-${halfHourIndex}`} className="day-cell">
+                                    {renderTimeSlot(halfHourIndex, dayIndex)}
                                 </div>
                             ))}
                         </div>

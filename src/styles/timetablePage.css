@@ -94,7 +94,7 @@
 .time-row {
     display: grid;
     grid-template-columns: 70px repeat(5, 1fr);
-    min-height: 50px;
+    min-height: 25px;
     border-bottom: 1px solid #dee2e6;
 }
 
@@ -124,6 +124,7 @@
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 1; /* ensure slots stack properly */
 }
 
 .class-slot:hover {
@@ -140,7 +141,7 @@
 
 .class-code {
     font-weight: 600;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -148,7 +149,7 @@
 }
 
 .class-type, .class-location {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: #495057;
     white-space: nowrap;
     overflow: hidden;
@@ -156,7 +157,7 @@
 }
 
 .online-class {
-    border-left: 3px solid #28a745;
+    border-top: 8px solid #739cee;
 }
 
 /* Responsive adjustments */

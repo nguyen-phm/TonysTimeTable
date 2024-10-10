@@ -19,7 +19,10 @@ const TimetableComponent = () => {
                     location_id,
                     start_time,
                     duration_30mins,
-                    Subjects (code)
+                    Subjects (code),
+                    Locations (name),
+                    staff_id,
+                    Staff (name)
                 `)
                 .order('start_time');
             if (error) throw error;
@@ -54,7 +57,9 @@ const TimetableComponent = () => {
     
         return classesInSlot.map((classItem, index) => {
             const subjectCode = classItem.Subjects?.code || 'N/A';
+            const classLocation = classItem.Locations?.name || 'N/A';
             const backgroundColor = getClassColor(subjectCode);
+            const staffName = classItem.Staff?.name;
     
             return (
                 <div
@@ -68,10 +73,10 @@ const TimetableComponent = () => {
                     <div className="class-content">
                         <div className="class-code">{subjectCode}</div>
                         <div className="class-type">
-                            {classItem.class_type || 'Class Type N/A'}
+                            {`${classItem.class_type} - ${staffName}`|| 'Class Type N/A'}
                         </div>
                         <div className="class-location">
-                            {classItem.is_online ? 'Online' : `Room ${classItem.location_id}`}
+                            {classItem.is_online ? 'Online' : `${classLocation}`}
                         </div>
                     </div>
                 </div>

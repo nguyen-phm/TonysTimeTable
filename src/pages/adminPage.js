@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-react';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
+import SubjectClassComponent from '../components/subjectClassComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -28,7 +29,7 @@ const AdminPage = () => {
             case 'courses':
                 return <CourseComponent />;
             case 'students':
-                return <StudentComponent />;
+                return <SubjectClassComponent />;
             case 'staff':
                 return <StaffContent />;
             case 'classrooms':

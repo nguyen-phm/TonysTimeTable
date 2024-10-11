@@ -63,21 +63,32 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
 
     // Save changes to database
     const handleSubmit = async () => {
-        // Update existing classes
-        for (const classItem of classes) {
-            await supabase
-                .from('Classes')
-                .update(classItem)
-                .eq('id', classItem.id);
-        }
+        try {
+            // Update existing classes
+            for (const classItem of classes) {
+                // Ensure only non-nullable fields are included in the payload
+                const { id, class_type, is_online, duration_30mins, staff_id } = classItem;
+                await supabase
+                    .from('Classes')
+                    .update({ class_type, is_online, duration_30mins, staff_id })
+                    .eq('id', id);
+            }
 
-        // Insert new classes
-        for (const newClass of newClasses) {
-            await supabase.from('Classes').insert({ subject_id: subject.id, ...newClass });
-        }
+            // Insert new classes
+            for (const newClass of newClasses) {
+                // Ensure only non-nullable fields are included in the insert payload
+                const { class_type, is_online, duration_30mins, staff_id } = newClass;
+                await supabase
+                    .from('Classes')
+                    .insert({ subject_id: subject.id, class_type, is_online, duration_30mins, staff_id });
+            }
 
-        setNewClasses([]);
-        onClose();
+            // Clear new classes after submission
+            setNewClasses([]);
+            onClose();  // Close the popup
+        } catch (error) {
+            console.error('Error saving classes:', error.message);
+        }
     };
 
     return (
@@ -85,7 +96,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
             <div className='scrollpop-border'>
                 <div className="scrollpop-h2">{subject.code}</div>
                 <div className="scrollpop">
-
+    
                     {isLoading ? (
                         <div>Loading classes...</div>
                     ) : (
@@ -102,6 +113,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                         onChange={(e) =>
                                                             handleClassChange(index, 'class_type', e.target.value)
                                                         }
+                                                        required
                                                     >
                                                         <option value="" disabled hidden>
                                                             Select Class Type
@@ -112,7 +124,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                     </select>
                                                 </label>
                                             </div>
-
+    
                                             <div className="dropdown-container">
                                                 <label>
                                                     Staff:
@@ -121,6 +133,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                         onChange={(e) =>
                                                             handleClassChange(index, 'staff_id', e.target.value)
                                                         }
+                                                        required
                                                     >
                                                         <option value="" disabled hidden>
                                                             Select Staff
@@ -134,7 +147,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                 </label>
                                             </div>
                                         </div>
-
+    
                                         <div className="flex-container">
                                             <div className="dropdown-container">
                                                 <label>
@@ -146,18 +159,20 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                         onChange={(e) =>
                                                             handleClassChange(index, 'duration_30mins', e.target.value)
                                                         }
+                                                        required
                                                     />
                                                 </label>
                                             </div>
-
+    
                                             <div className="dropdown-container">
                                                 <label>
                                                     Is Online:
                                                     <select
                                                         value={classItem.is_online ? 'true' : 'false'}
                                                         onChange={(e) =>
-                                                            handleClassChange(index, 'is_online', e.target.value === 'true')
+                                                            handleClassChange(index, 'is_online', e.target.value === 'true' ? true : false)
                                                         }
+                                                        required
                                                     >
                                                         <option value="true">Yes</option>
                                                         <option value="false">No</option>
@@ -165,14 +180,14 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                 </label>
                                             </div>
                                         </div>
-
+    
                                         <button className="more-options" onClick={() => handleRemoveClass(classItem.id)}>Remove Class</button>
                                     </div>
                                 ))
                             ) : (
                                 <div>This subject currently has no classes.</div>
                             )}
-
+    
                             {newClasses.map((newClass, index) => (
                                 <div className='class-container' key={index}>
                                     <div className="flex-container">
@@ -183,6 +198,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                 onChange={(e) =>
                                                     handleNewClassChange(index, 'class_type', e.target.value)
                                                 }
+                                                required
                                             >
                                                 <option value="" disabled hidden>
                                                     Select Class Type
@@ -192,13 +208,14 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                 <option value="Practical">Practical</option>
                                             </select>
                                         </div>
-
+    
                                         <div className="dropdown-container">
                                             <label>
                                                 Staff:
                                                 <select
                                                     value={newClass.staff_id}
                                                     onChange={(e) => handleNewClassChange(index, 'staff_id', e.target.value)}
+                                                    required
                                                 >
                                                     <option value="" disabled hidden>
                                                         Select Staff
@@ -222,29 +239,31 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                     type="number"
                                                     value={newClass.duration_30mins}
                                                     onChange={(e) => handleNewClassChange(index, 'duration_30mins', e.target.value)}
+                                                    required
                                                 />
                                             </label>
                                         </div>
-
+    
                                         <div className="dropdown-container">
-                                            <label>
-                                                Is Online:
-                                                <select
-                                                    value={newClass.is_online ? 'true' : 'false'}
-                                                    onChange={(e) =>
-                                                        handleNewClassChange(index, 'is_online', e.target.value === 'true')
-                                                    }
-                                                >
-                                                    <option value="true">Yes</option>
-                                                    <option value="false">No</option>
-                                                </select>
-                                            </label>
+                                        <label>
+                                            Is Online:
+                                            <select
+                                                value={newClass.is_online ? 'true' : 'false'}
+                                                onChange={(e) =>
+                                                    handleNewClassChange(index, 'is_online', e.target.value === 'true' ? true : false)
+                                                }
+                                                required
+                                            >
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </select>
+                                        </label>
                                         </div>
                                     </div>
                                 </div>
                             ))}
-
-                            <button className="more-options"onClick={handleAddClass}>Add Class</button>
+    
+                            <button className="more-options" onClick={handleAddClass}>Add Class</button>
                         </>
                     )}
                 </div>
@@ -254,7 +273,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                 </div>
             </div>
         </div>
-    );
+    );    
 };
 
 export default EditSubjectClassPopup;

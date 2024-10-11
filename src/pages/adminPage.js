@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-react';
+import { Home, BookOpen, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
+import ClassComponent from '../components/classComponent';
+import StaffComponent from '../components/staffComponent';
 import SubjectClassComponent from '../components/subjectClassComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
@@ -28,12 +30,14 @@ const AdminPage = () => {
                 return <AccountContent />;
             case 'courses':
                 return <CourseComponent />;
-            case 'students':
+            case 'subjectclasses':
                 return <SubjectClassComponent />;
+            case 'students':
+                return <StudentComponent />;
             case 'staff':
-                return <StaffContent />;
+                return <StaffComponent />;
             case 'classrooms':
-                return <ClassroomsContent />;
+                return <ClassComponent />;
             case 'home':
                 return <HomeContent />;
             default:
@@ -61,6 +65,7 @@ const AdminPage = () => {
                         <div className="nav-section">
                             <SidebarLink Icon={BookOpen} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
+                            <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>
@@ -133,18 +138,6 @@ const AccountContent = () => (
             <p><span className="font-semibold">Last Login:</span> 2023-09-24 14:30:00</p>
             <p><span className="font-semibold">Account Status:</span> Active</p>
         </div>
-    </div>
-);
-
-const StaffContent = () => (
-    <div className="admin-section">
-        <p>Staff functionality coming soon... d-(^_^)z</p>
-    </div>
-);
-
-const ClassroomsContent = () => (
-    <div className="admin-section">
-        <p>Classrooms functionality coming soon... d-(^_^)z</p>
     </div>
 );
 

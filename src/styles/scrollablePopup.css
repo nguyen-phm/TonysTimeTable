@@ -1,35 +1,39 @@
-/* Container for the scrollpop and the background blur */
 .scrollpop-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent dark background */
+    background-color: rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px); /* Apply the blur effect */
+    backdrop-filter: blur(5px);
 }
-  
-  /* The scrollpop box itself */
-  .scrollpop {
+
+.scrollpop-border {
     background-color: white;
     padding: 30px;
     padding-inline: 40px;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-    width: 400px;
+    width: 450px;
+}
+
+.scrollpop {
+    padding-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     height: fit-content; /* Fixed height of the modal (adjust as needed) */
-    max-height: 80vh; /* Ensure the modal doesn't grow beyond the viewport */
+    max-height: 60vh; /* Ensure the modal doesn't grow beyond the viewport */
     overflow-y: auto; /* Enable scrolling within the modal */
     z-index: 1010;
 }
 
 .scrollpop label {
     font-size: 1.1em;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
     font-family: 'Poppins', sans-serif;
     color: #333;
     width: 100%;
@@ -45,7 +49,6 @@
     font-size: 2rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 20px;
     border-bottom: 1.5px solid #e87070;
     font-family: 'Poppins', sans-serif;
     padding-bottom: 10px;
@@ -55,13 +58,6 @@
     color: #a2a2a2;       
     font-family: 'Poppins', sans-serif; 
     font-size: 1em;  
-}
-
-.scrollpop label {
-    font-size: 1.1em;
-    margin-bottom: 8px;
-    font-family: 'Poppins', sans-serif;
-    color: #333;
 }
 
 .scrollpop input[type = 'text'],
@@ -92,47 +88,6 @@
     font-size: 0.9em;
 }
 
-.p-multiselect {
-    border: 1px solid #ccc;
-    padding-left: 5px;
-    border-radius: 5px;
-    margin-top: 5px;
-    margin-bottom: 8px;
-    height: 40px;
-    width: 100%;
-    background-color: white;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9em;
-}
-
-.p-multiselect-trigger {
-    color: #202020;
-    height: auto;
-    width: 9.5px;
-    margin-inline: 4px;
-}
-
-.p-multiselect:focus, 
-.p-multiselect.p-focus {
-    box-shadow: none;
-    outline: none;
-    border-color: #ccc;
-}
-
-.p-multiselect-panel {
-    background-color: #fff;
-    border-radius: 5px; 
-    border: 1px solid #ccc;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
-}
-
-.p-multiselect-token {
-    border-radius: 5px;
-    font-size: 1em;
-    padding-inline: 5px;
-    margin-right: 1px;
-}
-
 .scrollpop-buttons {
     position: sticky;
     bottom: 0;
@@ -161,6 +116,13 @@
 .scrollpop-buttons button:hover {
     background-color: #c95353;
 }
+
+.class-container {
+    border-bottom: 1px solid #ccd0d5;
+    padding-top: 0px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
   
 .flex-container {
     display: flex;
@@ -172,6 +134,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding-top: 5px;
 }
 
 .dropdown-container select {

@@ -150,19 +150,3 @@
 .popup-buttons button:hover {
     background-color: #c95353;
 }
-  
-.flex-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-.dropdown-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.dropdown-container select {
-    width: 100%;
-}

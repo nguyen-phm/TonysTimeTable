@@ -5,7 +5,10 @@ import SignupPage from './pages/signupPage';
 import TimetablePage from './pages/timetablePage';
 import ForgotPasswordPage from './pages/forgotPasswordPage'
 import ProtectedRoute from './components/protectedRoute';
+import RecoveryPage from './pages/recoveryPage';
 import MFAComponent from './components/mfaComponent';
+import AdminPage from './pages/adminPage';
+
 
 function App() {
   return (
@@ -18,6 +21,13 @@ function App() {
           //MFA
           <Route path="/mfa" element={<MFAComponent />} />
 
+          <Route
+            path="/admin"
+            element={
+              <AdminPage />
+            }
+          />
+
           <Route 
             path="/timetable" 
             element={
@@ -26,6 +36,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/resetpassword" element={<RecoveryPage />} />
         </Routes>
       </BrowserRouter>
   );

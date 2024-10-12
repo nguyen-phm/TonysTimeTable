@@ -2,49 +2,77 @@ import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.16.0?target=deno";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions";
+// CORS headers configuration
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*", // Replace "*" with your frontend domain in production
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
 
-// Define structure for storing GPT's JSON changes
-let suggestedChanges: any = null;  // The proposed JSON changes by GPT
-let gptResponseText: string | null = null;  // The human-readable description
-
+// Edge function handler
 serve(async (req) => {
   try {
-    if (req.method === "POST") {
-      const { query, action } = await req.json();  // Read the request content from frontend
+    // Handle preflight CORS requests
+    if (req.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
 
+    // Read the request body only once
+    let requestBody;
+    if (req.method === "POST") {
+      requestBody = await req.json(); // Read the body once and store it for reuse
+      const { query, action } = requestBody; // Extract relevant fields from the body
+    
       // Connect to your Supabase instance
       const supabaseUrl = Deno.env.get("MY_SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("MY_SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseKey);
-
+    
       if (action === "fetch_suggestions") {
-        // Step 1: Get GPT suggestions
-
-        // Query your database for necessary data
+        // Fetch data from multiple tables in Supabase
         const { data: classesData, error: classesError } = await supabase.from("Classes").select("*");
-        const { data: usersData, error: usersError } = await supabase.from("Users").select("*");
         const { data: staffData, error: staffError } = await supabase.from("Staff").select("*");
-
-        if (classesError || usersError || staffError) throw new Error("Error querying database");
-
+        const { data: coursesData, error: coursesError } = await supabase.from("Courses").select("*");
+        const { data: campusesData, error: campusesError } = await supabase.from("Campuses").select("*");
+        const { data: studentsData, error: studentsError } = await supabase.from("Students").select("*");
+        const { data: subjectsData, error: subjectsError } = await supabase.from("Subjects").select("*");
+        const { data: locationsData, error: locationsError } = await supabase.from("Locations").select("*");
+        const { data: enrolmentData, error: enrolmentError } = await supabase.from("StudentSubject").select("*");
+    
+        // Check for errors in querying the database
+        if (classesError || staffError || coursesError || campusesError || studentsError || subjectsError || locationsError || enrolmentError) {
+          throw new Error("Error querying database");
+        }
+    
         const dbData = {
           Classes: classesData,
-          Users: usersData,
           Staff: staffData,
+          Courses: coursesData,
+          Campuses: campusesData,
+          Students: studentsData,
+          Subjects: subjectsData,
+          Location: locationsData,
+          StudentSubject: enrolmentData,
         };
-
+    
         // GPT API request to get suggestions based on the database content
         const messages = [
           {
             role: "system",
-            content: "You are an expert admin assistant. When admin ask for help in changes, optimisations, provide two paragraph in output: a json format of changes made base on the specific table or multiple tables they asked in database, then in another paragraph provide words describtion on changes made"
+            content: `You are an expert admin assistant. When receive query, first identify admin ask for information in database or ask you for help with changes or create instance in database.
+            If the admin asks for information from the database, only reply with a paragraph of description that starts with "Required Information:". 
+            If the admin asks for help with changes or optimizations, 
+            provide two parts in the output: JSON format of changes made based on the specific table or multiple tables they 
+            asked for in the database (always start with the id, then other attributes), followed by a description of the changes made. 
+            Ask for whether the admin approves it or not.`
           },
           {
             role: "user",
-            content: `Here is the database content:\n${JSON.stringify(dbData, null, 2)}. \n\n Users queries: ${query}`
-          }
+            content: `Here is the database content:\n${JSON.stringify(dbData, null, 2)}.\n\nUser query: ${query}`,
+          },
         ];
-
+    
         const openaiApiKey = Deno.env.get("OPENAI_API_KEY")!;
         const openaiResponse = await fetch(OPENAI_API_URL, {
           method: "POST",
@@ -53,110 +81,115 @@ serve(async (req) => {
             Authorization: `Bearer ${openaiApiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o-mini-2024-07-18",
             messages: messages,
             max_tokens: 500,
             temperature: 0.7,
           }),
         });
-
+    
         if (!openaiResponse.ok) {
           const errorDetails = await openaiResponse.json();
           throw new Error(`OpenAI API error: ${errorDetails.error.message}`);
         }
-
+    
         const openaiOptimizedData = await openaiResponse.json();
-        gptResponseText = openaiOptimizedData.choices[0].message.content.trim();
-
-        // GPT response should contain two parts: description and JSON changes
-
+        const gptResponseText = openaiOptimizedData.choices[0].message.content.trim();
+    
         if (gptResponseText !== null) {
-          // Find the first occurrence of the opening '{' of the JSON and the closing '}' to locate the JSON block
-          const jsonStartIndex = gptResponseText.indexOf("{");
-          const jsonEndIndex = gptResponseText.lastIndexOf("}") + 1;
-          if (jsonStartIndex === -1 || jsonEndIndex === -1) {
-            throw new Error("No JSON found in GPT response.");
-          }
-        
-          // Extract the JSON part using substring
-          const jsonPart = gptResponseText.substring(jsonStartIndex, jsonEndIndex).trim();
-        
-          // Extract the explanation text that follows the JSON
-          const textPart = gptResponseText.substring(jsonEndIndex).trim();
-        
-          console.log("JSON Part: ", jsonPart); // Log JSON part
-          console.log("Text Part: ", textPart); // Log text part
-        
-      
-          if (!jsonPart) {
-              throw new Error("No JSON changes found in GPT response.");
-          }
-      
-          try {
-              // Parse the JSON part and store the changes
+          // Check if the response starts with "Required Information:"
+          if (gptResponseText.startsWith("Required Information:")) {
+            // Handle info request
+            return new Response(
+              JSON.stringify({ info: gptResponseText }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          } else {
+            // Handle suggestions/optimizations
+            const jsonStartIndex = gptResponseText.indexOf("{");
+            const jsonEndIndex = gptResponseText.lastIndexOf("}") + 1;
+            if (jsonStartIndex === -1 || jsonEndIndex === -1) {
+              throw new Error("No JSON found in GPT response.");
+            }
+    
+            const jsonPart = gptResponseText.substring(jsonStartIndex, jsonEndIndex).trim();
+            const textPart = gptResponseText.substring(jsonEndIndex).trim();
+    
+            let suggestedChanges;
+            try {
               suggestedChanges = JSON.parse(jsonPart);
-          } catch (err) {
+            } catch (err) {
               throw new Error("Error parsing the JSON changes from GPT response.");
+            }
+    
+            return new Response(
+              JSON.stringify({ description: textPart, jsonChanges: suggestedChanges }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } else {
+          throw new Error("GPT response is null.");
+        }
+      } else if (action === "approve") {
+        if (!query || typeof query !== "object") {
+          return new Response(JSON.stringify({ error: "No valid changes provided" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          });
+        }
+      
+        // Apply the changes provided by the frontend
+        for (const [tableName, changes] of Object.entries(query)) {
+          const changesArray = Array.isArray(changes) ? changes : [changes];
+          for (const change of changesArray) {
+            const { id, ...updatedFields } = change; // Extract the id and fields to update
+            if (!id){
+                return new Response(JSON.stringify({ error: `Missing 'id' in changes for table ${tableName} `}), {
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  status: 400,
+                });
+              }
+            const { data: existingData, error: checkError } = await supabase.from(tableName).select("id").eq("id", id).single();
+            if (checkError) {
+              const { error: insertError } = await supabase.from(tableName).insert([updatedFields]);
+                 if (insertError) {
+                    return new Response(JSON.stringify({ error: `Error inserting into ${tableName}: ${insertError.message} `}), {
+                        headers: { ...corsHeaders, "Content-Type": "application/json" },
+                        status: 500,
+                });
+              }
+            }
+            else if (existingData) {
+              const { error } = await supabase.from(tableName).update(updatedFields).eq("id", id);
+              if (error) {
+                return new Response(JSON.stringify({ error: `Error updating ${tableName}: ${error.message} `}), {
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  status: 500,
+                });
+              }
+          }
+            }
           }
       
-          // Return both the human-readable description and the JSON changes to the frontend
-          return new Response(
-              JSON.stringify({ description: textPart.trim(), jsonChanges: suggestedChanges }),
-              {
-                  headers: { "Content-Type": "application/json" },
-              }
-          );
+        return new Response(JSON.stringify({ message: "Changes approved and applied to all rows" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       } else {
-          throw new Error("GPT response is null.");
-      }
-      } else if (action === "approve") {
-        // Step 2: If the user approves, apply the stored JSON changes to the database
-        if (!suggestedChanges) {
-          throw new Error("No suggestions to approve.");
-        }
-
-        // Apply the changes from the proposed JSON to the database
-        for (const tableName of Object.keys(suggestedChanges)) {
-          const changesForTable = suggestedChanges[tableName];
-
-          for (const change of changesForTable) {
-            const { id, ...updatedFields } = change;  // Extract 'id' and the fields to update
-
-            const { error } = await supabase
-              .from(tableName)
-              .update(updatedFields)
-              .eq("id", id);
-
-            if (error) throw new Error(`Error updating ${tableName}: ` + error.message);
-          }
-        }
-
-        // Clear the stored changes after they are applied
-        suggestedChanges = null;
-
-        return new Response(
-          JSON.stringify({ message: "Changes approved and database updated successfully" }),
-          {
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      } else {
-        throw new Error("Invalid action.");
+        return new Response(JSON.stringify({ error: "Invalid action." }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        });
       }
     } else {
-      // If request is not POST, return a method not allowed response
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 405,
       });
     }
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: err.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
 });

@@ -39,13 +39,25 @@ const StaffComponent = () => {
 
     const handleDeleteStaff = async (staffId) => {
         try {
-            const { error } = await supabase
+            // Step 1: Nullify the staff_id in the Classes table where the staff member is referenced
+            const { error: nullifyError } = await supabase
+                .from('Classes')
+                .update({ staff_id: null }) // Nullify staff_id in Classes table
+                .eq('staff_id', staffId);   // Where the staff_id matches the staff being deleted
+
+            if (nullifyError) {
+                console.error('Error nullifying staff_id in Classes table:', nullifyError);
+                return; // Exit if there is an error
+            }
+
+            // Step 2: Delete the staff record
+            const { error: deleteError } = await supabase
                 .from('Staff')
                 .delete()
                 .eq('id', staffId);
 
-            if (error) {
-                console.error('Error deleting staff:', error);
+            if (deleteError) {
+                console.error('Error deleting staff:', deleteError);
             } else {
                 setStaff(staff.filter((member) => member.id !== staffId)); // Remove staff from the list
             }

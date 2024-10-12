@@ -9,7 +9,22 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
     const [newClasses, setNewClasses] = useState([]);
     const [staffList, setStaffList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    
+    // Add an event listener to handle "Escape" key press
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
 
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, [onClose]);
+    
     // Fetch data on component load
     useEffect(() => {
         const fetchData = async () => {
@@ -37,14 +52,16 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
     // Handle class change for existing classes
     const handleClassChange = (index, field, value) => {
         const updatedClasses = [...classes];
-        updatedClasses[index][field] = value;
+        // Set staff_id to null if the "Select Staff" option is chosen (value = "")
+        updatedClasses[index][field] = value === "" ? null : value;
         setClasses(updatedClasses);
     };
 
     // Handle change for new classes
     const handleNewClassChange = (index, field, value) => {
         const updatedNewClasses = [...newClasses];
-        updatedNewClasses[index][field] = value;
+        // Set staff_id to null if the "Select Staff" option is chosen (value = "")
+        updatedNewClasses[index][field] = value === "" ? null : value;
         setNewClasses(updatedNewClasses);
     };
 
@@ -52,7 +69,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
     const handleAddClass = () => {
         setNewClasses([
             ...newClasses,
-            { class_type: '', is_online: false, start_time: '', duration_30mins: '', location_id: '', staff_id: '' },
+            { class_type: '', is_online: false, start_time: '', duration_30mins: '', location_id: '', staff_id: null },
         ]);
     };
 
@@ -129,15 +146,12 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                                 <label>
                                                     Staff:
                                                     <select
-                                                        value={classItem.staff_id}
+                                                        value={classItem.staff_id || ''} // If staff_id is null, show the placeholder
                                                         onChange={(e) =>
                                                             handleClassChange(index, 'staff_id', e.target.value)
                                                         }
-                                                        required
                                                     >
-                                                        <option value="" disabled hidden>
-                                                            Select Staff
-                                                        </option>
+                                                        <option value="">Select Staff</option> {/* Placeholder for null value */}
                                                         {staffList.map((staff) => (
                                                             <option key={staff.id} value={staff.id}>
                                                                 {staff.name}
@@ -213,13 +227,10 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
                                             <label>
                                                 Staff:
                                                 <select
-                                                    value={newClass.staff_id}
+                                                    value={newClass.staff_id || ''} // If staff_id is null, show the placeholder
                                                     onChange={(e) => handleNewClassChange(index, 'staff_id', e.target.value)}
-                                                    required
                                                 >
-                                                    <option value="" disabled hidden>
-                                                        Select Staff
-                                                    </option>
+                                                    <option value="">Select Staff</option> {/* Placeholder for null value */}
                                                     {staffList.map((staff) => (
                                                         <option key={staff.id} value={staff.id}>
                                                             {staff.name}
@@ -277,8 +288,4 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
 };
 
 export default EditSubjectClassPopup;
-
-
-
-
 

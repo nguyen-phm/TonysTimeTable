@@ -86,6 +86,16 @@ const CourseComponent = () => {
                 console.error('Error deleting from StudentSubject:', subjectRelationError);
                 return;
             }
+
+            const { error: classesError } = await supabase
+                .from('Classes')
+                .delete()
+                .eq('subject_id', subjectId);
+
+            if (classesError) {
+                console.error('Error deleting classes related to subject:', classesError);
+                return; 
+            }
     
             const { error: subjectError } = await supabase
                 .from('Subjects')

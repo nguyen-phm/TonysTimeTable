@@ -78,14 +78,10 @@ const ClassComponent = () => {
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{classroom.name}</div>
-                                    <div className="course-code">
-                                        Type: {classroom.class_type}
+                                    <div className='course-details'>
+                                        <div className="course-code">Type: {classroom.class_type}</div>
+                                        <div className="course-code">Capacity: {classroom.capacity}</div>  
                                     </div>
-                                </div>
-                                <div className="course-details">
-                                    <div className="delivery-mode">
-                                        Capacity: {classroom.capacity}
-                                    </div>    
                                 </div>
                                 <div className="course-actions">
                                     <button className="more-options" onClick={() => handleEditClassroom(classroom)}>

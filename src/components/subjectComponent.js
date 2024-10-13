@@ -1,55 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import AddSubjectPopup from './popups/addSubjectPopup';
-import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
+import EditSubjectPopup from './popups/editSubjectPopup'; 
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
 
 const SubjectComponent = () => {
     const [courses, setCourses] = useState([]);
+    const [campuses, setCampuses] = useState([]); // To store campuses
     const [subjects, setSubjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showSubjectPopup, setShowSubjectPopup] = useState(false);
     const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false); 
     const [selectedSubject, setSelectedSubject] = useState(null); 
 
+    // Fetch courses, campuses, and subjects from Supabase
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const { data, error } = await supabase
+
+                // Fetch courses
+                const { data: coursesData, error: coursesError } = await supabase
                     .from('Courses')
                     .select('*');
 
-                if (error) {
-                    console.error('Error fetching courses:', error);
+                if (coursesError) {
+                    console.error('Error fetching courses:', coursesError);
                 } else {
-                    setCourses(data);
+                    setCourses(coursesData);
                 }
+
+                // Fetch campuses
+                const { data: campusesData, error: campusesError } = await supabase
+                    .from('Campuses')
+                    .select('*');
+
+                if (campusesError) {
+                    console.error('Error fetching campuses:', campusesError);
+                } else {
+                    setCampuses(campusesData);
+                }
+
+                // Fetch subjects
+                const { data: subjectsData, error: subjectsError } = await supabase
+                    .from('Subjects')
+                    .select('*');
+
+                if (subjectsError) {
+                    console.error('Error fetching subjects:', subjectsError);
+                } else {
+                    setSubjects(subjectsData);
+                }
+
             } finally {
                 setIsLoading(false);
             }
         };
 
-        const fetchSubjects = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('Subjects')
-                    .select('*');
-
-                if (error) {
-                    console.error('Error fetching subjects:', error);
-                } else {
-                    setSubjects(data);
-                }
-            } catch (error) {
-                console.error('Error fetching subjects:', error);
-            }
-        };
-
-        fetchCourses();
-        fetchSubjects();
+        fetchData();
     }, []);
+
+    // Find course name by course_id
+    const getCourseName = (courseId) => {
+        const course = courses.find((course) => course.id === courseId);
+        return course ? course.name : 'Unknown Course';
+    };
+
+    // Find campus name by course's campus_id
+    const getCampusName = (courseId) => {
+        const course = courses.find((course) => course.id === courseId);
+        if (course) {
+            const campus = campuses.find((campus) => campus.id === course.campus_id);
+            return campus ? campus.name : 'Unknown Campus';
+        }
+        return 'Unknown Campus';
+    };
 
     const addSubject = async (subjectData) => {
         try {
@@ -61,7 +87,6 @@ const SubjectComponent = () => {
             if (error) {
                 console.error('Error adding subject:', error);
             } else if (data && data.length > 0) {
-                // Use functional form to ensure state is correctly updated
                 setSubjects((prevSubjects) => [...prevSubjects, data[0]]);
             }
         } catch (error) {
@@ -121,7 +146,7 @@ const SubjectComponent = () => {
             {isLoading ? (
                 <div className='courses-list'>   
                     <div className='course-row'>
-                        <p>Loading Subjects</p>
+                        <p>Loading Subjects...</p>
                     </div>
                 </div>
             ) : (
@@ -131,7 +156,11 @@ const SubjectComponent = () => {
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{subject.name}</div>
-                                    <div className="course-code">{subject.code}</div>
+                                    <div className="course-details">
+                                        <div className="course-code">{subject.code}</div>
+                                        <div className="course-code">{getCourseName(subject.course_id)}</div>
+                                        <div className="course-code">{getCampusName(subject.course_id)}</div>
+                                    </div>
                                 </div>
                                 <div className="subject-actions">
                                     <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>

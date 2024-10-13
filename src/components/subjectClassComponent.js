@@ -4,32 +4,72 @@ import EditSubjectClassPopup from './popups/editSubjectClassPopup'; // Import th
 import '../styles/adminPage.css';
 
 const SubjectListComponent = () => {
+    const [courses, setCourses] = useState([]);
+    const [campuses, setCampuses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [showEditPopup, setShowEditPopup] = useState(false);
 
     useEffect(() => {
-        const fetchSubjects = async () => {
+        const fetchData = async () => {
             try {
-                const { data, error } = await supabase
+                setIsLoading(true);
+
+                // Fetch courses
+                const { data: coursesData, error: coursesError } = await supabase
+                    .from('Courses')
+                    .select('*');
+
+                if (coursesError) {
+                    console.error('Error fetching courses:', coursesError);
+                } else {
+                    setCourses(coursesData);
+                }
+
+                // Fetch campuses
+                const { data: campusesData, error: campusesError } = await supabase
+                    .from('Campuses')
+                    .select('*');
+
+                if (campusesError) {
+                    console.error('Error fetching campuses:', campusesError);
+                } else {
+                    setCampuses(campusesData);
+                }
+
+                // Fetch subjects
+                const { data: subjectsData, error: subjectsError } = await supabase
                     .from('Subjects')
                     .select('*');
 
-                if (error) {
-                    console.error('Error fetching subjects:', error);
+                if (subjectsError) {
+                    console.error('Error fetching subjects:', subjectsError);
                 } else {
-                    setSubjects(data);
+                    setSubjects(subjectsData);
                 }
-            } catch (error) {
-                console.error('Error fetching subjects:', error);
+
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchSubjects();
+        fetchData();
     }, []);
+
+    const getCourseName = (courseId) => {
+        const course = courses.find((course) => course.id === courseId);
+        return course ? course.name : 'Unknown Course';
+    };
+
+    const getCampusName = (courseId) => {
+        const course = courses.find((course) => course.id === courseId);
+        if (course) {
+            const campus = campuses.find((campus) => campus.id === course.campus_id);
+            return campus ? campus.name : 'Unknown Campus';
+        }
+        return 'Unknown Campus';
+    };
 
     const handleEditSubject = (subject) => {
         setSelectedSubject(subject);
@@ -50,7 +90,11 @@ const SubjectListComponent = () => {
                         <div key={index} className="course-row">
                             <div className="course-info">
                                 <div className="course-name">{subject.name}</div>
-                                <div className="course-code">{subject.code}</div>
+                                <div className="course-details">
+                                        <div className="course-code">{subject.code}</div>
+                                        <div className="course-code">{getCourseName(subject.course_id)}</div>
+                                        <div className="course-code">{getCampusName(subject.course_id)}</div>
+                                    </div>
                             </div>
                             <div className="subject-actions">
                                 <button className="more-options" onClick={() => handleEditSubject(subject)}>

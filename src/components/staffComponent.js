@@ -86,7 +86,9 @@ const StaffComponent = () => {
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{member.name}</div>
-                                    <div className="course-code">{member.university_email}</div>
+                                    <div className='course-details'>
+                                        <div className="course-code">{member.university_email}</div>
+                                    </div>
                                 </div>
                                 <div className="course-actions">
                                     <button className="more-options" onClick={() => handleEditStaff(member)}>

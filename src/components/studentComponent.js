@@ -29,6 +29,7 @@ const StudentComponent = () => {
                         student_id,
                         name,
                         university_email,
+                        course_id,
                         Courses (
                             name,
                             campus_id,

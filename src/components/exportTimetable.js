@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 import ExcelJS from 'exceljs';
 
 // Export the timetable for a given course as an Excel file
-async function exportTimetable(course_id) {
+const exportTimetable = async (courseId) => {
     // Attempt to fetch course
     const { data: course, error } = await supabase
         .from('Courses')
@@ -10,18 +10,16 @@ async function exportTimetable(course_id) {
             id, name,
             Campuses(venue_name)
         `)
-        .eq('id', course_id)
+        .eq('id', courseId)
         .limit(1)
         .single();
-    
     if (error) {
         throw new Error('Error fetching course: ', error.message);
     }
 
-    // Attempt to export timetable to excel
-    const excelBuffer = await generateExcelFile(course);
-
-    if (!excelBuffer) {
+    // Attempt to export timetable
+    const buffer = await generateXLSX(course);
+    if (!buffer) {
         throw new Error('Failed to export timetable');
     }
     
@@ -37,36 +35,44 @@ async function exportTimetable(course_id) {
 }
 
 // Generate the Excel file and write it to a buffer
-async function generateExcelFile(course) {
+const generateXLSX = async(course) =>  {
     // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Timetable');
 
     let boilerplateLineCount = 0;
     // Add a single line of boilerplate and increment the counter
-    const addBoilerplateLine = (text, color, center, size, bold) =>  {
+    const addBoilerplateLine = (text, color, center, bold) =>  {
         boilerplateLineCount++;
         worksheet.mergeCells(`A${boilerplateLineCount}:F${boilerplateLineCount}`);
         const cell = worksheet.getRow(boilerplateLineCount).getCell(1);
         cell.value = text;
-        cell.font = { size: size, name: 'Tahoma', color: { argb: color }, bold: bold }
+        cell.font = { size: 9, name: 'Tahoma', color: { argb: color }, bold: bold }
         if (center) {
             cell.alignment = { horizontal: 'center'};
         }
     }
 
-    // Add boilerplate
-    addBoilerplateLine('Victorian Institute of Technology Pty Ltd', '0000FF', true, 9, true);
-    addBoilerplateLine('ABN: 41 085 128 525 RTO No: 20829 TEQSA ID: PRV14007 CRICOS Provider Code: 02044E', '0000FF', true, 9, false);
-    addBoilerplateLine(course.name, '000000', true, 9, true);
-    addBoilerplateLine(`Venue: ${course.Campuses.venue_name}`, '000000', true, 9, true);
-    addBoilerplateLine('Timetable:', '000000', false, 9, true);
-    addBoilerplateLine('Note: (a) This is a Master Timetable. You are required to refer to your Unit Allocation (i.e., your enrolled units) to know which units/sessions are applicable to you.', 'C00000', false, 9, true);
-    addBoilerplateLine('(b) Time Table may change in the event of some exigencies.', 'C00000', false, 9, true);
-    addBoilerplateLine('(c) Units have additional consulting sessions (based on unit requirements) which is not reflected below including online guided learning.', 'C00000', false, 9, true);
+    // Add boilerplate lines
+    addBoilerplateLine('Victorian Institute of Technology Pty Ltd', 
+        '0000FF', true, true);
+    addBoilerplateLine('ABN: 41 085 128 525 RTO No: 20829 TEQSA ID: PRV14007 CRICOS Provider Code: 02044E', 
+        '0000FF', true, false);
+    addBoilerplateLine(course.name, 
+        '000000', true, true);
+    addBoilerplateLine(`Venue: ${course.Campuses.venue_name}`, 
+        '000000', true, true);
+    addBoilerplateLine('Timetable:', 
+        '000000', false, true);
+    addBoilerplateLine('Note: (a) This is a Master Timetable. You are required to refer to your Unit Allocation (i.e., your enrolled units) to know which units/sessions are applicable to you.', 
+        'C00000', false, true);
+    addBoilerplateLine('(b) Time Table may change in the event of some exigencies.', 
+        'C00000', false, true);
+    addBoilerplateLine('(c) Units have additional consulting sessions (based on unit requirements) which is not reflected below including online guided learning.', 
+        'C00000', false, true);
 
     // Add VIT logo
-    const response =  await fetch('/logoExcel_upscaled.png');
+    const response = await fetch('/logoExcel_upscaled.png');
     const logo = workbook.addImage({
         buffer: response.arrayBuffer(),
         extension: 'png', 
@@ -76,7 +82,6 @@ async function generateExcelFile(course) {
         ext: { width: 150, height: 75 },
         editAs: 'oneCell'
     });
-    
 
     // Add timetable headers
     const headers = ['Day', 'Time', 'Unit', 'Classroom', 'Teaching Staff', 'Delivery Mode'];
@@ -120,7 +125,8 @@ async function generateExcelFile(course) {
     return buffer;
 }
 
-async function fetchClassData(course) {
+// Fetch and format class data
+const fetchClassData = async(course) => {
     // Attempt to fetch classes
     const { data: classes, error } = await supabase
         .from('Classes')
@@ -132,10 +138,8 @@ async function fetchClassData(course) {
         `)
         .eq('Subjects.course_id', course.id)
         .order('start_time');
-
     if (error) {
         throw new Error('Failed to fetch classes: ', error.message);
-        return [];
     }
 
     // Format class data
@@ -152,14 +156,9 @@ async function fetchClassData(course) {
     return classData;
 }
 
-// Utility function function validate an encoded time
-function validateTime(time) {
-    return Number.isInteger(time) && time >= 0 && time < 24*2*5;
-  }
-
 // Utility function to extract the day from an encoded time as a string
 // Assumes that the encoded time is valid
-function timeToDayString(time) {
+const timeToDayString = (time) => {
     switch (Math.floor(time / 48)) {
         case 0: return 'Monday';
         case 1: return 'Tuesday';
@@ -171,8 +170,8 @@ function timeToDayString(time) {
 
 // Utility function to extract the time from an encoded time as a string
 // Assumes that the encoded time is valid
-function timeToTimeString(time) {
-    const hour24 = Math.floor(time/2) % 24; 
+const timeToTimeString = (time) => {
+    const hour24 = Math.floor(time / 2) % 24; 
     const hour12Str = (hour24 % 12 || 12).toString();
     const minuteStr = time % 2 == 0 ? '00' : '30'; 
     const amPm = hour24 < 12 ? 'am' : 'pm';

@@ -107,27 +107,27 @@ const AddSubjectPopup = ({ onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <div className='popup-h2'>Add New Subject</div>
+                <div className='popup-h2'>Add New Unit</div>
                 <form onSubmit={handleSubmit}>
                     <label>
-                        Subject Name:
+                        Unit Name:
                         <input
                             type="text"
                             value={subjectName}
                             onChange={(e) => setSubjectName(e.target.value)}
                             required
-                            placeholder="Enter Subject Name"
+                            placeholder="Enter Unit Name"
                         />
                     </label>
 
                     <label>
-                        Subject Code:
+                        Unit Code:
                         <input
                             type="text"
                             value={subjectCode}
                             onChange={(e) => setSubjectCode(e.target.value)}
                             required
-                            placeholder="Enter Subject Code"
+                            placeholder="Enter Unit Code"
                         />
                     </label>
 

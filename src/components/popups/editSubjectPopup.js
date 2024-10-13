@@ -23,20 +23,26 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
         };
     }, [onClose]);
 
+    // Fetch courses and their related campuses
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchCoursesAndCampuses = async () => {
             const { data, error } = await supabase
                 .from('Courses')
-                .select('*');
+                .select(`
+                    id,
+                    name,
+                    campus_id,
+                    Campuses ( name )
+                `); // Fetch course name, campus ID, and the associated campus name
 
             if (error) {
-                console.error('Error fetching courses:', error);
+                console.error('Error fetching courses and campuses:', error);
             } else {
                 setCourses(data);
             }
         };
 
-        fetchCourses();
+        fetchCoursesAndCampuses();
     }, []);
 
     const handleSubmit = async (e) => {
@@ -69,27 +75,27 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <div className='popup-h2'>Edit Subject</div>
+                <div className='popup-h2'>Edit Unit</div>
                 <form onSubmit={handleSubmit}>
                     <label>
-                        Subject Name:
+                        Unit Name:
                         <input
                             type="text"
                             value={subjectName}
                             onChange={(e) => setSubjectName(e.target.value)}
                             required
-                            placeholder="Enter Subject Name"
+                            placeholder="Enter Unit Name"
                         />
                     </label>
 
                     <label>
-                        Subject Code:
+                        Unit Code:
                         <input
                             type="text"
                             value={subjectCode}
                             onChange={(e) => setSubjectCode(e.target.value)}
                             required
-                            placeholder="Enter Subject Code"
+                            placeholder="Enter Unit Code"
                         />
                     </label>
 
@@ -103,7 +109,7 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
                             <option value="" disabled hidden className="placeholder-option">Select a Course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
-                                    {course.name}
+                                    {course.name} - {course.Campuses.name} {/* Display course-campus */}
                                 </option>
                             ))}
                         </select>

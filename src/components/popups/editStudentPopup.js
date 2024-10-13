@@ -7,10 +7,10 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     const [name, setName] = useState(student.name);
     const [email, setEmail] = useState(student.university_email);
     const [selectedCourse, setSelectedCourse] = useState(student.course_id);
-    const [studentId, setStudentId] = useState(student.student_id); // New state for student ID
+    const [studentId, setStudentId] = useState(student.student_id); 
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]); // Store selected subjects
+    const [selectedSubjects, setSelectedSubjects] = useState([]); 
 
     // Add an event listener to handle "Escape" key press
     useEffect(() => {
@@ -30,10 +30,15 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     // Fetch the courses and subjects from the database
     useEffect(() => {
         const fetchCoursesAndSubjects = async () => {
-            // Fetch courses
+            // Fetch courses with campus names
             const { data: coursesData, error: coursesError } = await supabase
                 .from('Courses')
-                .select('*');
+                .select(`
+                    id,
+                    name,
+                    campus_id,
+                    Campuses ( name )
+                `);
 
             if (coursesError) {
                 console.error('Error fetching courses:', coursesError);
@@ -63,7 +68,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
             } else {
                 // Pre-fill the multi-select with the subject IDs the student is currently enrolled in
                 const prefilledSubjects = studentSubjectsData.map((ss) => ss.subject_id);
-                setSelectedSubjects(prefilledSubjects); // Set selected subjects by ID
+                setSelectedSubjects(prefilledSubjects);
             }
         };
 
@@ -84,7 +89,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                 // Step 1: Update the student's basic info including the student ID
                 const { data, error } = await supabase
                     .from('Students')
-                    .update({ name, university_email: email, course_id: selectedCourse, student_id: studentId }) // Include student_id in the update
+                    .update({ name, university_email: email, course_id: selectedCourse, student_id: studentId })
                     .eq('id', student.id)
                     .select();
 
@@ -116,7 +121,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                             console.error('Error inserting student subjects:', insertError);
                         } else {
                             console.log('Student subjects updated successfully');
-                            onSubmit(data[0]); // Send the updated student data back
+                            onSubmit(data[0]);
                         }
                     }
                 }
@@ -154,7 +159,6 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                         />
                     </label>
 
-                    {/* New field for Student ID */}
                     <label>
                         Student ID:
                         <input
@@ -163,8 +167,8 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                             onChange={(e) => setStudentId(e.target.value)}
                             required
                             placeholder="Enter 4-digit Student ID"
-                            maxLength={4} // Restrict input to 4 characters
-                            pattern="\d{4}" // Ensure only digits
+                            maxLength={4}
+                            pattern="\d{4}"
                             title="Please enter exactly 4 digits"
                         />
                     </label>
@@ -179,7 +183,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                             <option value="" disabled hidden className="placeholder-option">Select a Course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
-                                    {course.name}
+                                    {course.name} - {course.Campuses?.name} {/* course-campus format */}
                                 </option>
                             ))}
                         </select>
@@ -188,14 +192,14 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                     <label>
                         Select Subjects:
                         <MultiSelect
-                            value={selectedSubjects} // Should be an array of IDs
+                            value={selectedSubjects}
                             options={subjects.map((subject) => ({
                                 id: subject.id,
                                 name: subject.name || 'Unnamed Subject',
                             }))}
-                            onChange={(e) => setSelectedSubjects(e.value)} // Update the selected subjects state
+                            onChange={(e) => setSelectedSubjects(e.value)}
                             optionLabel="name"
-                            optionValue="id" // Ensure the value matches subject.id
+                            optionValue="id"
                             placeholder="Select subjects"
                             display="chip"
                             filter
@@ -216,3 +220,4 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
 };
 
 export default EditStudentPopup;
+

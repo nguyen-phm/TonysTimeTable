@@ -20,7 +20,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
     useEffect(() => {
         const handleEsc = (event) => {
             if (event.key === 'Escape') {
-            onClose();
+                onClose();
             }
         };
 
@@ -31,19 +31,26 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
         };
     }, [onClose]);
 
-    // Fetch the courses from the database
+    // Fetch the courses and campuses from the database
     useEffect(() => {
-        const fetchCourses = async () => {
-            const { data, error } = await supabase.from('Courses').select('*');
+        const fetchCoursesAndCampuses = async () => {
+            const { data, error } = await supabase
+                .from('Courses')
+                .select(`
+                    id,
+                    name,
+                    campus_id,
+                    Campuses ( name )
+                `);
 
             if (error) {
-                console.error('Error fetching courses:', error);
+                console.error('Error fetching courses and campuses:', error);
             } else {
                 setCourses(data || []);
             }
         };
 
-        fetchCourses();
+        fetchCoursesAndCampuses();
     }, []);
 
     // Fetch subjects when a course is selected
@@ -91,7 +98,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                     // Insert multiple records into StudentSubject table
                     const studentSubjectEntries = selectedSubjects.map(subject => ({
                         student_id: studentId,
-                        subject_id: subject.id // Use the subject ID
+                        subject_id: subject.id 
                     }));
 
                     const { error: studentSubjectError } = await supabase
@@ -102,7 +109,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                         console.error('Error adding student-subject relations:', studentSubjectError);
                     } else {
                         console.log('Student added and subjects assigned:', studentData);
-                        onSubmit(studentData[0]); // Send back the new student to update the state
+                        onSubmit(studentData[0]); 
                     }
                 }
             } catch (error) {
@@ -139,7 +146,6 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                         />
                     </label>
 
-                    {/* New field for 4-digit student ID */}
                     <label>
                         Student ID:
                         <input
@@ -148,8 +154,8 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                             onChange={(e) => setStudentId(e.target.value)}
                             required
                             placeholder="Enter 4-digit Student ID"
-                            maxLength={4} // Restrict input to 4 characters
-                            pattern="\d{4}" // Ensure only digits
+                            maxLength={4} 
+                            pattern="\d{4}" 
                             title="Please enter exactly 4 digits"
                         />
                     </label>
@@ -164,7 +170,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                             <option disabled hidden value="">Select a course</option>
                             {courses?.map((course) => (
                                 <option key={course?.id} value={course?.id}>
-                                    {course?.name || 'Unnamed Course'}
+                                    {course?.name} - {course?.Campuses?.name} {/* Display course-campus */}
                                 </option>
                             ))}
                         </select>
@@ -180,15 +186,14 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                                     name: subject.name || 'Unnamed Subject'
                                 }))}
                                 onChange={(e) => setSelectedSubjects(e.value)}
-                                optionLabel="name"  // Display the subject name
+                                optionLabel="name"  
                                 placeholder="Select subjects"
                                 display="chip"
                                 filter
-                                className="multiselect-custom" // Apply custom styles
+                                className="multiselect-custom" 
                             />
                         </label>
                     )}
-
 
                     <div className="popup-buttons">
                         <button type="submit">Submit</button>
@@ -203,6 +208,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddStudentPopup;
+
 
 
 

@@ -42,6 +42,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
             if (error) {
                 console.error('Error fetching courses and campuses:', error);
             } else {
+                console.log('Fetched courses:', data); // Log the fetched courses data
                 setCourses(data || []);
             }
         };
@@ -53,6 +54,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     useEffect(() => {
         const fetchSubjects = async () => {
             if (selectedCourse) {
+                console.log('Selected course ID:', selectedCourse); // Log selected course ID
                 const { data, error } = await supabase
                     .from('Subjects')
                     .select('*')
@@ -61,11 +63,14 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                 if (error) {
                     console.error('Error fetching subjects:', error);
                 } else {
-                    setSubjects(data || []);
+                    console.log('Fetched subjects for course:', data); // Log the fetched subjects
+                    if (data.length > 0) {
+                        setSubjects(data);
+                    } else {
+                        console.log('No subjects found for the selected course');
+                        setSubjects([]); // Clear subjects if none found
+                    }
                 }
-            } else {
-                // If no course is selected, clear the subjects
-                setSubjects([]);
             }
         };
 
@@ -84,6 +89,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
             if (studentSubjectsError) {
                 console.error('Error fetching student subjects:', studentSubjectsError);
             } else {
+                console.log('Fetched student subjects:', studentSubjectsData); // Log student subjects
                 const prefilledSubjects = studentSubjectsData.map((ss) => ss.subject_id);
                 setSelectedSubjects(prefilledSubjects);
             }
@@ -154,6 +160,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     const handleCourseChange = (e) => {
         setSelectedCourse(e.target.value);
         setSelectedSubjects([]); // Clear selected subjects when course changes
+        setSubjects([]); // Clear subjects to prevent stale data
     };
 
     return (
@@ -244,3 +251,4 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
 };
 
 export default EditStudentPopup;
+

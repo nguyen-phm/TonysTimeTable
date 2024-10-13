@@ -5,44 +5,55 @@ import '../../styles/popup.css';
 const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
     const [subjectName, setSubjectName] = useState(subject.name);
     const [subjectCode, setSubjectCode] = useState(subject.code);
-    const [year, setYear] = useState(subject.year);
-    const [semester, setSemester] = useState(subject.semester);
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(subject.course_id); 
 
+    // Add an event listener to handle "Escape" key press
     useEffect(() => {
-        const fetchCourses = async () => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, [onClose]);
+
+    // Fetch courses and their related campuses
+    useEffect(() => {
+        const fetchCoursesAndCampuses = async () => {
             const { data, error } = await supabase
                 .from('Courses')
-                .select('*');
+                .select(`
+                    id,
+                    name,
+                    campus_id,
+                    Campuses ( name )
+                `); // Fetch course name, campus ID, and the associated campus name
 
             if (error) {
-                console.error('Error fetching courses:', error);
+                console.error('Error fetching courses and campuses:', error);
             } else {
                 setCourses(data);
             }
         };
 
-        fetchCourses();
+        fetchCoursesAndCampuses();
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (
-            subjectName.trim() !== '' &&
-            subjectCode.trim() !== '' &&
-            String(year).trim() !== '' &&
-            semester !== '' &&
-            selectedCourse !== ''
-        ) {
+        if (subjectName.trim() !== '' && subjectCode.trim() !== '' && selectedCourse !== '') {
             try {
                 const { data, error } = await supabase
                     .from('Subjects')
                     .update({
                         name: subjectName,
                         code: subjectCode,
-                        year: year,
-                        semester: semester,
                         course_id: selectedCourse,
                     })
                     .eq('id', subject.id) 
@@ -64,52 +75,28 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <div className='popup-h2'>Edit Subject</div>
+                <div className='popup-h2'>Edit Unit</div>
                 <form onSubmit={handleSubmit}>
                     <label>
-                        Subject Name:
+                        Unit Name:
                         <input
                             type="text"
                             value={subjectName}
                             onChange={(e) => setSubjectName(e.target.value)}
                             required
-                            placeholder="Enter Subject Name"
+                            placeholder="Enter Unit Name"
                         />
                     </label>
 
                     <label>
-                        Subject Code:
+                        Unit Code:
                         <input
                             type="text"
                             value={subjectCode}
                             onChange={(e) => setSubjectCode(e.target.value)}
                             required
-                            placeholder="Enter Subject Code"
+                            placeholder="Enter Unit Code"
                         />
-                    </label>
-
-                    <label>
-                        Year:
-                        <input
-                            type="number"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            required
-                            placeholder="Enter Year"
-                        />
-                    </label>
-
-                    <label>
-                        Semester:
-                        <select
-                            value={semester}
-                            onChange={(e) => setSemester(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled hidden className="placeholder-option">Select Semester</option>
-                            <option value="ONE">One</option>
-                            <option value="TWO">Two</option>
-                        </select>
                     </label>
 
                     <label>
@@ -122,7 +109,7 @@ const EditSubjectPopup = ({ subject, onClose, onSubmit }) => {
                             <option value="" disabled hidden className="placeholder-option">Select a Course</option>
                             {courses.map((course) => (
                                 <option key={course.id} value={course.id}>
-                                    {course.name}
+                                    {course.name} - {course.Campuses.name} {/* Display course-campus */}
                                 </option>
                             ))}
                         </select>

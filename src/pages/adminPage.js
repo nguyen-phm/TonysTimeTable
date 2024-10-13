@@ -4,6 +4,7 @@ import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import ClassComponent from '../components/classComponent';
 import StaffComponent from '../components/staffComponent';
+import SubjectComponent from '../components/subjectComponent';
 import SubjectClassComponent from '../components/subjectClassComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
@@ -30,6 +31,8 @@ const AdminPage = () => {
                 return <AccountContent />;
             case 'courses':
                 return <CourseComponent />;
+            case 'units':
+                return <SubjectComponent />;
             case 'subjectclasses':
                 return <SubjectClassComponent />;
             case 'students':
@@ -64,6 +67,7 @@ const AdminPage = () => {
                     <nav className="flex-grow pb-5 pt-2">
                         <div className="nav-section">
                             <SidebarLink Icon={BookOpen} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
+                            <SidebarLink Icon={BookOpen} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
                             <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />

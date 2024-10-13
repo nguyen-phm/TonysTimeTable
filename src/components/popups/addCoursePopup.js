@@ -5,6 +5,7 @@ import '../../styles/popup.css';
 
 const AddCoursePopup = ({ onClose, onSubmit }) => {
     const [courseName, setCourseName] = useState('');
+    const [courseCode, setCourseCode] = useState(''); // New state for course code
     const [campuses, setCampuses] = useState([]); 
     const [selectedCampuses, setSelectedCampuses] = useState([]); 
 
@@ -40,16 +41,18 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
         fetchCampuses();
     }, []);
 
-    const insertCourseToSupabase = async (courseName, campusIds) => {
+    // Insert course into Supabase
+    const insertCourseToSupabase = async (courseName, courseCode, campusIds) => {
         try {
             const courseEntries = campusIds.map((campusId) => ({
                 name: courseName,
+                course_code: courseCode, // Insert the course code
                 campus_id: campusId, 
             }));
 
             const { data, error } = await supabase
                 .from('Courses')
-                .insert(courseEntries) 
+                .insert(courseEntries)
                 .select();
 
             if (error) {
@@ -64,12 +67,13 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (courseName.trim() !== '' && selectedCampuses.length > 0) {
-            await insertCourseToSupabase(courseName, selectedCampuses);
-            onSubmit(courseName); 
-            setCourseName(''); 
-            setSelectedCampuses([]); 
-            onClose(); 
+        if (courseName.trim() !== '' && courseCode.trim() !== '' && selectedCampuses.length > 0) {
+            await insertCourseToSupabase(courseName, courseCode, selectedCampuses);
+            onSubmit(courseName); // Call the parent onSubmit with the course name
+            setCourseName(''); // Reset course name
+            setCourseCode(''); // Reset course code
+            setSelectedCampuses([]); // Reset selected campuses
+            onClose(); // Close the popup
         }
     };
 
@@ -86,6 +90,17 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
                             onChange={(e) => setCourseName(e.target.value)}
                             required
                             placeholder="Enter Course Name"
+                        />
+                    </label>
+
+                    <label>
+                        Course Code:
+                        <input
+                            type="text"
+                            value={courseCode}
+                            onChange={(e) => setCourseCode(e.target.value)}
+                            required
+                            placeholder="Enter Course Code"
                         />
                     </label>
 
@@ -120,4 +135,5 @@ const AddCoursePopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddCoursePopup;
+
 

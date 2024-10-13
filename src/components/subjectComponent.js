@@ -146,7 +146,7 @@ const SubjectComponent = () => {
             {isLoading ? (
                 <div className='courses-list'>   
                     <div className='course-row'>
-                        <p>Loading Subjects...</p>
+                        <p>Loading Units</p>
                     </div>
                 </div>
             ) : (
@@ -175,7 +175,7 @@ const SubjectComponent = () => {
             <br />
 
             <button className='more-options' type="button" onClick={() => setShowSubjectPopup(true)}>
-                Add Subject
+                Add Unit
             </button>
 
             {showSubjectPopup && (

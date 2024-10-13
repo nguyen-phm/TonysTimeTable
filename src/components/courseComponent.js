@@ -98,7 +98,11 @@ const CourseComponent = () => {
     return (
         <div className="admin-section">
             {isLoading ? (
-                <p>Loading Courses...</p>
+                <div className='courses-list'>   
+                    <div className='course-row'>
+                        <p>Loading Courses</p>
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="courses-list">

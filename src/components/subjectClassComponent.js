@@ -81,7 +81,7 @@ const SubjectListComponent = () => {
             {isLoading ? (
                 <div className="courses-list">
                     <div className="course-row">
-                        <p>Loading Subjects...</p>
+                        <p>Loading Unit Classes</p> 
                     </div>
                 </div>
             ) : (

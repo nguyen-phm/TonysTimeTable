@@ -78,7 +78,11 @@ const StaffComponent = () => {
     return (
         <div className="admin-section">
             {isLoading ? (
-                <p>Loading Staff</p>
+                <div className='courses-list'>   
+                    <div className='course-row'>
+                        <p>Loading Staff</p>
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="courses-list">

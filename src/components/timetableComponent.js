@@ -5,7 +5,7 @@ import GenerateTimetablePopup from './popups/generateTimetablePopup';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-const TimetableComponent = () => {
+const TimetableComponent = ({ filters }) => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
@@ -15,7 +15,7 @@ const TimetableComponent = () => {
     const fetchTimetableData = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('Classes')
                 .select(`
                     id,
@@ -25,14 +25,27 @@ const TimetableComponent = () => {
                     location_id,
                     start_time,
                     duration_30mins,
-                    Subjects (code),
+                    Subjects (code, course_id, Courses(campus_id)),
                     Locations (name),
                     staff_id,
                     Staff (name)
                 `)
                 .order('start_time');
+    
+            if (filters.campusId) {
+                query = query.eq('Subjects.Courses.campus_id', filters.campusId);
+            }
+            if (filters.courseId) {
+                query = query.eq('Subjects.course_id', filters.courseId);
+            }
+    
+            const { data, error } = await query;
             if (error) throw error;
-            setClasses(data || []);
+            
+            // Additional filter to ensure only classes with valid subject codes are included
+            const filteredData = data.filter(classItem => classItem.Subjects && classItem.Subjects.code !== 'N/A');
+            
+            setClasses(filteredData || []);
         } catch (error) {
             console.error('Error fetching timetable data:', error);
         } finally {
@@ -40,10 +53,16 @@ const TimetableComponent = () => {
         }
     };
 
+    useEffect(() => {
+        fetchTimetableData();
+    }, [filters]);
+
     const generateAndFetchTimetable = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase.functions.invoke('generate-timetable');
+            const { data, error } = await supabase.functions.invoke('generate-timetable', {
+                body: JSON.stringify(filters)
+            });
             if (error) throw error;
             await fetchTimetableData();
         } catch (error) {
@@ -53,10 +72,6 @@ const TimetableComponent = () => {
         }
     };
 
-    useEffect(() => {
-        fetchTimetableData();
-    }, []);
-
     const handleConfirmGenerate = () => {
         generateAndFetchTimetable();
         setShowPopup(false);
@@ -65,6 +80,8 @@ const TimetableComponent = () => {
     const handleGenerateClick = () => {
         setShowPopup(true);
     };
+
+    const isGenerateDisabled = filters.campusId || filters.courseId;
 
     // Export as PDF
     const handleExportPDF = async () => {
@@ -82,11 +99,11 @@ const TimetableComponent = () => {
 
             try {
                 const canvas = await html2canvas(timetableClone, {
-                    scale: 2, // resolution
+                    scale: 2,
                     useCORS: true,
                     logging: false,
-                    windowWidth: timetableClone.offsetWidth, //  use the actual tt width
-                    windowHeight: timetableClone.scrollHeight, // and the height
+                    windowWidth: timetableClone.offsetWidth,
+                    windowHeight: timetableClone.scrollHeight,
                     onclone: (clonedDoc) => {
                         const clonedElement = clonedDoc.body.firstChild;
                         clonedElement.style.transform = 'scale(1)';
@@ -102,7 +119,7 @@ const TimetableComponent = () => {
                 const pdf = new jsPDF({
                     orientation: 'landscape',
                     unit: 'pt',
-                    format: [pdfWidth, pdfHeight] // Custom dimensions
+                    format: [pdfWidth, pdfHeight]
                 });
                 
                 const imgWidth = canvas.width;
@@ -110,7 +127,7 @@ const TimetableComponent = () => {
                 const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
                 
                 const imgX = (pdfWidth - imgWidth * ratio) / 2;
-                const imgY = (pdfHeight - imgHeight * ratio) / 2; // Center vertically
+                const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
                 pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
                 pdf.save('timetable.pdf');
@@ -122,6 +139,7 @@ const TimetableComponent = () => {
 
     const colorMap = {};
     const getClassColor = (subjectCode) => {
+        if (!subjectCode || subjectCode === 'N/A') return '#FFFFFF'; // White colour for invalid subjects
         if (!colorMap[subjectCode]) {
             const hue = subjectCode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 137.508;
             colorMap[subjectCode] = `hsl(${hue % 360}, 70%, 85%)`;
@@ -178,8 +196,8 @@ const TimetableComponent = () => {
             <div className="button-container">
                 <button
                     onClick={handleGenerateClick}
-                    disabled={isLoading}
-                    className="generate-button"
+                    disabled={isLoading || isGenerateDisabled}
+                    className={`generate-button ${isGenerateDisabled ? 'disabled' : ''}`}
                 >
                     {isLoading ? 'Loading...' : 'Generate New Timetable'}
                 </button>
@@ -194,7 +212,6 @@ const TimetableComponent = () => {
                     {showExportDropdown && (
                         <div className="export-dropdown-content">
                             <button onClick={handleExportPDF}>Export as PDF</button>
-                            {/* CSV export option removed */}
                         </div>
                     )}
                 </div>

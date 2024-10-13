@@ -242,3 +242,8 @@
   border-radius: 8px;
   padding: 1rem;
 }
+
+.apply-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -3,6 +3,7 @@ import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-reac
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import TimetableComponent from '../components/timetableComponent';
+import TimetableFilterComponent from '../components/timetableFilterComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -11,7 +12,8 @@ import '../styles/timetablePage.css';
 import VITLogo from '../assets/VIT_White.png';
 
 const AdminPage = () => {
-    const [activeTab, setActiveTab] = useState('courses');
+    const [activeTab, setActiveTab] = useState('home');
+    const [timetableFilters, setTimetableFilters] = useState({ campusId: null, courseId: null });
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -21,6 +23,10 @@ const AdminPage = () => {
         } else {
             navigate('/');
         }
+    };
+
+    const handleTimetableFilterChange = (filters) => {
+        setTimetableFilters(filters);
     };
 
     const renderContent = () => {
@@ -36,10 +42,31 @@ const AdminPage = () => {
             case 'classrooms':
                 return <ClassroomsContent />;
             case 'home':
-                return <TimetableComponent />;
+                return <TimetableComponent filters={timetableFilters} />;
             default:
                 return null;
         }
+    };
+
+    const renderSidebar = () => {
+        if (activeTab === 'home') {
+            return (
+                <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />
+            );
+        }
+        return (
+            <div className='filters-border'>
+                <div className="filters-title">FILTERS</div>
+                <hr className="filters-divider" />
+                <FilterSection label="Course Name" />
+                <FilterSection label="Course ID" />
+                <FilterSection label="Unit Name" />
+                <FilterSection label="Unit ID" />
+                <FilterSection label="Campus" />
+                <hr className="filters-divider" />
+                <button className="apply-button">Apply</button>
+            </div>
+        );
     };
 
     return (
@@ -92,17 +119,7 @@ const AdminPage = () => {
 
                     {/* Filters sidebar */}
                     <div className="filters-sidebar">
-                        <div className='filters-border'>
-                            <div className="filters-title">FILTERS</div>
-                            <hr className="filters-divider" />
-                            <FilterSection label="Course Name" />
-                            <FilterSection label="Course ID" />
-                            <FilterSection label="Unit Name" />
-                            <FilterSection label="Unit ID" />
-                            <FilterSection label="Campus" />
-                            <hr className="filters-divider" />
-                            <button className="apply-button">Apply</button>
-                        </div>
+                        {renderSidebar()}
                     </div>
                 </div>
             </div>
@@ -148,6 +165,5 @@ const ClassroomsContent = () => (
         <p>Classrooms functionality coming soon... d-(^_^)z</p>
     </div>
 );
-
 
 export default AdminPage;

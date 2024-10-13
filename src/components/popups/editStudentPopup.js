@@ -7,10 +7,10 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
     const [name, setName] = useState(student.name);
     const [email, setEmail] = useState(student.university_email);
     const [selectedCourse, setSelectedCourse] = useState(student.course_id);
-    const [studentId, setStudentId] = useState(student.student_id); 
+    const [studentId, setStudentId] = useState(student.student_id);
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]); 
+    const [selectedSubjects, setSelectedSubjects] = useState([]);
 
     // Add an event listener to handle "Escape" key press
     useEffect(() => {
@@ -27,11 +27,10 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
         };
     }, [onClose]);
 
-    // Fetch the courses and subjects from the database
+    // Fetch courses when the component mounts
     useEffect(() => {
-        const fetchCoursesAndSubjects = async () => {
-            // Fetch courses with campus names
-            const { data: coursesData, error: coursesError } = await supabase
+        const fetchCoursesAndCampuses = async () => {
+            const { data, error } = await supabase
                 .from('Courses')
                 .select(`
                     id,
@@ -40,24 +39,43 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                     Campuses ( name )
                 `);
 
-            if (coursesError) {
-                console.error('Error fetching courses:', coursesError);
+            if (error) {
+                console.error('Error fetching courses and campuses:', error);
             } else {
-                setCourses(coursesData);
+                setCourses(data || []);
             }
+        };
 
-            // Fetch all subjects
-            const { data: subjectsData, error: subjectsError } = await supabase
-                .from('Subjects')
-                .select('*');
+        fetchCoursesAndCampuses();
+    }, []);
 
-            if (subjectsError) {
-                console.error('Error fetching subjects:', subjectsError);
+    // Fetch subjects based on the selected course and course changes
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            if (selectedCourse) {
+                const { data, error } = await supabase
+                    .from('Subjects')
+                    .select('*')
+                    .eq('course_id', selectedCourse);
+
+                if (error) {
+                    console.error('Error fetching subjects:', error);
+                } else {
+                    setSubjects(data || []);
+                }
             } else {
-                setSubjects(subjectsData);
+                // If no course is selected, clear the subjects
+                setSubjects([]);
             }
+        };
 
-            // Fetch the subjects the student is already enrolled in
+        // Fetch subjects when the component mounts and when selectedCourse changes
+        fetchSubjects();
+    }, [selectedCourse]);
+
+    // Pre-fill the subjects the student is already enrolled in when the component mounts
+    useEffect(() => {
+        const fetchStudentSubjects = async () => {
             const { data: studentSubjectsData, error: studentSubjectsError } = await supabase
                 .from('StudentSubject')
                 .select('subject_id')
@@ -66,13 +84,13 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
             if (studentSubjectsError) {
                 console.error('Error fetching student subjects:', studentSubjectsError);
             } else {
-                // Pre-fill the multi-select with the subject IDs the student is currently enrolled in
                 const prefilledSubjects = studentSubjectsData.map((ss) => ss.subject_id);
                 setSelectedSubjects(prefilledSubjects);
             }
         };
 
-        fetchCoursesAndSubjects();
+        // Fetch the student's currently enrolled subjects
+        fetchStudentSubjects();
     }, [student.id]);
 
     const handleSubmit = async (e) => {
@@ -132,6 +150,12 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
         }
     };
 
+    // Handle course change and clear the subjects
+    const handleCourseChange = (e) => {
+        setSelectedCourse(e.target.value);
+        setSelectedSubjects([]); // Clear selected subjects when course changes
+    };
+
     return (
         <div className="popup-container">
             <div className="popup">
@@ -177,7 +201,7 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
                         Course:
                         <select
                             value={selectedCourse}
-                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            onChange={handleCourseChange} // Handle course change
                             required
                         >
                             <option value="" disabled hidden className="placeholder-option">Select a Course</option>
@@ -220,4 +244,3 @@ const EditStudentPopup = ({ student, onClose, onSubmit }) => {
 };
 
 export default EditStudentPopup;
-

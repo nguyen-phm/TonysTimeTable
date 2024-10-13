@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { MultiSelect } from 'primereact/multiselect'; // Import PrimeReact MultiSelect
 import { supabase } from '../supabaseClient';
 import '../../styles/popup.css';
+import 'primereact/resources/themes/saga-blue/theme.css'; // PrimeReact theme
+import 'primereact/resources/primereact.min.css'; // PrimeReact core CSS
 
 const AddClassPopup = ({ onClose, onSubmit }) => {
     const [name, setName] = useState('');
     const [capacity, setCapacity] = useState('');
-    const [classType, setClassType] = useState('');
+    const [selectedClassTypes, setSelectedClassTypes] = useState([]); // Multi-select state for class types
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState('');
+
+    // Define available class types
+    const classTypeOptions = [
+        { label: 'Tutorial', value: 'Tutorial' },
+        { label: 'Practical', value: 'Practical' },
+        { label: 'Lecture', value: 'Lecture' },
+    ];
 
     // Fetch campuses for campus selection
     useEffect(() => {
@@ -19,7 +29,7 @@ const AddClassPopup = ({ onClose, onSubmit }) => {
             if (error) {
                 console.error('Error fetching campuses: ', error);
             } else {
-                setCampuses(data); // Store fetched campuses
+                setCampuses(data); 
             }
         };
 
@@ -29,17 +39,17 @@ const AddClassPopup = ({ onClose, onSubmit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (name.trim() !== '' && capacity.trim() !== '' && classType.trim() !== '' && selectedCampus.trim() !== '') {
+        if (name.trim() !== '' && capacity.trim() !== '' && selectedClassTypes.length > 0 && selectedCampus.trim() !== '') {
             try {
                 const { data, error } = await supabase
-                    .from('Locations') // Insert into Locations table
-                    .insert([{ name, capacity, class_type: classType, campus_id: selectedCampus }])
+                    .from('Locations') 
+                    .insert([{ name, capacity, class_types: selectedClassTypes, campus_id: selectedCampus }]) // Insert class_types array
                     .select();
 
                 if (error) {
                     console.error('Error adding classroom:', error);
                 } else {
-                    onSubmit(data[0]); // Send the new classroom data to ClassComponent
+                    onSubmit(data[0]); 
                 }
             } catch (error) {
                 console.error('Error adding classroom:', error.message);
@@ -76,13 +86,14 @@ const AddClassPopup = ({ onClose, onSubmit }) => {
                     </label>
 
                     <label>
-                        Class Type:
-                        <input
-                            type="text"
-                            value={classType}
-                            onChange={(e) => setClassType(e.target.value)}
-                            required
-                            placeholder="Enter Class Type"
+                        Class Types:
+                        <MultiSelect
+                            value={selectedClassTypes}
+                            options={classTypeOptions} // Use the predefined options
+                            onChange={(e) => setSelectedClassTypes(e.value)} // Update state when options are selected
+                            placeholder="Select Class Types"
+                            display="chip"
+                            className="multiselect-custom"
                         />
                     </label>
 
@@ -115,3 +126,4 @@ const AddClassPopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddClassPopup;
+

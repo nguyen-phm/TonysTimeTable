@@ -17,7 +17,14 @@ const ClassComponent = () => {
                 setIsLoading(true);
                 const { data, error } = await supabase
                     .from('Locations') // Fetch from the Locations table
-                    .select('*');
+                    .select(`
+                        id,
+                        name,
+                        capacity,
+                        campus_id,
+                        class_types,
+                        Campuses ( name )
+                    `); // Join with Campuses table to get the campus name
 
                 if (error) {
                     console.error('Error fetching classrooms:', error);
@@ -63,10 +70,9 @@ const ClassComponent = () => {
     };
 
     return (
-
         <div className="admin-section">
             {isLoading ? (
-                <div className='courses-list'>   
+                <div className='courses-list'>
                     <div className='course-row'>
                         <p>Loading Classrooms</p>
                     </div>
@@ -79,8 +85,11 @@ const ClassComponent = () => {
                                 <div className="course-info">
                                     <div className="course-name">{classroom.name}</div>
                                     <div className='course-details'>
-                                        <div className="course-code">Type: {classroom.class_type}</div>
-                                        <div className="course-code">Capacity: {classroom.capacity}</div>  
+                                        <div className="course-code">
+                                            {classroom.class_types.join(', ')}
+                                        </div>
+                                        <div className="course-code">{classroom.Campuses?.name}</div>
+                                        <div className="course-code">Capacity: {classroom.capacity}</div>
                                     </div>
                                 </div>
                                 <div className="course-actions">

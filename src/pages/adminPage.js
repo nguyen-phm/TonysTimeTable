@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Home, BookOpen, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
+import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
+import CampusComponent from '../components/campusComponent';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import ClassComponent from '../components/classComponent';
@@ -27,6 +28,8 @@ const AdminPage = () => {
 
     const renderContent = () => {
         switch (activeTab) {
+            case 'campuses':
+                return <CampusComponent />;
             case 'account':
                 return <AccountContent />;
             case 'courses':
@@ -66,8 +69,9 @@ const AdminPage = () => {
                     {/* Main navigation links */}
                     <nav className="flex-grow pb-5 pt-2">
                         <div className="nav-section">
-                            <SidebarLink Icon={BookOpen} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
-                            <SidebarLink Icon={BookOpen} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
+                            <SidebarLink Icon={School} label="Campuses" onClick={() => setActiveTab('campuses')} active={activeTab === 'campuses'} />
+                            <SidebarLink Icon={BookCopy} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
+                            <SidebarLink Icon={BookOpenText} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
                             <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import AddCoursePopup from './popups/addCoursePopup';
 import AddSubjectPopup from './popups/addSubjectPopup';
 import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
 
-const CourseComponent = () => {
+const SubjectComponent = () => {
     const [courses, setCourses] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -168,4 +167,4 @@ const CourseComponent = () => {
     );
 };
 
-export default CourseComponent;
+export default SubjectComponent;

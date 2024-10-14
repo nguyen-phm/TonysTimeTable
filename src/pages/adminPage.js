@@ -118,7 +118,7 @@ const AdminPage = () => {
             </div>
             
             {/* Main content area */}
-            <div className="flex-grow flex flex-col">
+            <div className="main-content">
                 <div className='top-nav-wrapper'>
                     <div className="top-nav">
                         <h1 className="top-nav-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>

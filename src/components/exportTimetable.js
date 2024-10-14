@@ -2,36 +2,21 @@ import { supabase } from './supabaseClient';
 import ExcelJS from 'exceljs';
 
 // Export the timetable for a given course as an Excel file
-const exportTimetable = async (courseId) => {
-    // Attempt to fetch course
-    const { data: course, error } = await supabase
-        .from('Courses')
-        .select(`
-            id, name,
-            Campuses(venue_name)
-        `)
-        .eq('id', courseId)
-        .limit(1)
-        .single();
-    if (error) {
-        throw new Error('Error fetching course: ', error.message);
+const exportTimetable = async (course) => {
+    try {
+        const buffer = await generateXLSX(course);
+         // Force download
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${course.name}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+    } catch (error) {
+       console.error('Error exporting timetable: ' + error.message);
     }
-
-    // Attempt to export timetable
-    const buffer = await generateXLSX(course);
-    if (!buffer) {
-        throw new Error('Failed to export timetable');
-    }
-    
-    // Force download
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${course.name}.xlsx`);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
 }
 
 // Generate the Excel file and write it to a buffer
@@ -145,14 +130,17 @@ const fetchClassData = async(course) => {
     // Format class data
     const classData = Array.from(Array(classes.length), () => new Array(6))
     for (let i = 0; i < classes.length; i++) {
+        if (!classes[i].start_time || !classes[i].Locations) {
+            throw new Error('Timetable has yet to be generated or needs to be regenerated');
+        }
         classData[i][0] = timeToDayString(classes[i].start_time);
         classData[i][1] = `${timeToTimeString(classes[i].start_time)} to ${timeToTimeString(classes[i].start_time + classes[i].duration_30mins)}`; 
         classData[i][2] = `${classes[i].Subjects.code} - ${classes[i].Subjects.name} (${classes[i].class_type})`;
         classData[i][3] = classes[i].Locations.name;
-        classData[i][4] = classes[i].Staff.name;
+        classData[i][4] = classes[i].Staff?.name ?? 'Unassigned';
         classData[i][5] = classes[i].is_online ? 'Online' : 'Face to Face';
     };
-    
+
     return classData;
 }
 

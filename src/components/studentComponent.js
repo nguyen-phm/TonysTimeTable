@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import AddStudentPopup from './popups/addStudentPopup'; 
 import EditStudentPopup from './popups/editStudentPopup'; 
+import ErrorPopup from './popups/errorPopup'; 
 import { supabase } from './supabaseClient';
+import {
+    handleFileUpload
+} from './csvFileHandle'; 
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
 
@@ -10,15 +14,30 @@ const StudentComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showStudentPopup, setShowStudentPopup] = useState(false);
     const [showEditStudentPopup, setShowEditStudentPopup] = useState(false);
-    const [selectedStudent, setSelectedStudent] = useState(null); 
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [showErrorPopup, setShowErrorPopup] = useState(false); 
+    const [errorMessages, setErrorMessages] = useState([]); 
 
     useEffect(() => {
         const fetchStudents = async () => {
             try {
                 setIsLoading(true);
                 const { data, error } = await supabase
-                    .from('Students') 
-                    .select('*');
+                    .from('Students')
+                    .select(`
+                        id,
+                        student_id,
+                        name,
+                        university_email,
+                        course_id,
+                        Courses (
+                            name,
+                            campus_id,
+                            Campuses (
+                                name
+                            )
+                        )
+                    `);
 
                 if (error) {
                     console.error('Error fetching students:', error);
@@ -34,18 +53,40 @@ const StudentComponent = () => {
     }, []);
 
     const addStudent = (studentData) => {
-        setStudents([...students, studentData]); 
+        setStudents(prevStudents => [...prevStudents, studentData]);
+    };
+
+    const updateStudentList = (updatedStudent) => {
+        setStudents((prevStudents) => 
+            prevStudents.map((student) => 
+                student.id === updatedStudent.id ? updatedStudent : student
+            )
+        );
+    };
+
+    const handleUploadButtonClick = () => {
+        document.getElementById('file-input').click();
     };
 
     const handleDeleteStudent = async (studentId) => {
         try {
-            const { error } = await supabase
+            const { error: joinTableError } = await supabase
+                .from('StudentSubject') 
+                .delete()
+                .eq('student_id', studentId);   
+    
+            if (joinTableError) {
+                console.error('Error deleting from join table:', joinTableError);
+                return;
+            }
+    
+            const { error: studentError } = await supabase
                 .from('Students')
                 .delete()
-                .eq('id', studentId); 
-
-            if (error) {
-                console.error('Error deleting student:', error);
+                .eq('id', studentId);
+    
+            if (studentError) {
+                console.error('Error deleting student:', studentError);
             } else {
                 setStudents(students.filter((student) => student.id !== studentId));
             }
@@ -53,21 +94,26 @@ const StudentComponent = () => {
             console.error('Error deleting student:', error);
         }
     };
-
+    
     const handleEditStudent = (student) => {
         setSelectedStudent(student); 
         setShowEditStudentPopup(true); 
     };
 
-    const updateStudent = (updatedStudent) => {
-        setStudents(students.map((student) => (student.id === updatedStudent.id ? updatedStudent : student)));
+    const closeErrorPopup = () => {
+        setShowErrorPopup(false);
+        setErrorMessages([]); 
     };
 
     return (
         <div className="admin-section">
 
             {isLoading ? (
-                <p>Loading students...</p>
+                <div className='courses-list'>   
+                    <div className='course-row'>
+                        <p>Loading Students</p>
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="courses-list">
@@ -75,7 +121,11 @@ const StudentComponent = () => {
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{student.name}</div>
-                                    <div className="course-code">{student.university_email}</div>
+                                    <div className='course-details'>
+                                        <div className="course-code">{student.student_id}</div>
+                                        <div className="course-code">{student.Courses?.name || 'No Course'}</div>
+                                        <div className="course-code">{student.Courses?.Campuses?.name || 'No Campus'}</div>
+                                    </div>
                                 </div>
                                 <div className="student-actions">
                                     <button className="more-options" onClick={() => handleEditStudent(student)}>Edit</button>
@@ -93,6 +143,18 @@ const StudentComponent = () => {
                 Add Student
             </button>
 
+            <button className='more-options' type="button" onClick={handleUploadButtonClick}>
+                Upload CSV
+            </button>
+
+            <input
+                id="file-input"
+                type="file"
+                accept=".csv"
+                onChange={(event) => handleFileUpload(event, setErrorMessages, setShowErrorPopup)}
+                style={{ display: 'none' }} 
+            />
+
             {showStudentPopup && (
                 <AddStudentPopup
                     onClose={() => setShowStudentPopup(false)}
@@ -104,7 +166,14 @@ const StudentComponent = () => {
                 <EditStudentPopup
                     student={selectedStudent}
                     onClose={() => setShowEditStudentPopup(false)}
-                    onSubmit={updateStudent}
+                    onSubmit={updateStudentList}
+                />
+            )}
+
+            {showErrorPopup && (
+                <ErrorPopup
+                    errors={errorMessages}
+                    onClose={closeErrorPopup}
                 />
             )}
         </div>
@@ -112,3 +181,4 @@ const StudentComponent = () => {
 };
 
 export default StudentComponent;
+

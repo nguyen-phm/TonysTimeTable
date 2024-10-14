@@ -3,7 +3,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* General layout */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .h-screen { height: 100vh; }
@@ -113,128 +112,6 @@
   font-size: 1.75rem;
   font-weight: 400;
   color: #272727;
-}
-
-.filters-sidebar {
-  background: #f3f4f6;
-  width: 18rem; 
-  padding: 1.5rem 0; 
-  padding-right: 1.5rem;
-}
-
-.filters-border {
-  background-color: white;
-  padding: 1.5rem;
-  border: 1px solid #d1d6db;
-  border-radius: 5px;
-}
-
-.filters-title {
-  font-size: 1.5rem; 
-  font-weight: 400; 
-}
-
-.filter-section {
-  margin-bottom: 1.25rem;
-}
-
-.filter-label {
-  display: block;
-  margin-bottom: 0.25rem; 
-  font-size: 0.875rem; 
-  font-weight: 500; 
-  color: #4A5568;
-}
-
-.filters-divider {
-  border: none; 
-  border-top: 1px solid #797979; 
-  margin-top: 20px;
-  margin-bottom: 20px; 
-  width: calc(100% + 3rem); 
-  transform: translateX(-1.5rem); 
-}
-
-.filter-input {
-  width: 100%;
-  height: 35px;
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.375rem;
-  background-color: white;
-}
-
-.filter-section ::placeholder{
-  font-size: 0.95rem;
-}
-
-.apply-button {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #E87070;
-  color: white;
-  border-radius: 0.375rem;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.apply-button:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Course list */
-.courses-list {
-  background-color: white;
-  border-radius: 3px;
-  overflow: hidden;
-  border: 1px solid #d1d6db;
-}
-
-.course-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #d1d6db;
-}
-
-.course-row:last-child {
-  border-bottom: none;
-}
-
-.course-info {
-  flex-grow: 1;
-}
-
-.course-title {
-  font-weight: 500;
-  color: #1a202c;
-}
-
-.course-code {
-  color: #718096;
-  font-size: 0.875rem;
-}
-
-.course-details {
-  display: flex;
-  gap: 2rem;
-  color: #4A5568;
-  margin-right: 1rem;
-}
-
-.more-options {
-  background: none;
-  border: none;
-  color: #718096;
-  cursor: pointer;
-  padding: 0.5rem;
-}
-
-.more-options:hover {
-  background-color: #f7fafc;
-  border-radius: 4px;
 }
 
 .account-box {

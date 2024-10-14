@@ -1,126 +1,127 @@
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
-import AddSubjectPopup from './popups/addSubjectPopup';
-import EditSubjectPopup from './popups/editSubjectPopup'; // Import EditSubjectPopup
+import EditCoursePopup from './popups/editCoursePopup';
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
-import '../styles/courseComponent.css';
 
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);
-    const [subjects, setSubjects] = useState([]);
+    const [campuses, setCampuses] = useState([]); // Store campus data
     const [isLoading, setIsLoading] = useState(true);
-    const [showCoursePopup, setShowCoursePopup] = useState(false);
-    const [showSubjectPopup, setShowSubjectPopup] = useState(false);
-    const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false); // For editing subjects
-    const [selectedSubject, setSelectedSubject] = useState(null); // Store the selected subject for editing
+    const [showAddCoursePopup, setShowAddCoursePopup] = useState(false);
+    const [showEditCoursePopup, setShowEditCoursePopup] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(null);
 
+    // Fetch courses and campuses from Supabase when the component mounts
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const { data, error } = await supabase
+
+                // Fetch courses
+                const { data: coursesData, error: coursesError } = await supabase
                     .from('Courses')
                     .select('*');
 
-                if (error) {
-                    console.error('Error fetching courses:', error);
-                } else {
-                    setCourses(data);
+                if (coursesError) {
+                    console.error('Error fetching courses:', coursesError);
                 }
+
+                // Fetch campuses
+                const { data: campusesData, error: campusesError } = await supabase
+                    .from('Campuses')
+                    .select('*');
+
+                if (campusesError) {
+                    console.error('Error fetching campuses:', campusesError);
+                }
+
+                // Store the courses and campuses data
+                setCourses(coursesData || []);
+                setCampuses(campusesData || []);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        const fetchSubjects = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('Subjects')
-                    .select('*');
-
-                if (error) {
-                    console.error('Error fetching subjects:', error);
-                } else {
-                    setSubjects(data);
-                }
-            } catch (error) {
-                console.error('Error fetching subjects:', error);
-            }
-        };
-
-        fetchCourses();
-        fetchSubjects();
+        fetchData();
     }, []);
 
-    const addCourse = (courseName) => {
-        setCourses([...courses, courseName]);
+    const addCourse = (newCourse) => {
+        setCourses([...courses, newCourse]); // Add new course to the list
     };
 
-    const addSubject = async (subjectData) => {
+    const handleDeleteCourse = async (courseId) => {
         try {
-            const { data, error } = await supabase
-                .from('Subjects')
-                .insert([subjectData])
-                .select();
-
-            if (error) {
-                console.error('Error adding subject:', error);
-            } else if (data && data.length > 0) {
-                setSubjects([...subjects, data[0]]);
-            }
-        } catch (error) {
-            console.error('Error adding subject:', error);
-        }
-    };
-
-    const handleDeleteSubject = async (subjectId) => {
-        try {
-            const { error } = await supabase
+            // Step 1: Remove any subjects associated with this course
+            const { error: subjectsError } = await supabase
                 .from('Subjects')
                 .delete()
-                .eq('id', subjectId);
+                .eq('course_id', courseId); // Delete subjects where course_id matches
 
-            if (error) {
-                console.error('Error deleting subject:', error);
+            if (subjectsError) {
+                console.error('Error deleting subjects related to course:', subjectsError);
+                return;
+            }
+
+            // Step 2: Delete the course record
+            const { error: deleteError } = await supabase
+                .from('Courses')
+                .delete()
+                .eq('id', courseId);
+
+            if (deleteError) {
+                console.error('Error deleting course:', deleteError);
             } else {
-                setSubjects(subjects.filter((subject) => subject.id !== subjectId));
+                setCourses(courses.filter((course) => course.id !== courseId)); // Remove course from the list
             }
         } catch (error) {
-            console.error('Error deleting subject:', error);
+            console.error('Error deleting course:', error);
         }
     };
 
-    const handleEditSubject = (subject) => {
-        setSelectedSubject(subject); // Store the selected subject for editing
-        setShowEditSubjectPopup(true); // Show the edit popup
+    const handleEditCourse = (course) => {
+        setSelectedCourse(course); // Store the selected course
+        setShowEditCoursePopup(true); // Show the edit popup
     };
 
-    const updateSubject = (updatedSubject) => {
-        setSubjects(subjects.map((subject) => (subject.id === updatedSubject.id ? updatedSubject : subject)));
+    const updateCourse = (updatedCourse) => {
+        setCourses(courses.map((course) => (course.id === updatedCourse.id ? updatedCourse : course)));
+    };
+
+    // Find campus name by campus_id
+    const getCampusName = (campusId) => {
+        const campus = campuses.find((campus) => campus.id === campusId);
+        return campus ? campus.name : 'Unknown Campus'; // Return the campus name or 'Unknown'
     };
 
     return (
         <div className="admin-section">
-
             {isLoading ? (
-                <p>Loading courses and subjects...</p>
+                <div className='courses-list'>   
+                    <div className='course-row'>
+                        <p>Loading Courses</p>
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="courses-list">
-                        {subjects.map((subject, index) => (
+                        {courses.map((course, index) => (
                             <div key={index} className="course-row">
                                 <div className="course-info">
-                                    <div className="course-name">{subject.name}</div>
-                                    <div className="course-code">{subject.code}</div>
+                                    <div className="course-name">{course.name}</div>
+                                    <div className='course-details'>    
+                                        <div className="course-code">{course.course_code || 'No Code'}</div>
+                                        <div className="course-code">{getCampusName(course.campus_id)}</div> 
+                                    </div>
                                 </div>
-                                <div className="course-details">
-                                    <div className="delivery-mode">Year: {subject.year}</div>
-                                    <div className="campus">Semester: {subject.semester}</div>
-                                </div>
-                                <div className="subject-actions">
-                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>
-                                    <button className="more-options" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
+                                <div className="course-actions">
+                                    <button className="more-options" onClick={() => handleEditCourse(course)}>
+                                        Edit
+                                    </button>
+                                    <button className="more-options" onClick={() => handleDeleteCourse(course.id)}>
+                                        Remove
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -130,33 +131,22 @@ const CourseComponent = () => {
 
             <br />
 
-            <button className='more-options' type="more" onClick={() => setShowCoursePopup(true)}>
+            <button className="more-options" type="button" onClick={() => setShowAddCoursePopup(true)}>
                 Add Course
             </button>
 
-            {showCoursePopup && (
+            {showAddCoursePopup && (
                 <AddCoursePopup
-                    onClose={() => setShowCoursePopup(false)}
+                    onClose={() => setShowAddCoursePopup(false)}
                     onSubmit={addCourse}
                 />
             )}
 
-            <button className='more-options' type="button" onClick={() => setShowSubjectPopup(true)}>
-                Add Subject
-            </button>
-
-            {showSubjectPopup && (
-                <AddSubjectPopup
-                    onClose={() => setShowSubjectPopup(false)}
-                    onSubmit={addSubject}
-                />
-            )}
-
-            {showEditSubjectPopup && selectedSubject && (
-                <EditSubjectPopup
-                    subject={selectedSubject}
-                    onClose={() => setShowEditSubjectPopup(false)}
-                    onSubmit={updateSubject}
+            {showEditCoursePopup && selectedCourse && (
+                <EditCoursePopup
+                    course={selectedCourse}
+                    onClose={() => setShowEditCoursePopup(false)}
+                    onSubmit={updateCourse}
                 />
             )}
         </div>

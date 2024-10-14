@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Home, BookOpen, User, Presentation, Users, Settings } from 'lucide-react';
+import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
+import CampusComponent from '../components/campusComponent';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import TimetableComponent from '../components/timetableComponent';
 import TimetableFilterComponent from '../components/timetableFilterComponent';
+import ClassComponent from '../components/classComponent';
+import StaffComponent from '../components/staffComponent';
+import SubjectComponent from '../components/subjectComponent';
+import SubjectClassComponent from '../components/subjectClassComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -31,16 +36,22 @@ const AdminPage = () => {
 
     const renderContent = () => {
         switch (activeTab) {
+            case 'campuses':
+                return <CampusComponent />;
             case 'account':
                 return <AccountContent />;
             case 'courses':
                 return <CourseComponent />;
+            case 'units':
+                return <SubjectComponent />;
+            case 'subjectclasses':
+                return <SubjectClassComponent />;
             case 'students':
                 return <StudentComponent />;
             case 'staff':
-                return <StaffContent />;
+                return <StaffComponent />;
             case 'classrooms':
-                return <ClassroomsContent />;
+                return <ClassComponent />;
             case 'home':
                 return <TimetableComponent filters={timetableFilters} />;
             default:
@@ -87,8 +98,11 @@ const AdminPage = () => {
                     {/* Main navigation links */}
                     <nav className="flex-grow pb-5 pt-2">
                         <div className="nav-section">
-                            <SidebarLink Icon={BookOpen} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
+                            <SidebarLink Icon={School} label="Campuses" onClick={() => setActiveTab('campuses')} active={activeTab === 'campuses'} />
+                            <SidebarLink Icon={BookCopy} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
+                            <SidebarLink Icon={BookOpenText} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
+                            <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>

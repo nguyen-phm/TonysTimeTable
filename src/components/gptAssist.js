@@ -5,6 +5,7 @@ const GPTAssist = () => {
   const [query, setQuery] = useState(''); // State to store user input query
   const [conversation, setConversation] = useState([]); // State to store the conversation
   const [suggestedChanges, setSuggestedChanges] = useState(null); // Store suggested changes for approval
+  const [file, setFile] = useState(null); // Store the uploaded file
   const [fileName, setFileName] = useState(''); // Store the uploaded file name
   const [loading, setLoading] = useState(false); // Track loading state
   const [error, setError] = useState(null); // Track error messages
@@ -53,27 +54,29 @@ const GPTAssist = () => {
   };
 
   // Function to handle form submission with the typed query
-  const handleSubmitQuery = () => {
-    if (!query) {
+  const handleSubmitQuery = async () => {
+    if (!query && !file) {
       setError("Please enter a query or upload a file.");
       return;
     }
     setLoading(true);
     setError(null); // Clear previous errors
-    fetchSuggestions(query); // Fetch GPT suggestions based on the typed query
+    
+    if (file) {
+      // Handle file submission if a file is uploaded
+      await handleFileSubmission(file);
+    } else {
+      // Handle text-based query submission
+      fetchSuggestions(query);
+    }
+    
     setQuery(''); // Clear the input field after submission
+    setFile(null); // Clear the file after submission
+    setFileName(''); // Clear the file name
   };
 
-  // Function to handle MP3 and TXT file upload
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-  
-    setFileName(file.name); // Store the file name
-    setLoading(true); // Set loading state
-    setError(null); // Clear previous errors
-  
-    // Check file type for TXT or MP3
+  // Function to handle MP3 and TXT file submission to the backend
+  const handleFileSubmission = async (file) => {
     if (file.type === "text/plain") {
       // Handle TXT file
       const reader = new FileReader();
@@ -82,12 +85,11 @@ const GPTAssist = () => {
         fetchSuggestions(fileContent); // Send the file content as the query
       };
       reader.readAsText(file); // Read the file content as text
-      setLoading(false); // Reset loading state after processing the text
     } else if (file.type === "audio/mpeg") {
       // Handle MP3 file
       const formData = new FormData();
       formData.append('file', file); // Append the MP3 file to the form data
-  
+
       try {
         // Call the edge function to transcribe the MP3 file
         const response = await fetch("https://epzbzgpckybkcuujwiac.supabase.co/functions/v1/speechToText", {
@@ -97,13 +99,12 @@ const GPTAssist = () => {
           },
           body: formData, // Send the MP3 file as form data
         });
-  
+
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
-  
-        // Check if the response is in JSON or plain text format
+
         const contentType = response.headers.get("Content-Type");
         let data;
         if (contentType && contentType.includes("application/json")) {
@@ -111,26 +112,35 @@ const GPTAssist = () => {
         } else {
           data = await response.text(); // If it's plain text, read it as text
         }
-  
-        console.log("Received transcription:", data);
-  
-        // Set the transcribed text as the query and call GPT for suggestions
+
         const transcribedText = typeof data === "string" ? data : data.transcribedText;
         fetchSuggestions(transcribedText); // Fetch GPT suggestions based on the transcribed text
-  
+
       } catch (err) {
         console.error("Error processing MP3 file:", err);
         setError("Error processing MP3 file");
-      } finally {
-        setLoading(false);
       }
     } else {
       setError("Unsupported file type. Please upload a .txt or .mp3 file.");
-      setLoading(false);
+    }
+    setLoading(false); // Reset loading state after processing the file
+  };
+
+  // Handle file upload and store it in state
+  const handleFileUpload = (e) => {
+    const uploadedFile = e.target.files[0];
+    if (!uploadedFile) return;
+
+    setFile(uploadedFile); // Store the file in state
+    setFileName(uploadedFile.name); // Store the file name for display
+  };
+
+  // Handle "Enter" key submission
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmitQuery();
     }
   };
-  
-
   // Function to handle approving the suggested changes
   const handleApprove = async () => {
     try {
@@ -156,7 +166,6 @@ const GPTAssist = () => {
     setConversation((prev) => [...prev, { type: "system", text: "Changes have been rejected." }]);
     setSuggestedChanges(null); // Clear the suggestions after rejection
   };
-
   return (
     <div className="chat-container">
       {/* Chatbox container */}
@@ -195,6 +204,7 @@ const GPTAssist = () => {
           type="text" 
           value={query} 
           onChange={(e) => setQuery(e.target.value)} 
+          onKeyPress={handleKeyPress} // Listen for "Enter" key press
           placeholder="Ask GPT something..." 
           className="query-input"
         />

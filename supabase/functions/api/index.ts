@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.16.0?target=deno";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const OPENAI_WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions";
 // CORS headers configuration
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // Replace "*" with your frontend domain in production
@@ -61,7 +60,7 @@ serve(async (req) => {
           {
             role: "system",
             content: `You are an expert admin assistant. When receive query, first identify admin ask for information in database or ask you for help with changes or create instance in database.
-            If the admin asks for information from the database, only reply with a paragraph of description that starts with "Required Information:". 
+            If the admin asks for information from the database, only reply with a paragraph of description that starts with "Required Information:". Make sure to list out every information admin ask for. 
             If the admin asks for help with changes or optimizations, 
             provide two parts in the output: JSON format of changes made based on the specific table or multiple tables they 
             asked for in the database (always start with the id, then other attributes), followed by a description of the changes made. 

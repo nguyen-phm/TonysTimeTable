@@ -4,6 +4,7 @@ import '../styles/timetablePage.css';
 import GenerateTimetablePopup from './popups/generateTimetablePopup';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import Papa from 'papaparse';
 
 const TimetableComponent = ({ filters }) => {
     const [classes, setClasses] = useState([]);
@@ -25,7 +26,7 @@ const TimetableComponent = ({ filters }) => {
                     location_id,
                     start_time,
                     duration_30mins,
-                    Subjects (code, course_id, Courses(campus_id)),
+                    Subjects (code, course_id, Courses(campus_id, name)),
                     Locations (name),
                     staff_id,
                     Staff (name)
@@ -42,9 +43,7 @@ const TimetableComponent = ({ filters }) => {
             const { data, error } = await query;
             if (error) throw error;
             
-            // Additional filter to ensure only classes with valid subject codes are included
             const filteredData = data.filter(classItem => classItem.Subjects && classItem.Subjects.code !== 'N/A');
-            
             setClasses(filteredData || []);
         } catch (error) {
             console.error('Error fetching timetable data:', error);
@@ -90,11 +89,10 @@ const TimetableComponent = ({ filters }) => {
             document.body.appendChild(timetableClone);
             timetableClone.classList.add('pdf-export');
 
-            // Force recalculation of class slot heights
             const classSlots = timetableClone.getElementsByClassName('class-slot');
             Array.from(classSlots).forEach(slot => {
                 const duration = parseInt(slot.style.height);
-                slot.style.height = `${Math.max(duration, 60)}px`; // Minimum 60px height
+                slot.style.height = `${Math.max(duration, 60)}px`;
             });
 
             try {
@@ -112,20 +110,19 @@ const TimetableComponent = ({ filters }) => {
                 });
 
                 const imgData = canvas.toDataURL('image/png');
-                
                 const pdfWidth = timetableClone.offsetWidth * 0.75;
                 const pdfHeight = timetableClone.scrollHeight * 0.75;
-                
+
                 const pdf = new jsPDF({
                     orientation: 'landscape',
                     unit: 'pt',
                     format: [pdfWidth, pdfHeight]
                 });
-                
+
                 const imgWidth = canvas.width;
                 const imgHeight = canvas.height;
                 const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-                
+
                 const imgX = (pdfWidth - imgWidth * ratio) / 2;
                 const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
@@ -137,9 +134,32 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
+    // Export as CSV
+    const handleExportCSV = () => {
+        const csvData = classes.map(classItem => ({
+            'Student ID': '', // Optional field
+            'Student Name': '', // Optional field
+            'University Email': '', // Optional field
+            'Course Name': classItem.Subjects?.Courses?.name || 'N/A',
+            'Campus': classItem.Subjects?.Courses?.campus_id || 'N/A',
+            [classItem.Subjects?.code]: 'ENRL', // Enrolled
+        }));
+
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'timetable.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const colorMap = {};
     const getClassColor = (subjectCode) => {
-        if (!subjectCode || subjectCode === 'N/A') return '#FFFFFF'; // White colour for invalid subjects
+        if (!subjectCode || subjectCode === 'N/A') return '#FFFFFF';
         if (!colorMap[subjectCode]) {
             const hue = subjectCode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 137.508;
             colorMap[subjectCode] = `hsl(${hue % 360}, 70%, 85%)`;
@@ -149,7 +169,6 @@ const TimetableComponent = ({ filters }) => {
 
     const renderTimeSlot = (halfHourIndex, dayIndex) => {
         const dbTime = dayIndex * 48 + halfHourIndex + 16;
-
         const classesInSlot = classes.filter(c => c.start_time === dbTime);
         if (classesInSlot.length === 0) return null;
 
@@ -212,6 +231,7 @@ const TimetableComponent = ({ filters }) => {
                     {showExportDropdown && (
                         <div className="export-dropdown-content">
                             <button onClick={handleExportPDF}>Export as PDF</button>
+                            <button onClick={handleExportCSV}>Export as CSV</button>
                         </div>
                     )}
                 </div>

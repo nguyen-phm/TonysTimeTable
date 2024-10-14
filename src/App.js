@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import LoginPage from './pages/loginPage';
 import SignupPage from './pages/signupPage';
-import TimetablePage from './pages/timetablePage';
+import './styles/timetablePage.css';
 import ForgotPasswordPage from './pages/forgotPasswordPage'
 import ProtectedRoute from './components/protectedRoute';
 import RecoveryPage from './pages/recoveryPage';
@@ -20,19 +20,11 @@ function App() {
           
           //MFA
           <Route path="/mfa" element={<MFAComponent />} />
-
-          <Route
-            path="/admin"
-            element={
-              <AdminPage />
-            }
-          />
-
           <Route 
-            path="/timetable" 
+            path="/admin" 
             element={
               <ProtectedRoute>
-                <TimetablePage />
+                <AdminPage />
               </ProtectedRoute>
             } 
           />

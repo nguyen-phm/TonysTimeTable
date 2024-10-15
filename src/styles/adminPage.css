@@ -131,3 +131,23 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Generate Button */
+.generate-button {
+  margin-bottom: 20px;
+  padding: 0.5rem 2.5rem;
+  background-color: #E87070;
+  color: white;
+  border-radius: 0.375rem;
+  text-align: center;
+  
+}
+
+.generate-button:hover {
+  background-color: #e6a9a9;
+}
+
+.generate-button:disabled {
+  background-color: #f1d5d5;
+  cursor: not-allowed;
+}

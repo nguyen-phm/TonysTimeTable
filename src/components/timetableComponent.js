@@ -183,7 +183,7 @@ const TimetableComponent = ({ filters }) => {
                     key={index}
                     className={`class-slot ${classItem.is_online ? 'online-class' : ''}`}
                     style={{
-                        height: `${classItem.duration_30mins * 25 - 3 * classItem.duration_30mins}px`,
+                        height: `${classItem.duration_30mins * 29.2 -6}px`, // Height for class slots
                         backgroundColor,
                     }}
                 >
@@ -212,38 +212,13 @@ const TimetableComponent = ({ filters }) => {
 
     return (
         <div className="timetable-section">
-            <div className="button-container">
-                <button
-                    onClick={handleGenerateClick}
-                    disabled={isLoading || isGenerateDisabled}
-                    className={`generate-button ${isGenerateDisabled ? 'disabled' : ''}`}
-                >
-                    {isLoading ? 'Loading...' : 'Generate New Timetable'}
-                </button>
-
-                <div className="export-dropdown">
-                    <button
-                        onClick={() => setShowExportDropdown(!showExportDropdown)}
-                        className="export-button"
-                    >
-                        Export
-                    </button>
-                    {showExportDropdown && (
-                        <div className="export-dropdown-content">
-                            <button onClick={handleExportPDF}>Export as PDF</button>
-                            <button onClick={handleExportCSV}>Export as CSV</button>
-                        </div>
-                    )}
-                </div>
-            </div>
-
             {showPopup && (
                 <GenerateTimetablePopup
                     onClose={() => setShowPopup(false)}
                     onConfirm={handleConfirmGenerate}
                 />
             )}
-
+    
             <div className="timetable" ref={timetableRef}>
                 <div className="timetable-header">
                     <div className="time-header">Time</div>
@@ -266,8 +241,32 @@ const TimetableComponent = ({ filters }) => {
                     ))}
                 </div>
             </div>
+            <div className="button-container">
+                <button
+                    onClick={handleGenerateClick}
+                    disabled={isLoading || isGenerateDisabled}
+                    className={`generate-button ${isGenerateDisabled ? 'disabled' : ''}`}
+                >
+                    {isLoading ? 'Loading...' : 'Generate New Timetable'}
+                </button>
+    
+                <div className="export-dropdown">
+                    <button
+                        onClick={() => setShowExportDropdown(!showExportDropdown)}
+                        className="export-button"
+                    >
+                        Export
+                    </button>
+                    {showExportDropdown && (
+                        <div className="export-dropdown-content">
+                            <button onClick={handleExportPDF}>Export as PDF</button>
+                            <button onClick={handleExportCSV}>Export as CSV</button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-    );
+    );    
 };
 
 export default TimetableComponent;

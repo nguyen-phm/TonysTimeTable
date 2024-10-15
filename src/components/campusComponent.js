@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddCampusPopup from './popups/addCampusPopup'; // Popup for adding campuses
 import EditCampusPopup from './popups/editCampusPopup'; // Popup for editing campuses
+import RemovePopup from './popups/removePopup'; // Import the RemovePopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 
@@ -9,7 +10,9 @@ const CampusComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddCampusPopup, setShowAddCampusPopup] = useState(false);
     const [showEditCampusPopup, setShowEditCampusPopup] = useState(false);
-    const [selectedCampus, setSelectedCampus] = useState(null); // To store selected campus for editing
+    const [selectedCampus, setSelectedCampus] = useState(null);
+    const [showRemovePopup, setShowRemovePopup] = useState(false); // State for RemovePopup
+    const [campusToDelete, setCampusToDelete] = useState(null); // Campus ID to delete
 
     // Fetch campuses from Supabase when the component mounts
     useEffect(() => {
@@ -37,7 +40,12 @@ const CampusComponent = () => {
         setCampuses([...campuses, newCampus]); // Add new campus to the list
     };
 
-    const handleDeleteCampus = async (campusId) => {
+    const handleDeleteCampus = (campusId) => {
+        setCampusToDelete(campusId); // Set the campus ID to delete
+        setShowRemovePopup(true); // Show the remove confirmation popup
+    };
+
+    const confirmDeleteCampus = async (campusId) => {
         try {
             // Step 1: Remove any courses associated with this campus
             const { error: coursesError } = await supabase
@@ -63,6 +71,9 @@ const CampusComponent = () => {
             }
         } catch (error) {
             console.error('Error deleting campus:', error);
+        } finally {
+            setShowRemovePopup(false); // Close the remove popup
+            setCampusToDelete(null); // Reset campus to delete
         }
     };
 
@@ -124,6 +135,13 @@ const CampusComponent = () => {
                     campus={selectedCampus}
                     onClose={() => setShowEditCampusPopup(false)}
                     onSubmit={updateCampus}
+                />
+            )}
+
+            {showRemovePopup && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={() => confirmDeleteCampus(campusToDelete)} // Pass the ID directly
                 />
             )}
         </div>

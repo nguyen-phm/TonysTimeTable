@@ -99,6 +99,8 @@ const AdminPage = () => {
                             <SidebarLink Icon={BookCopy} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
                             <SidebarLink Icon={BookOpenText} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
+                        </div>
+                        <div className="nav-section">
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>
@@ -161,18 +163,6 @@ const AccountContent = () => (
             <p><span className="font-semibold">Last Login:</span> 2023-09-24 14:30:00</p>
             <p><span className="font-semibold">Account Status:</span> Active</p>
         </div>
-    </div>
-);
-
-const StaffContent = () => (
-    <div className="admin-section">
-        <p>Staff functionality coming soon... d-(^_^)z</p>
-    </div>
-);
-
-const ClassroomsContent = () => (
-    <div className="admin-section">
-        <p>Classrooms functionality coming soon... d-(^_^)z</p>
     </div>
 );
 

@@ -63,7 +63,8 @@ serve(async (req) => {
             If the admin asks for information from the database, only reply with a paragraph of description that starts with "Required Information:". Make sure to list out every information admin ask for. 
             If the admin asks for help with changes or optimizations, 
             provide two parts in the output: JSON format of changes made based on the specific table or multiple tables they 
-            asked for in the database (always start with the id, then other attributes), followed by a description of the changes made. 
+            asked for in the database always start with this structure, table name, then the attributes of the instances
+            (always start with the "id", then other attributes), followed by a description of the changes made. 
             Ask for whether the admin approves it or not.`
           },
           {
@@ -136,21 +137,22 @@ serve(async (req) => {
             status: 400,
           });
         }
-      
+        console.log("json", JSON.stringify(query));
         // Apply the changes provided by the frontend
         for (const [tableName, changes] of Object.entries(query)) {
           const changesArray = Array.isArray(changes) ? changes : [changes];
           for (const change of changesArray) {
             const { id, ...updatedFields } = change; // Extract the id and fields to update
-            if (!id){
+            if (id === null || id === undefined){
                 return new Response(JSON.stringify({ error: `Missing 'id' in changes for table ${tableName} `}), {
                   headers: { ...corsHeaders, "Content-Type": "application/json" },
                   status: 400,
                 });
               }
             const { data: existingData, error: checkError } = await supabase.from(tableName).select("id").eq("id", id).single();
+            console.log("id", id);
             if (checkError) {
-              const { error: insertError } = await supabase.from(tableName).insert([updatedFields]);
+              const { error: insertError } = await supabase.from(tableName).insert([id, ...updatedFields]);
                  if (insertError) {
                     return new Response(JSON.stringify({ error: `Error inserting into ${tableName}: ${insertError.message} `}), {
                         headers: { ...corsHeaders, "Content-Type": "application/json" },

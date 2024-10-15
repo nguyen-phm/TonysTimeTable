@@ -8,7 +8,6 @@ import TimetableFilterComponent from '../components/timetableFilterComponent';
 import ClassComponent from '../components/classComponent';
 import StaffComponent from '../components/staffComponent';
 import SubjectComponent from '../components/subjectComponent';
-import SubjectClassComponent from '../components/subjectClassComponent';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -44,8 +43,6 @@ const AdminPage = () => {
                 return <CourseComponent />;
             case 'units':
                 return <SubjectComponent />;
-            case 'subjectclasses':
-                return <SubjectClassComponent />;
             case 'students':
                 return <StudentComponent />;
             case 'staff':
@@ -102,7 +99,6 @@ const AdminPage = () => {
                             <SidebarLink Icon={BookCopy} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
                             <SidebarLink Icon={BookOpenText} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
-                            <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>

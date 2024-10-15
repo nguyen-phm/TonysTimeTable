@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddSubjectPopup from './popups/addSubjectPopup';
 import EditSubjectPopup from './popups/editSubjectPopup'; 
+import EditSubjectClassPopup from './popups/editSubjectClassPopup';
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
@@ -12,6 +13,7 @@ const SubjectComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showSubjectPopup, setShowSubjectPopup] = useState(false);
     const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false); 
+    const [showEditClassPopup, setShowEditClassPopup] = useState(false);
     const [selectedSubject, setSelectedSubject] = useState(null); 
 
     // Fetch courses, campuses, and subjects from Supabase
@@ -136,6 +138,11 @@ const SubjectComponent = () => {
         setShowEditSubjectPopup(true);
     };
 
+    const handleEditSubjectClass = (subject) => {
+        setSelectedSubject(subject);
+        setShowEditClassPopup(true);
+    };
+
     const updateSubject = (updatedSubject) => {
         setSubjects(subjects.map((subject) => (subject.id === updatedSubject.id ? updatedSubject : subject)));
     };
@@ -163,7 +170,8 @@ const SubjectComponent = () => {
                                     </div>
                                 </div>
                                 <div className="subject-actions">
-                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>
+                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit Unit</button>
+                                    <button className="more-options" onClick={() => handleEditSubjectClass(subject)}>Classes </button>
                                     <button className="more-options" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
                                 </div>
                             </div>
@@ -190,6 +198,13 @@ const SubjectComponent = () => {
                     subject={selectedSubject}
                     onClose={() => setShowEditSubjectPopup(false)}
                     onSubmit={updateSubject}
+                />
+            )}
+
+            {showEditClassPopup && selectedSubject && (
+                <EditSubjectClassPopup
+                    subject={selectedSubject}
+                    onClose={() => setShowEditClassPopup(false)}
                 />
             )}
         </div>

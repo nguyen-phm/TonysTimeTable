@@ -1,9 +1,9 @@
 import Papa from 'papaparse';
 import { supabase } from './supabaseClient';
 
-export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => {
+export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup, onStudentsUpdated) => {
     const file = event.target.files[0];
-    const errors = []; // Array to store errors
+    const errors = []; 
 
     if (file) {
         Papa.parse(file, {
@@ -23,7 +23,7 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                         if (!validateStudentData({ studentId, name, courseName, campusName })) {
                             const errorMessage = `Missing required data for student ${name || 'Unknown'}.`;
                             console.error(errorMessage);
-                            errors.push(errorMessage); // Add error to the array
+                            errors.push(errorMessage); 
                             continue;
                         }
 
@@ -54,21 +54,43 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                             }
 
                             let studentIdDb;
+                            let updatedStudent;
                             if (existingStudent) {
                                 await updateStudentInDatabase(existingStudent.id, { name, university_email, courseId });
                                 studentIdDb = existingStudent.id;
                                 console.log(`Student ${name} updated successfully.`);
+                                
+                                updatedStudent = {
+                                    id: studentIdDb,
+                                    student_id: studentId,
+                                    name,
+                                    university_email,
+                                    course_id: courseId,
+                                    Courses: courseData
+                                };
 
                                 // Clear existing subject enrollments
                                 await clearExistingEnrollments(studentIdDb);
                             } else {
                                 studentIdDb = await insertStudent({ studentId, name, university_email, courseId });
                                 console.log(`Student ${name} inserted successfully.`);
+
+                                updatedStudent = {
+                                    id: studentIdDb,
+                                    student_id: studentId,
+                                    name,
+                                    university_email,
+                                    course_id: courseId,
+                                    Courses: courseData
+                                };
                             }
 
                             // Enroll the student in subjects
                             await enrollStudentInSubjects(studentIdDb, student);
                             console.log(`Student ${name} enrolled in subjects successfully.`);
+
+                            // Update the parent component's state with the newly added/updated student
+                            onStudentsUpdated(updatedStudent);
 
                         } catch (error) {
                             const errorMessage = `Error processing student ${name}: ${error.message}`;

@@ -21,9 +21,9 @@ const RemovePopup = ({ onClose, onConfirm }) => {
     return (
         <div className="popup-container">
             <div className="popup">
-                <div className='popup-h2'>Are you sure?</div>
+                <div className='popup-h2'>Are you sure</div>
                 <div className="popup-message">
-                    Do you want to remove this entry? <br />All related data will also be removed!
+                    Do you want to remove this entry. <br />All related data will also be removed.
                 </div>
                 <div className="popup-buttons">
                     <button

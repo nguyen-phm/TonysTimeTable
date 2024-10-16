@@ -64,6 +64,20 @@ const StudentComponent = () => {
         );
     };
 
+    // Handle updates from CSV upload
+    const handleStudentsUpdated = (student) => {
+        setStudents(prevStudents => {
+            const existingIndex = prevStudents.findIndex(s => s.student_id === student.student_id);
+            if (existingIndex !== -1) {
+                // Update existing student
+                return prevStudents.map(s => (s.student_id === student.student_id ? student : s));
+            } else {
+                // Add new student
+                return [...prevStudents, student];
+            }
+        });
+    };
+
     const handleUploadButtonClick = () => {
         document.getElementById('file-input').click();
     };
@@ -160,14 +174,14 @@ const StudentComponent = () => {
                 id="file-input"
                 type="file"
                 accept=".csv"
-                onChange={(event) => handleFileUpload(event, setErrorMessages, setShowErrorPopup)}
+                onChange={(event) => handleFileUpload(event, setErrorMessages, setShowErrorPopup, handleStudentsUpdated)}
                 style={{ display: 'none' }} 
             />
 
             {showStudentPopup && (
                 <AddStudentPopup
                     onClose={() => setShowStudentPopup(false)}
-                    onSubmit={addStudent} // Pass the callback to update the students state
+                    onSubmit={addStudent}
                 />
             )}
 
@@ -197,5 +211,6 @@ const StudentComponent = () => {
 };
 
 export default StudentComponent;
+
 
 

@@ -1,7 +1,6 @@
 import Papa from 'papaparse';
 import { supabase } from './supabaseClient';
 
-// Function to handle CSV file upload
 export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => {
     const file = event.target.files[0];
     const errors = []; // Array to store errors
@@ -54,13 +53,22 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                                 continue;
                             }
 
+                            let studentIdDb;
                             if (existingStudent) {
                                 await updateStudentInDatabase(existingStudent.id, { name, university_email, courseId });
+                                studentIdDb = existingStudent.id;
                                 console.log(`Student ${name} updated successfully.`);
+
+                                // Clear existing subject enrollments
+                                await clearExistingEnrollments(studentIdDb);
                             } else {
-                                await insertStudent({ studentId, name, university_email, courseId });
+                                studentIdDb = await insertStudent({ studentId, name, university_email, courseId });
                                 console.log(`Student ${name} inserted successfully.`);
                             }
+
+                            // Enroll the student in subjects
+                            await enrollStudentInSubjects(studentIdDb, student);
+                            console.log(`Student ${name} enrolled in subjects successfully.`);
 
                         } catch (error) {
                             const errorMessage = `Error processing student ${name}: ${error.message}`;
@@ -90,6 +98,57 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                 setShowErrorPopup(true);
             }
         });
+    }
+};
+
+// Helper function to clear existing subject enrollments for a student
+export const clearExistingEnrollments = async (studentId) => {
+    const { error: deleteError } = await supabase
+        .from('StudentSubject')
+        .delete()
+        .eq('student_id', studentId);
+
+    if (deleteError) {
+        console.error(`Error clearing existing subject enrollments for student ${studentId}:`, deleteError);
+    } else {
+        console.log(`Existing subject enrollments for student ${studentId} cleared.`);
+    }
+};
+
+// Helper function to enroll student in subjects
+export const enrollStudentInSubjects = async (studentId, student) => {
+    const subjectCodes = Object.keys(student).filter(key => /\d/.test(key)); // Find columns that contain subject codes
+
+    for (const subjectCode of subjectCodes) {
+        const enrollmentStatus = student[subjectCode];
+
+        if (enrollmentStatus === 'ENRL') {
+            const { data: subjectData, error: subjectError } = await supabase
+                .from('Subjects')
+                .select('id')
+                .eq('code', subjectCode)
+                .single();
+
+            if (subjectError || !subjectData) {
+                console.error(`Error: Subject with code ${subjectCode} does not exist.`);
+                continue;
+            }
+
+            const subjectId = subjectData.id;
+
+            // Insert into studentSubjects table
+            const { data: enrollmentData, error: enrollmentError } = await supabase
+                .from('StudentSubject')
+                .insert([{ student_id: studentId, subject_id: subjectId }])
+                .select();
+
+            if (enrollmentError) {
+                console.error(`Error enrolling student ${studentId} in subject ${subjectCode}:`, enrollmentError);
+                continue;
+            }
+
+            console.log(`Student ${studentId} enrolled in subject ${subjectCode} successfully.`);
+        }
     }
 };
 

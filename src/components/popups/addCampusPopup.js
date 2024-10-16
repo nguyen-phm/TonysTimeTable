@@ -11,7 +11,7 @@ const AddCampusPopup = ({ onClose, onSubmit }) => {
 
         if (name.trim() !== '') {
             try {
-                // Insert a new campus record
+                // Insert new campus record
                 const { data, error } = await supabase
                     .from('Campuses')
                     .insert({ name, venue_name: venueName || null }) // Set venue_name to NULL if not provided

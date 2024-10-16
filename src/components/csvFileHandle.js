@@ -1,12 +1,13 @@
 import Papa from 'papaparse';
 import { supabase } from './supabaseClient';
 
-// Function to handle CSV file upload
-export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => {
+export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup, onStudentsUpdated) => {
     const file = event.target.files[0];
-    const errors = []; // Array to store errors
+    const errors = [];
 
     if (file) {
+        alert("CSV uploaded, please wait...");
+
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
@@ -24,7 +25,7 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                         if (!validateStudentData({ studentId, name, courseName, campusName })) {
                             const errorMessage = `Missing required data for student ${name || 'Unknown'}.`;
                             console.error(errorMessage);
-                            errors.push(errorMessage); // Add error to the array
+                            errors.push(errorMessage);
                             continue;
                         }
 
@@ -54,12 +55,50 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                                 continue;
                             }
 
+                            let studentIdDb;
+                            let updatedStudent;
+                            let isNewStudent = false; // Track if the student is new
+
                             if (existingStudent) {
-                                await updateStudentInDatabase(existingStudent.id, { name, university_email, courseId });
-                                console.log(`Student ${name} updated successfully.`);
+                                // Check if any updates are needed for the existing student
+                                const needsUpdate = existingStudent.name !== name ||
+                                                    existingStudent.university_email !== university_email ||
+                                                    existingStudent.course_id !== courseId;
+
+                                if (needsUpdate) {
+                                    await updateStudentInDatabase(existingStudent.id, { name, university_email, courseId });
+                                    studentIdDb = existingStudent.id;
+                                    console.log(`Student ${name} updated successfully.`);
+                                } else {
+                                    console.log(`Student ${name} already up to date. Skipping update.`);
+                                    continue; // Skip adding to state if no updates are made
+                                }
                             } else {
-                                await insertStudent({ studentId, name, university_email, courseId });
+                                // New student - insert into the database
+                                studentIdDb = await insertStudent({ studentId, name, university_email, courseId });
                                 console.log(`Student ${name} inserted successfully.`);
+                                isNewStudent = true;
+                            }
+
+                            updatedStudent = {
+                                id: studentIdDb,
+                                student_id: studentId,
+                                name,
+                                university_email,
+                                course_id: courseId,
+                                Courses: courseData
+                            };
+
+                            // Clear existing subject enrollments
+                            await clearExistingEnrollments(studentIdDb);
+
+                            // Enroll the student in subjects
+                            await enrollStudentInSubjects(studentIdDb, student);
+                            console.log(`Student ${name} enrolled in subjects successfully.`);
+
+                            // Only update the parent component's state if the student is new or was updated
+                            if (isNewStudent || existingStudent) {
+                                onStudentsUpdated(updatedStudent);
                             }
 
                         } catch (error) {
@@ -90,6 +129,57 @@ export const handleFileUpload = (event, setErrorMessages, setShowErrorPopup) => 
                 setShowErrorPopup(true);
             }
         });
+    }
+};
+
+// Helper function to clear existing subject enrollments for a student
+export const clearExistingEnrollments = async (studentId) => {
+    const { error: deleteError } = await supabase
+        .from('StudentSubject')
+        .delete()
+        .eq('student_id', studentId);
+
+    if (deleteError) {
+        console.error(`Error clearing existing subject enrollments for student ${studentId}:`, deleteError);
+    } else {
+        console.log(`Existing subject enrollments for student ${studentId} cleared.`);
+    }
+};
+
+// Helper function to enroll student in subjects
+export const enrollStudentInSubjects = async (studentId, student) => {
+    const subjectCodes = Object.keys(student).filter(key => /\d/.test(key)); // Find columns that contain subject codes
+
+    for (const subjectCode of subjectCodes) {
+        const enrollmentStatus = student[subjectCode];
+
+        if (enrollmentStatus === 'ENRL') {
+            const { data: subjectData, error: subjectError } = await supabase
+                .from('Subjects')
+                .select('id')
+                .eq('code', subjectCode)
+                .single();
+
+            if (subjectError || !subjectData) {
+                console.error(`Error: Subject with code ${subjectCode} does not exist.`);
+                continue;
+            }
+
+            const subjectId = subjectData.id;
+
+            // Insert into studentSubjects table
+            const { data: enrollmentData, error: enrollmentError } = await supabase
+                .from('StudentSubject')
+                .insert([{ student_id: studentId, subject_id: subjectId }])
+                .select();
+
+            if (enrollmentError) {
+                console.error(`Error enrolling student ${studentId} in subject ${subjectCode}:`, enrollmentError);
+                continue;
+            }
+
+            console.log(`Student ${studentId} enrolled in subject ${subjectCode} successfully.`);
+        }
     }
 };
 

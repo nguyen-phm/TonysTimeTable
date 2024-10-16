@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import AddStudentPopup from './popups/addStudentPopup'; 
 import EditStudentPopup from './popups/editStudentPopup'; 
+import RemovePopup from './popups/removePopup';
 import ErrorPopup from './popups/errorPopup'; 
 import { supabase } from './supabaseClient';
-import {
-    handleFileUpload
-} from './csvFileHandle'; 
+import { handleFileUpload } from './csvFileHandle'; 
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
 
@@ -17,6 +16,7 @@ const StudentComponent = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showErrorPopup, setShowErrorPopup] = useState(false); 
     const [errorMessages, setErrorMessages] = useState([]); 
+    const [showRemovePopup, setShowRemovePopup] = useState(false);
 
     useEffect(() => {
         const fetchStudents = async () => {
@@ -64,6 +64,20 @@ const StudentComponent = () => {
         );
     };
 
+    // Handle updates from CSV upload
+    const handleStudentsUpdated = (student) => {
+        setStudents(prevStudents => {
+            const existingIndex = prevStudents.findIndex(s => s.student_id === student.student_id);
+            if (existingIndex !== -1) {
+                // Update existing student
+                return prevStudents.map(s => (s.student_id === student.student_id ? student : s));
+            } else {
+                // Add new student
+                return [...prevStudents, student];
+            }
+        });
+    };
+
     const handleUploadButtonClick = () => {
         document.getElementById('file-input').click();
     };
@@ -105,9 +119,20 @@ const StudentComponent = () => {
         setErrorMessages([]); 
     };
 
+    const handleConfirmRemove = async () => {
+        if (selectedStudent) {
+            await handleDeleteStudent(selectedStudent.id);
+            setShowRemovePopup(false);
+        }
+    };
+
+    const handleRemoveClick = (student) => {
+        setSelectedStudent(student);
+        setShowRemovePopup(true);
+    };
+
     return (
         <div className="admin-section">
-
             {isLoading ? (
                 <div className='courses-list'>   
                     <div className='course-row'>
@@ -115,26 +140,24 @@ const StudentComponent = () => {
                     </div>
                 </div>
             ) : (
-                <>
-                    <div className="courses-list">
-                        {students.map((student, index) => (
-                            <div key={index} className="course-row">
-                                <div className="course-info">
-                                    <div className="course-name">{student.name}</div>
-                                    <div className='course-details'>
-                                        <div className="course-code">{student.student_id}</div>
-                                        <div className="course-code">{student.Courses?.name || 'No Course'}</div>
-                                        <div className="course-code">{student.Courses?.Campuses?.name || 'No Campus'}</div>
-                                    </div>
-                                </div>
-                                <div className="student-actions">
-                                    <button className="more-options" onClick={() => handleEditStudent(student)}>Edit</button>
-                                    <button className="more-options" onClick={() => handleDeleteStudent(student.id)}>Remove</button>
+                <div className="courses-list">
+                    {students.map((student, index) => (
+                        <div key={index} className="course-row">
+                            <div className="course-info">
+                                <div className="course-name">{student.name}</div>
+                                <div className='course-details'>
+                                    <div className="course-code">{student.student_id}</div>
+                                    <div className="course-code">{student.Courses?.name || 'No Course'}</div>
+                                    <div className="course-code">{student.Courses?.Campuses?.name || 'No Campus'}</div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </>
+                            <div className="student-actions">
+                                <button className="more-options" onClick={() => handleEditStudent(student)}>Edit</button>
+                                <button className="more-options" onClick={() => handleRemoveClick(student)}>Remove</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             )}
 
             <br />
@@ -151,7 +174,7 @@ const StudentComponent = () => {
                 id="file-input"
                 type="file"
                 accept=".csv"
-                onChange={(event) => handleFileUpload(event, setErrorMessages, setShowErrorPopup)}
+                onChange={(event) => handleFileUpload(event, setErrorMessages, setShowErrorPopup, handleStudentsUpdated)}
                 style={{ display: 'none' }} 
             />
 
@@ -176,9 +199,18 @@ const StudentComponent = () => {
                     onClose={closeErrorPopup}
                 />
             )}
+
+            {showRemovePopup && selectedStudent && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={handleConfirmRemove}
+                />
+            )}
         </div>
     );
 };
 
 export default StudentComponent;
+
+
 

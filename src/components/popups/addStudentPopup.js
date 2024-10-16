@@ -6,14 +6,13 @@ import 'primereact/resources/themes/saga-blue/theme.css'; // Import the PrimeRea
 import 'primereact/resources/primereact.min.css';         // Core CSS for PrimeReact components
 import 'primeicons/primeicons.css';       
 
-
 const AddStudentPopup = ({ onClose, onSubmit }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [studentId, setStudentId] = useState(''); // New state for student ID
     const [selectedCourse, setSelectedCourse] = useState('');
     const [courses, setCourses] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]);
+    const [selectedSubjects, setSelectedSubjects] = useState([]); // Now optional
     const [subjects, setSubjects] = useState([]);
 
     // Add an event listener to handle "Escape" key press
@@ -83,7 +82,7 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
             return;
         }
 
-        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '' && selectedSubjects.length > 0) {
+        if (name.trim() !== '' && email.trim() !== '' && selectedCourse !== '') {
             try {
                 const { data: studentData, error: studentError } = await supabase
                     .from('Students')
@@ -95,22 +94,26 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
                 } else {
                     const studentId = studentData[0]?.id;
 
-                    // Insert multiple records into StudentSubject table
-                    const studentSubjectEntries = selectedSubjects.map(subject => ({
-                        student_id: studentId,
-                        subject_id: subject.id 
-                    }));
+                    // Insert multiple records into StudentSubject table only if there are selected subjects
+                    if (selectedSubjects.length > 0) {
+                        const studentSubjectEntries = selectedSubjects.map(subject => ({
+                            student_id: studentId,
+                            subject_id: subject.id 
+                        }));
 
-                    const { error: studentSubjectError } = await supabase
-                        .from('StudentSubject')
-                        .insert(studentSubjectEntries);
+                        const { error: studentSubjectError } = await supabase
+                            .from('StudentSubject')
+                            .insert(studentSubjectEntries);
 
-                    if (studentSubjectError) {
-                        console.error('Error adding student-subject relations:', studentSubjectError);
-                    } else {
-                        console.log('Student added and subjects assigned:', studentData);
-                        onSubmit(studentData[0]); 
+                        if (studentSubjectError) {
+                            console.error('Error adding student-subject relations:', studentSubjectError);
+                        }
                     }
+
+                    console.log('Student added (with or without subjects):', studentData);
+
+                    // Pass the new student data back to the parent component to update the state
+                    onSubmit(studentData[0]); 
                 }
             } catch (error) {
                 console.error('Error adding student:', error.message);
@@ -208,7 +211,3 @@ const AddStudentPopup = ({ onClose, onSubmit }) => {
 };
 
 export default AddStudentPopup;
-
-
-
-

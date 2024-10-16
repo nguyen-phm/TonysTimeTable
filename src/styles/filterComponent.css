@@ -5,7 +5,8 @@
 
 .filters-sidebar {
     background: #f3f4f6;
-    width: 18rem; 
+    max-width: 18rem; 
+    width: fit-content;
     padding: 1.5rem 0; 
     padding-right: 1.5rem;
   }

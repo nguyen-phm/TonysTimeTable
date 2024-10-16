@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
+import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, MessageSquareMore } from 'lucide-react';
 import CampusComponent from '../components/campusComponent';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
@@ -8,6 +8,7 @@ import TimetableFilterComponent from '../components/timetableFilterComponent';
 import ClassComponent from '../components/classComponent';
 import StaffComponent from '../components/staffComponent';
 import SubjectComponent from '../components/subjectComponent';
+import GPTAssist from '../components/gptAssist';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -51,6 +52,8 @@ const AdminPage = () => {
                 return <ClassComponent />;
             case 'home':
                 return <TimetableComponent filters={timetableFilters} />;
+            case 'assistant':
+                return <GPTAssist />;
             default:
                 return null;
         }
@@ -61,7 +64,11 @@ const AdminPage = () => {
             return (
                 <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />
             );
+        } 
+        if (activeTab === 'assistant') {
+            return;
         }
+
         return (
             <div className='filters-border'>
                 <div className="filters-title">FILTERS</div>
@@ -105,6 +112,7 @@ const AdminPage = () => {
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>
                         <div className="nav-section">
+                            <SidebarLink Icon={MessageSquareMore} label="AI Assistant" onClick={() => setActiveTab('assistant')} active={activeTab === 'assistant'} />
                             <SidebarLink Icon={Settings} label="Account" onClick={() => setActiveTab('account')} active={activeTab === 'account'} />
                         </div>
                     </nav>

@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import '../styles/timetablePage.css';
 import GenerateTimetablePopup from './popups/generateTimetablePopup';
+import CourseSelectionPopup from './popups/courseSelectionPopup';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import Papa from 'papaparse';
+import exportTimetable from './exportTimetable';
 
 const TimetableComponent = ({ filters }) => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const [showCourseWarning, setShowCourseWarning] = useState(false);
     const timetableRef = useRef(null);
 
     const fetchTimetableData = async () => {
@@ -134,9 +136,27 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
-    // Export as CSV
-    const handleExportCSV = () => {
-
+    // Export as Excel
+    const handleExportExcel = async () => {
+        if (filters.courseId) {
+            try {
+                const { data: courseData, error: courseError } = await supabase
+                    .from('Courses')
+                    .select(`
+                        *,
+                        Campuses(venue_name)
+                    `)
+                    .eq('id', filters.courseId)
+                    .single();
+                if (courseError) throw courseError;
+                await exportTimetable(courseData);
+            } catch (error) {
+                console.error('Error exporting:', error);
+                // You might want to show an error message to the user here
+            }
+        } else {
+            setShowCourseWarning(true);
+        }
     };
 
     const colorMap = {};
@@ -200,6 +220,11 @@ const TimetableComponent = ({ filters }) => {
                     onConfirm={handleConfirmGenerate}
                 />
             )}
+            {showCourseWarning && (
+                <CourseSelectionPopup
+                    onClose={() => setShowCourseWarning(false)}
+                />
+            )}
     
             <div className="timetable" ref={timetableRef}>
                 <div className="timetable-header">
@@ -242,7 +267,7 @@ const TimetableComponent = ({ filters }) => {
                     {showExportDropdown && (
                         <div className="export-dropdown-content">
                             <button onClick={handleExportPDF}>Export as PDF</button>
-                            <button onClick={handleExportCSV}>Export as CSV</button>
+                            <button onClick={handleExportExcel}>Export as Excel</button>
                         </div>
                     )}
                 </div>

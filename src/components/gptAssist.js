@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Send, Paperclip } from 'lucide-react';
 import '../styles/gpt.css';
 
 const GPTAssist = () => {
@@ -186,8 +187,8 @@ const GPTAssist = () => {
                 )}
                 {msg.showButtons && (
                   <div className="action-buttons">
-                    <button className="accept-btn" onClick={handleApprove}>Approve</button>
-                    <button className="reject-btn" onClick={handleReject}>Reject</button>
+                    <button className="response-button" onClick={handleApprove}>Approve</button>
+                    <button className="response-button" onClick={handleReject}>Reject</button>
                   </div>
                 )}
               </div>
@@ -201,21 +202,34 @@ const GPTAssist = () => {
       {/* Input field for user to type in the query */}
       <div className="input-container">
         <input 
-          type="text" 
-          value={query} 
-          onChange={(e) => setQuery(e.target.value)} 
-          onKeyPress={handleKeyPress} // Listen for "Enter" key press
-          placeholder="Ask GPT something..." 
-          className="query-input"
+            type="text" 
+            value={query} 
+            onChange={(e) => setQuery(e.target.value)} 
+            onKeyPress={handleKeyPress} // Listen for "Enter" key press
+            placeholder="Message ChatGPT..." 
+            className="query-input"
         />
-        <button onClick={handleSubmitQuery}>Send</button>
-      </div>
 
-      {/* File upload input for both text and MP3 files */}
-      <div className="file-upload-container">
-        <input type="file" accept=".txt,.mp3" onChange={handleFileUpload} />
-        {fileName && <p>File uploaded: {fileName}</p>}
-      </div>
+        <button
+            className="file-upload-button"
+            onClick={() => document.getElementById('file-input').click()}
+        >
+            <Paperclip />
+        </button>
+
+        <button className="gpt-button" onClick={handleSubmitQuery}>
+            <Send />
+        </button>
+
+        {/* Hidden file input */}
+        <input
+            type="file"
+            accept=".txt,.mp3"
+            onChange={handleFileUpload}
+            id="file-input"
+            style={{ display: 'none' }} // Hide the default file input
+        />
+        </div> 
 
       {loading && <p>Processing...</p>}
       {error && <p className="error">{error}</p>}

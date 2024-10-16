@@ -136,25 +136,7 @@ const TimetableComponent = ({ filters }) => {
 
     // Export as CSV
     const handleExportCSV = () => {
-        const csvData = classes.map(classItem => ({
-            'Student ID': '', // Optional field
-            'Student Name': '', // Optional field
-            'University Email': '', // Optional field
-            'Course Name': classItem.Subjects?.Courses?.name || 'N/A',
-            'Campus': classItem.Subjects?.Courses?.campus_id || 'N/A',
-            [classItem.Subjects?.code]: 'ENRL', // Enrolled
-        }));
 
-        const csv = Papa.unparse(csvData);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'timetable.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     };
 
     const colorMap = {};

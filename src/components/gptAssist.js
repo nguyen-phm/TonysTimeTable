@@ -169,71 +169,74 @@ const GPTAssist = () => {
   };
   return (
     <div className="chat-container">
-      {/* Chatbox container */}
-      <div className="chat-box">
-        {conversation.map((msg, index) => (
-          <div key={index} className={`chat-message ${msg.type}`}>
-            {msg.type === "user" ? (
-              <div className="user-message">
-                <strong>You:</strong> {msg.text}
-              </div>
-            ) : msg.type === "response" ? (
-              <div className="gpt-response">
-                <strong>GPT:</strong> {msg.text}
-                {msg.json && (
-                  <pre className="json-output">
-                    {JSON.stringify(msg.json, null, 2)}
-                  </pre>
+        {/* Chatbox container */}
+        <div className="chat-box">
+            {conversation.map((msg, index) => (
+            <div key={index} className={`chat-message ${msg.type}`}>
+                {msg.type === "user" ? (
+                <div className="user-message">
+                    <strong>You:</strong> {msg.text}
+                </div>
+                ) : msg.type === "response" ? (
+                <div className="gpt-response">
+                    <strong>GPT:</strong> {msg.text}
+                    {msg.json && (
+                    <pre className="json-output">
+                        {JSON.stringify(msg.json, null, 2)}
+                    </pre>
+                    )}
+                    {msg.showButtons && (
+                    <div className="action-buttons">
+                        <button className="response-button" onClick={handleApprove}>Approve</button>
+                        <button className="response-button" onClick={handleReject}>Reject</button>
+                    </div>
+                    )}
+                </div>
+                ) : (
+                <div className="system-message">{msg.text}</div>
                 )}
-                {msg.showButtons && (
-                  <div className="action-buttons">
-                    <button className="response-button" onClick={handleApprove}>Approve</button>
-                    <button className="response-button" onClick={handleReject}>Reject</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="system-message">{msg.text}</div>
-            )}
-          </div>
-        ))}
-      </div>
+            </div>
+            ))}
+        </div>
 
-      {/* Input field for user to type in the query */}
-      <div className="input-container">
-        <input 
-            type="text" 
-            value={query} 
-            onChange={(e) => setQuery(e.target.value)} 
-            onKeyPress={handleKeyPress} // Listen for "Enter" key press
-            placeholder="Message ChatGPT..." 
-            className="query-input"
-        />
+        {/* Input field for user to type in the query */}
+        <div className="input-container">
+            <input 
+                type="text" 
+                value={query} 
+                onChange={(e) => setQuery(e.target.value)} 
+                onKeyPress={handleKeyPress} // Listen for "Enter" key press
+                placeholder="Message ChatGPT..." 
+                className="query-input"
+            />
 
-        <button
-            className="file-upload-button"
-            onClick={() => document.getElementById('file-input').click()}
-        >
-            <Paperclip />
-        </button>
+            <button
+                className="file-upload-button"
+                onClick={() => document.getElementById('file-input').click()}
+            >
+                <Paperclip />
+            </button>
 
-        <button className="gpt-button" onClick={handleSubmitQuery}>
-            <Send />
-        </button>
+            <button className="gpt-button" onClick={handleSubmitQuery}>
+                <Send />
+            </button>
 
-        {/* Hidden file input */}
-        <input
-            type="file"
-            accept=".txt,.mp3"
-            onChange={handleFileUpload}
-            id="file-input"
-            style={{ display: 'none' }} // Hide the default file input
-        />
+            {/* Hidden file input */}
+            <input
+                type="file"
+                accept=".txt,.mp3"
+                onChange={handleFileUpload}
+                id="file-input"
+                style={{ display: 'none' }} // Hide the default file input
+            />
         </div> 
 
-      {loading && <p>Processing...</p>}
-      {error && <p className="error">{error}</p>}
-    </div>
+        {/* Display file name when uploaded */}
+        {fileName && <p className="file-upload-message">File uploaded: {fileName}</p>}
+
+        {loading && <p>Processing...</p>}
+        {error && <p className="error">{error}</p>}
+        </div>
   );
 };
 

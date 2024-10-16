@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import AddSubjectPopup from './popups/addSubjectPopup';
-import EditSubjectPopup from './popups/editSubjectPopup'; 
+import EditSubjectPopup from './popups/editSubjectPopup';
+import EditSubjectClassPopup from './popups/editSubjectClassPopup';
+import RemovePopup from './popups/removePopup'; // Import the RemovePopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 import '../styles/courseComponent.css';
 
 const SubjectComponent = () => {
     const [courses, setCourses] = useState([]);
-    const [campuses, setCampuses] = useState([]); // To store campuses
+    const [campuses, setCampuses] = useState([]); 
     const [subjects, setSubjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showSubjectPopup, setShowSubjectPopup] = useState(false);
-    const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false); 
-    const [selectedSubject, setSelectedSubject] = useState(null); 
+    const [showEditSubjectPopup, setShowEditSubjectPopup] = useState(false);
+    const [showEditClassPopup, setShowEditClassPopup] = useState(false);
+    const [showRemovePopup, setShowRemovePopup] = useState(false); 
+    const [selectedSubject, setSelectedSubject] = useState(null);
 
     // Fetch courses, campuses, and subjects from Supabase
     useEffect(() => {
@@ -52,7 +56,6 @@ const SubjectComponent = () => {
                 } else {
                     setSubjects(subjectsData);
                 }
-
             } finally {
                 setIsLoading(false);
             }
@@ -100,7 +103,7 @@ const SubjectComponent = () => {
                 .from('StudentSubject')
                 .delete()
                 .eq('subject_id', subjectId);
-    
+
             if (subjectRelationError) {
                 console.error('Error deleting from StudentSubject:', subjectRelationError);
                 return;
@@ -113,14 +116,14 @@ const SubjectComponent = () => {
 
             if (classesError) {
                 console.error('Error deleting classes related to subject:', classesError);
-                return; 
+                return;
             }
-    
+
             const { error: subjectError } = await supabase
                 .from('Subjects')
                 .delete()
                 .eq('id', subjectId);
-    
+
             if (subjectError) {
                 console.error('Error deleting subject:', subjectError);
             } else {
@@ -136,6 +139,16 @@ const SubjectComponent = () => {
         setShowEditSubjectPopup(true);
     };
 
+    const handleEditSubjectClass = (subject) => {
+        setSelectedSubject(subject);
+        setShowEditClassPopup(true);
+    };
+
+    const handleRemoveSubjectClick = (subject) => {
+        setSelectedSubject(subject);
+        setShowRemovePopup(true);
+    };
+
     const updateSubject = (updatedSubject) => {
         setSubjects(subjects.map((subject) => (subject.id === updatedSubject.id ? updatedSubject : subject)));
     };
@@ -144,7 +157,7 @@ const SubjectComponent = () => {
         <div className="admin-section">
 
             {isLoading ? (
-                <div className='courses-list'>   
+                <div className='courses-list'>
                     <div className='course-row'>
                         <p>Loading Units</p>
                     </div>
@@ -163,8 +176,9 @@ const SubjectComponent = () => {
                                     </div>
                                 </div>
                                 <div className="subject-actions">
-                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit</button>
-                                    <button className="more-options" onClick={() => handleDeleteSubject(subject.id)}>Remove</button>
+                                    <button className="more-options" onClick={() => handleEditSubject(subject)}>Edit Unit</button>
+                                    <button className="more-options" onClick={() => handleEditSubjectClass(subject)}>Classes </button>
+                                    <button className="more-options" onClick={() => handleRemoveSubjectClick(subject)}>Remove</button>
                                 </div>
                             </div>
                         ))}
@@ -190,6 +204,23 @@ const SubjectComponent = () => {
                     subject={selectedSubject}
                     onClose={() => setShowEditSubjectPopup(false)}
                     onSubmit={updateSubject}
+                />
+            )}
+
+            {showEditClassPopup && selectedSubject && (
+                <EditSubjectClassPopup
+                    subject={selectedSubject}
+                    onClose={() => setShowEditClassPopup(false)}
+                />
+            )}
+
+            {showRemovePopup && selectedSubject && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={() => {
+                        handleDeleteSubject(selectedSubject.id);
+                        setShowRemovePopup(false);
+                    }}
                 />
             )}
         </div>

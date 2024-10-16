@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
 import EditCoursePopup from './popups/editCoursePopup';
+import RemovePopup from './popups/removePopup'; // Import RemovePopup
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 
@@ -10,7 +11,9 @@ const CourseComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddCoursePopup, setShowAddCoursePopup] = useState(false);
     const [showEditCoursePopup, setShowEditCoursePopup] = useState(false);
+    const [showRemovePopup, setShowRemovePopup] = useState(false); // Control remove popup
     const [selectedCourse, setSelectedCourse] = useState(null);
+    const [courseToRemove, setCourseToRemove] = useState(null); // Store the course to be removed
 
     // Fetch courses and campuses from Supabase when the component mounts
     useEffect(() => {
@@ -95,6 +98,18 @@ const CourseComponent = () => {
         return campus ? campus.name : 'Unknown Campus'; // Return the campus name or 'Unknown'
     };
 
+    // Show remove popup and set course to be removed
+    const handleRemoveClick = (course) => {
+        setCourseToRemove(course);
+        setShowRemovePopup(true); // Show remove confirmation popup
+    };
+
+    // Confirm deletion from RemovePopup
+    const confirmRemoveCourse = () => {
+        handleDeleteCourse(courseToRemove.id); // Delete the course
+        setShowRemovePopup(false); // Close the popup after deletion
+    };
+
     return (
         <div className="admin-section">
             {isLoading ? (
@@ -119,7 +134,7 @@ const CourseComponent = () => {
                                     <button className="more-options" onClick={() => handleEditCourse(course)}>
                                         Edit
                                     </button>
-                                    <button className="more-options" onClick={() => handleDeleteCourse(course.id)}>
+                                    <button className="more-options" onClick={() => handleRemoveClick(course)}>
                                         Remove
                                     </button>
                                 </div>
@@ -147,6 +162,13 @@ const CourseComponent = () => {
                     course={selectedCourse}
                     onClose={() => setShowEditCoursePopup(false)}
                     onSubmit={updateCourse}
+                />
+            )}
+
+            {showRemovePopup && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={confirmRemoveCourse}
                 />
             )}
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddStaffPopup from './popups/addStaffPopup';
 import EditStaffPopup from './popups/editStaffPopup';
+import RemovePopup from './popups/removePopup'; // Import the RemovePopup component
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 
@@ -9,7 +10,8 @@ const StaffComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddStaffPopup, setShowAddStaffPopup] = useState(false);
     const [showEditStaffPopup, setShowEditStaffPopup] = useState(false);
-    const [selectedStaff, setSelectedStaff] = useState(null); // To store selected staff for editing
+    const [showRemovePopup, setShowRemovePopup] = useState(false); // State for showing the remove popup
+    const [selectedStaff, setSelectedStaff] = useState(null); // Store selected staff for editing or removing
 
     // Fetch staff from Supabase when the component mounts
     useEffect(() => {
@@ -63,12 +65,19 @@ const StaffComponent = () => {
             }
         } catch (error) {
             console.error('Error deleting staff:', error);
+        } finally {
+            setShowRemovePopup(false); // Close the remove popup after deletion
         }
     };
 
     const handleEditStaff = (staff) => {
         setSelectedStaff(staff); // Store the selected staff
         setShowEditStaffPopup(true); // Show the edit popup
+    };
+
+    const handleRemoveClick = (staff) => {
+        setSelectedStaff(staff); // Store the selected staff for removal
+        setShowRemovePopup(true); // Show the remove popup
     };
 
     const updateStaff = (updatedStaff) => {
@@ -98,7 +107,7 @@ const StaffComponent = () => {
                                     <button className="more-options" onClick={() => handleEditStaff(member)}>
                                         Edit
                                     </button>
-                                    <button className="more-options" onClick={() => handleDeleteStaff(member.id)}>
+                                    <button className="more-options" onClick={() => handleRemoveClick(member)}>
                                         Remove
                                     </button>
                                 </div>
@@ -128,8 +137,16 @@ const StaffComponent = () => {
                     onSubmit={updateStaff}
                 />
             )}
+
+            {showRemovePopup && selectedStaff && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={() => handleDeleteStaff(selectedStaff.id)}
+                />
+            )}
         </div>
     );
 };
 
 export default StaffComponent;
+

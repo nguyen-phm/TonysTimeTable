@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddClassPopup from './popups/addClassPopup';
 import EditClassPopup from './popups/editClassPopup';
+import RemovePopup from './popups/removePopup'; // Import the RemovePopup
 import { supabase } from './supabaseClient';
 
 const ClassComponent = () => {
@@ -8,7 +9,8 @@ const ClassComponent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showAddClassPopup, setShowAddClassPopup] = useState(false);
     const [showEditClassPopup, setShowEditClassPopup] = useState(false);
-    const [selectedClassroom, setSelectedClassroom] = useState(null); // To store selected classroom for editing
+    const [showRemovePopup, setShowRemovePopup] = useState(false); // State to show/hide the remove popup
+    const [selectedClassroom, setSelectedClassroom] = useState(null); // Store selected classroom for editing or removing
 
     // Fetch classrooms from Supabase when the component mounts
     useEffect(() => {
@@ -57,12 +59,19 @@ const ClassComponent = () => {
             }
         } catch (error) {
             console.error('Error deleting classroom:', error);
+        } finally {
+            setShowRemovePopup(false); // Close the remove popup after deletion
         }
     };
 
     const handleEditClassroom = (classroom) => {
         setSelectedClassroom(classroom); // Store the selected classroom
         setShowEditClassPopup(true); // Show the edit popup
+    };
+
+    const handleRemoveClick = (classroom) => {
+        setSelectedClassroom(classroom); // Store the selected classroom for removal
+        setShowRemovePopup(true); // Show the remove popup
     };
 
     const updateClassroom = (updatedClassroom) => {
@@ -96,7 +105,7 @@ const ClassComponent = () => {
                                     <button className="more-options" onClick={() => handleEditClassroom(classroom)}>
                                         Edit
                                     </button>
-                                    <button className="more-options" onClick={() => handleDeleteClassroom(classroom.id)}>
+                                    <button className="more-options" onClick={() => handleRemoveClick(classroom)}>
                                         Remove
                                     </button>
                                 </div>
@@ -126,8 +135,16 @@ const ClassComponent = () => {
                     onSubmit={updateClassroom}
                 />
             )}
+
+            {showRemovePopup && selectedClassroom && (
+                <RemovePopup
+                    onClose={() => setShowRemovePopup(false)}
+                    onConfirm={() => handleDeleteClassroom(selectedClassroom.id)}
+                />
+            )}
         </div>
     );
 };
 
 export default ClassComponent;
+

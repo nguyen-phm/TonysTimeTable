@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, PcCase } from 'lucide-react';
+import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, MessageSquareMore } from 'lucide-react';
 import CampusComponent from '../components/campusComponent';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
@@ -8,7 +8,7 @@ import TimetableFilterComponent from '../components/timetableFilterComponent';
 import ClassComponent from '../components/classComponent';
 import StaffComponent from '../components/staffComponent';
 import SubjectComponent from '../components/subjectComponent';
-import SubjectClassComponent from '../components/subjectClassComponent';
+import GPTAssist from '../components/gptAssist';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../components/supabaseClient';
 import '../styles/adminPage.css';
@@ -44,8 +44,6 @@ const AdminPage = () => {
                 return <CourseComponent />;
             case 'units':
                 return <SubjectComponent />;
-            case 'subjectclasses':
-                return <SubjectClassComponent />;
             case 'students':
                 return <StudentComponent />;
             case 'staff':
@@ -54,6 +52,8 @@ const AdminPage = () => {
                 return <ClassComponent />;
             case 'home':
                 return <TimetableComponent filters={timetableFilters} />;
+            case 'assistant':
+                return <GPTAssist />;
             default:
                 return null;
         }
@@ -64,7 +64,11 @@ const AdminPage = () => {
             return (
                 <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />
             );
+        } 
+        if (activeTab === 'assistant') {
+            return;
         }
+
         return (
             <div className='filters-border'>
                 <div className="filters-title">FILTERS</div>
@@ -102,11 +106,13 @@ const AdminPage = () => {
                             <SidebarLink Icon={BookCopy} label="Courses" onClick={() => setActiveTab('courses')} active={activeTab === 'courses'} />
                             <SidebarLink Icon={BookOpenText} label="Units" onClick={() => setActiveTab('units')} active={activeTab === 'units'} />
                             <SidebarLink Icon={Presentation} label="Classrooms" onClick={() => setActiveTab('classrooms')} active={activeTab === 'classrooms'} />
-                            <SidebarLink Icon={PcCase} label="Subject Classes" onClick={() => setActiveTab('subjectclasses')} active={activeTab === 'subjectclasses'} />
+                        </div>
+                        <div className="nav-section">
                             <SidebarLink Icon={Users} label="Students" onClick={() => setActiveTab('students')} active={activeTab === 'students'} />
                             <SidebarLink Icon={User} label="Staff" onClick={() => setActiveTab('staff')} active={activeTab === 'staff'} />
                         </div>
                         <div className="nav-section">
+                            <SidebarLink Icon={MessageSquareMore} label="AI Assistant" onClick={() => setActiveTab('assistant')} active={activeTab === 'assistant'} />
                             <SidebarLink Icon={Settings} label="Account" onClick={() => setActiveTab('account')} active={activeTab === 'account'} />
                         </div>
                     </nav>
@@ -165,18 +171,6 @@ const AccountContent = () => (
             <p><span className="font-semibold">Last Login:</span> 2023-09-24 14:30:00</p>
             <p><span className="font-semibold">Account Status:</span> Active</p>
         </div>
-    </div>
-);
-
-const StaffContent = () => (
-    <div className="admin-section">
-        <p>Staff functionality coming soon... d-(^_^)z</p>
-    </div>
-);
-
-const ClassroomsContent = () => (
-    <div className="admin-section">
-        <p>Classrooms functionality coming soon... d-(^_^)z</p>
     </div>
 );
 

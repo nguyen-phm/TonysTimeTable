@@ -152,7 +152,6 @@ const TimetableComponent = ({ filters }) => {
                 await exportTimetable(courseData);
             } catch (error) {
                 console.error('Error exporting:', error);
-                // You might want to show an error message to the user here
             }
         } else {
             setShowCourseWarning(true);

@@ -45,7 +45,7 @@ const generateXLSX = async(course) =>  {
         '0000FF', true, false);
     addBoilerplateLine(course.name, 
         '000000', true, true);
-    addBoilerplateLine(`Venue: ${course.Campuses.venue_name}`, // having trouble with venue_name
+    addBoilerplateLine(`Venue: ${course.Campuses.venue_name}`, 
         '000000', true, true);
     addBoilerplateLine('Timetable:', 
         '000000', false, true);

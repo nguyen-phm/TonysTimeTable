@@ -19,7 +19,7 @@ const CourseSelectionPopup = ({ onClose }) => {
             <div className="popup">
                 <div className='popup-h2'>Course not selected</div>
                 <div className="popup-message">
-                    Select a course before exporting
+                    Select a course before exporting!
                 </div>
                 <div className="popup-buttons">
                     <button

@@ -153,19 +153,19 @@ const TimetableComponent = ({ filters }) => {
         const dbTime = dayIndex * 48 + halfHourIndex + 16;
         const classesInSlot = classes.filter(c => c.start_time === dbTime);
         if (classesInSlot.length === 0) return null;
-
+    
         return classesInSlot.map((classItem, index) => {
             const subjectCode = classItem.Subjects?.code || 'N/A';
             const classLocation = classItem.Locations?.name || 'N/A';
             const backgroundColor = getClassColor(subjectCode);
             const staffName = classItem.Staff?.name;
-
+    
             return (
                 <div
                     key={index}
                     className={`class-slot ${classItem.is_online ? 'online-class' : ''}`}
                     style={{
-                        height: `${classItem.duration_30mins * 29.2 -6}px`, // Height for class slots
+                        height: `${classItem.duration_30mins * 29.2 - 6}px`, // Height for class slots
                         backgroundColor,
                     }}
                 >
@@ -175,13 +175,13 @@ const TimetableComponent = ({ filters }) => {
                             {`${classItem.class_type} - ${staffName}` || 'Class Type N/A'}
                         </div>
                         <div className="class-location">
-                            {classItem.is_online ? 'Online' : `${classLocation}`}
+                            {classItem.is_online ? `Online & ${classLocation}` : classLocation}
                         </div>
                     </div>
                 </div>
             );
         });
-    };
+    };    
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const timeSlots = Array.from({ length: 25 }, (_, i) => i);

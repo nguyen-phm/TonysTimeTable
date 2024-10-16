@@ -167,7 +167,7 @@ const StudentComponent = () => {
             {showStudentPopup && (
                 <AddStudentPopup
                     onClose={() => setShowStudentPopup(false)}
-                    onSubmit={addStudent}
+                    onSubmit={addStudent} // Pass the callback to update the students state
                 />
             )}
 
@@ -197,4 +197,5 @@ const StudentComponent = () => {
 };
 
 export default StudentComponent;
+
 

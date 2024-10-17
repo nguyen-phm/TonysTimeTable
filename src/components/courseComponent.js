@@ -1,10 +1,11 @@
+// Work on correctly fetching from the database. (Filter function doesnt work yet fully)
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
 import EditCoursePopup from './popups/editCoursePopup';
 import { supabase } from './supabaseClient';
 import '../styles/adminPage.css';
 
-const CourseComponent = () => {
+const CourseComponent = ({ filters }) => {
     const [courses, setCourses] = useState([]);
     const [campuses, setCampuses] = useState([]); // Store campus data
     const [isLoading, setIsLoading] = useState(true);

@@ -5,6 +5,8 @@ import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import TimetableComponent from '../components/timetableComponent';
 import TimetableFilterComponent from '../components/timetableFilterComponent';
+import SubjectFilterComponent from '../components/subjectFilterComponent'
+import CourseFilterComponent from '../components/courseFilter';
 import ClassComponent from '../components/classComponent';
 import StaffComponent from '../components/staffComponent';
 import SubjectComponent from '../components/subjectComponent';
@@ -19,6 +21,8 @@ import VITLogo from '../assets/VIT_White.png';
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('home');
     const [timetableFilters, setTimetableFilters] = useState({ campusId: null, courseId: null });
+    const [subjectFilters, setSubjectFilters] = useState({ campusId: null, courseId: null, unitId: null});
+    const [courseFilters, setCourseFilters] = useState({ campusId: null, courseId: null });
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -34,6 +38,14 @@ const AdminPage = () => {
         setTimetableFilters(filters);
     };
 
+    const handleSubjectFilterChange = (filters) => {
+        setSubjectFilters(filters);
+    };
+
+    const handleCourseFilterChange = (filters) => {
+        setCourseFilters(filters);
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'campuses':
@@ -41,9 +53,9 @@ const AdminPage = () => {
             case 'account':
                 return <AccountContent />;
             case 'courses':
-                return <CourseComponent />;
+                return <CourseComponent filters={courseFilters}/>;
             case 'units':
-                return <SubjectComponent />;
+                return <SubjectComponent filters={subjectFilters} />;
             case 'subjectclasses':
                 return <SubjectClassComponent />;
             case 'students':
@@ -64,6 +76,14 @@ const AdminPage = () => {
             return (
                 <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />
             );
+        } else if (activeTab == 'units') {
+            return (
+                <SubjectFilterComponent onFilterChange={handleSubjectFilterChange} />
+            );
+        } else if (activeTab == 'courses'){
+            return (
+                <CourseFilterComponent onFilterChange={handleCourseFilterChange} />
+            )
         }
         return (
             <div className='filters-border'>

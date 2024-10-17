@@ -152,7 +152,7 @@ serve(async (req) => {
             const { data: existingData, error: checkError } = await supabase.from(tableName).select("id").eq("id", id).single();
             console.log("id", id);
             if (checkError) {
-              const { error: insertError } = await supabase.from(tableName).insert([id, ...updatedFields]);
+              const { error: insertError } = await supabase.from(tableName).insert([updatedFields]);
                  if (insertError) {
                     return new Response(JSON.stringify({ error: `Error inserting into ${tableName}: ${insertError.message} `}), {
                         headers: { ...corsHeaders, "Content-Type": "application/json" },

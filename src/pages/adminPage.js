@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, MessageSquareMore } from 'lucide-react';
 import CampusComponent from '../components/campusComponent';
+import SignupFormComponent from '../components/signupFormComponent';
 import CourseComponent from '../components/courseComponent';
 import StudentComponent from '../components/studentComponent';
 import TimetableComponent from '../components/timetableComponent';
@@ -39,7 +40,7 @@ const AdminPage = () => {
             case 'campuses':
                 return <CampusComponent />;
             case 'account':
-                return <AccountContent />;
+                return <SignupFormComponent />;
             case 'courses':
                 return <CourseComponent />;
             case 'units':

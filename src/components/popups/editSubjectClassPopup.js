@@ -83,21 +83,27 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
         try {
             // Update existing classes
             for (const classItem of classes) {
-                // Ensure only non-nullable fields are included in the payload
                 const { id, class_type, is_online, duration_30mins, staff_id } = classItem;
+                // Multiply duration_30mins by 2 before updating in the database
                 await supabase
                     .from('Classes')
-                    .update({ class_type, is_online, duration_30mins, staff_id })
+                    .update({ class_type, is_online, duration_30mins: duration_30mins * 2, staff_id })
                     .eq('id', id);
             }
 
             // Insert new classes
             for (const newClass of newClasses) {
-                // Ensure only non-nullable fields are included in the insert payload
                 const { class_type, is_online, duration_30mins, staff_id } = newClass;
+                // Multiply duration_30mins by 2 before inserting into the database
                 await supabase
                     .from('Classes')
-                    .insert({ subject_id: subject.id, class_type, is_online, duration_30mins, staff_id });
+                    .insert({
+                        subject_id: subject.id,
+                        class_type,
+                        is_online,
+                        duration_30mins: duration_30mins * 2,  // Multiply by 2 here
+                        staff_id,
+                    });
             }
 
             // Clear new classes after submission
@@ -107,6 +113,7 @@ const EditSubjectClassPopup = ({ subject, onClose }) => {
             console.error('Error saving classes:', error.message);
         }
     };
+
 
     return (
         <div className="scrollpop-container">

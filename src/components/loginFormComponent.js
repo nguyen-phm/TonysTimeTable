@@ -5,6 +5,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 
+/*
+<div className="login-sign-up">
+<p>Don't have an account?</p>
+<Link to="/sign-up">
+    {"Register"}
+</Link>
+</div>
+*/
+
 const LoginFormComponent = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -79,12 +88,6 @@ const LoginFormComponent = () => {
                         </Link>
                     </div>
                     <button type="submit">SIGN IN</button>
-                    <div className="login-sign-up">
-                        <p>Don't have an account?</p>
-                        <Link to="/sign-up">
-                            {"Register"}
-                        </Link>
-                    </div>
                 </form>  
                 <div className="login-hero-image">
                     <img src={VITLogo} alt="VIT Logo" />

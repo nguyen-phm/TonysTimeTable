@@ -1,54 +1,153 @@
-import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AdminPage from '../pages/adminPage';
+import { supabase } from '../components/supabaseClient';
+import { act } from 'react';
+import '@testing-library/jest-dom/extend-expect';
 
-describe('AdminPage', () => {
-  const renderWithRouter = (component) => {
+// Mocking
+jest.mock('../components/supabaseClient', () => ({
+    supabase: {
+        auth: {
+            signInWithPassword: jest.fn(),
+            signOut: jest.fn()
+        },
+        from: jest.fn((table) => ({
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            then: jest.fn(),
+            data: [],
+            error: null
+        }))
+    },
+}));
+
+const renderWithRouter = (component) => {
     return render(
-      <BrowserRouter>
-        {component}
-      </BrowserRouter>
+        <BrowserRouter>
+            {component}
+        </BrowserRouter>
     );
-  };
+};
 
-  beforeEach(() => {
+beforeEach(() => {
     jest.clearAllMocks();
-  });
+    // Mock return value for campuses data
+    supabase.from.mockImplementation((table) => {
+        if (table === 'campuses') {
+            return {
+                select: jest.fn().mockResolvedValue({
+                    data: [
+                        { id: 1, name: 'Campus 1' },
+                        { id: 2, name: 'Campus 2' },
+                    ],
+                    error: null,
+                }),
+                eq: jest.fn().mockReturnThis(),
+                order: jest.fn().mockReturnThis(),
+            };
+        }
+        return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            then: jest.fn(),
+            data: [],
+            error: null,
+        };
+    });
 
-  test('renders Courses section by default', () => {
-    renderWithRouter(<AdminPage />);
-    expect(screen.getByText(/BITS/i)).toBeInTheDocument();
-  });
+    // Mock auth signOut success
+    supabase.auth.signOut.mockResolvedValue({ error: null });
+});
 
-  test('switches to Account section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Account/i));
-    expect(screen.getByText(/Email/i)).toBeInTheDocument();
-  });
+// AdminPage Tests
+describe('AdminPage', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
-  test('switches to Home section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Home/i));
-    expect(screen.getByText(/Home dashboard/i)).toBeInTheDocument();
-  });
-  
-  test('switches to Classrooms section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Classrooms/i));
-    expect(screen.getByText(/Classrooms functionality/i)).toBeInTheDocument();
-  });
+    test('renders Home section by default', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        
+        expect(screen.getByRole('button', { name: /Loading.../i })).toBeInTheDocument();
+    });
 
-  test('switches to Students section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Students/i));
-    expect(screen.getByText(/Students functionality/i)).toBeInTheDocument();
-  });
+    test('switches to Campuses section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Campuses/i }));
+        });
+        expect(screen.getByText(/Add Campus/i)).toBeInTheDocument();
+    });
 
-  test('switches to Staff section', () => {
-    renderWithRouter(<AdminPage />);
-    fireEvent.click(screen.getByText(/Staff/i));
-    expect(screen.getByText(/Staff functionality/i)).toBeInTheDocument();
-  });
+    test('switches to Courses section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Courses/i }));
+        });
+        expect(screen.getByText(/Add Course/i)).toBeInTheDocument();
+    });
 
+    test('switches to Units section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getByText(/Units/i));
+        });
+
+        expect(screen.getByText(/Add Unit/i)).toBeInTheDocument();
+    });
+
+    test('switches to Classrooms section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Classrooms/i }));
+        });
+        expect(screen.getByText(/Add Classroom/i)).toBeInTheDocument();
+    });
+
+    test('switches to Students section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Students/i }));
+        });
+        expect(screen.getByText(/Add Student/i)).toBeInTheDocument();
+    });
+
+    test('switches to Staff section', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Staff/i }));
+        });
+        expect(screen.getByText(/Add Staff/i)).toBeInTheDocument();
+    });
+
+    // Signing out
+    test('handles sign out', async () => {
+        await act(async () => {
+            renderWithRouter(<AdminPage />);
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getByText(/SIGN OUT/i));
+        });
+
+        expect(supabase.auth.signOut).toHaveBeenCalled();
+    });
 });

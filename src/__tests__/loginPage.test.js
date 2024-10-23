@@ -3,16 +3,41 @@ import { BrowserRouter } from 'react-router-dom';
 import LoginFormComponent from '../components/loginFormComponent';
 import { supabase } from '../components/supabaseClient';
 import { act } from 'react';
+import '@testing-library/jest-dom/extend-expect';
 
-// Mock the supabase auth signInWithPassword method
+// Mocking
 jest.mock('../components/supabaseClient', () => ({
     supabase: {
         auth: {
             signInWithPassword: jest.fn(),
+            signOut: jest.fn()
         },
+        from: jest.fn((table) => ({
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            then: jest.fn(),
+            data: [],
+            error: null
+        }))
     },
 }));
 
+const createCanvasMock = () => {
+    const mockCanvas = {
+        getContext: jest.fn(() => ({
+            fillRect: jest.fn(),
+            drawImage: jest.fn(),
+            createPattern: jest.fn(),
+        })),
+    };
+
+    return mockCanvas;
+};
+
+global.HTMLCanvasElement.prototype.getContext = createCanvasMock().getContext;
+
+// LoginForm Tests
 describe('LoginFormComponent', () => {
     beforeEach(() => {
         act(() => {
@@ -24,7 +49,7 @@ describe('LoginFormComponent', () => {
         });
     });
 
-    test('logs in and redirects to /mfa on successful login', async () => {
+    test('logs in and redirects on successful login', async () => {
         // Mock the successful login response
         supabase.auth.signInWithPassword.mockResolvedValueOnce({
             data: { user: {} },
@@ -33,35 +58,13 @@ describe('LoginFormComponent', () => {
 
         await act(async () => {
             fireEvent.change(screen.getByPlaceholderText(/enter vit email/i), {
-                target: { value: 'test2@gmail.com' },
+                target: { value: 'default123@gmail.com' },
             });
             fireEvent.change(screen.getByPlaceholderText(/enter password/i), {
-                target: { value: 'password1' },
+                target: { value: 'default123' },
             });
             fireEvent.click(screen.getByText(/sign in/i));
         });
-
-        // Check if navigate was called with '/mfa'
         expect(supabase.auth.signInWithPassword).toHaveBeenCalled();
-        // You might also want to check if 'navigate' was called with the correct argument
     });
 });
-    // test('displays error message on failed login', async () => {
-    //     // Mock the failed login response
-    //     supabase.auth.signInWithPassword.mockResolvedValueOnce({
-    //         data: null,
-    //         error: { message: 'Invalid credentials' },
-    //     });
-
-    //     fireEvent.change(screen.getByPlaceholderText(/enter vit email/i), {
-    //         target: { value: 'wrong@vit.com' },
-    //     });
-    //     fireEvent.change(screen.getByPlaceholderText(/enter password/i), {
-    //         target: { value: 'password' },
-    //     });
-    //     fireEvent.click(screen.getByText(/sign in/i));
-
-    //     // Check for the error message display
-    //     const errorMessage = await screen.findByText(/invalid credentials/i);
-    //     expect(errorMessage).toBeInTheDocument();
-    // });

@@ -5,7 +5,7 @@ import { supabase } from '../components/supabaseClient';
 import { act } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 
-// Mocking
+// Mocking Supabase client
 jest.mock('../components/supabaseClient', () => ({
     supabase: {
         auth: {
@@ -58,10 +58,10 @@ describe('LoginFormComponent', () => {
 
         await act(async () => {
             fireEvent.change(screen.getByPlaceholderText(/enter vit email/i), {
-                target: { value: 'default123@gmail.com' },
+                target: { value: 'test' },
             });
             fireEvent.change(screen.getByPlaceholderText(/enter password/i), {
-                target: { value: 'default123' },
+                target: { value: 'test' },
             });
             fireEvent.click(screen.getByText(/sign in/i));
         });

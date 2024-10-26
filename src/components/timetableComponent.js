@@ -15,10 +15,12 @@ const TimetableComponent = ({ filters }) => {
     const [showCourseWarning, setShowCourseWarning] = useState(false);
     const timetableRef = useRef(null);
 
+    // Fetch timetable data based on selected filters
     const fetchTimetableData = async () => {
         setIsLoading(true);
         try {
-            let query = supabase
+            // Build query
+            let query = supabase 
                 .from('Classes')
                 .select(`
                     id,
@@ -35,6 +37,7 @@ const TimetableComponent = ({ filters }) => {
                 `)
                 .order('start_time');
     
+            // Apply filters if they exist
             if (filters.campusId) {
                 query = query.eq('Subjects.Courses.campus_id', filters.campusId);
             }
@@ -42,9 +45,11 @@ const TimetableComponent = ({ filters }) => {
                 query = query.eq('Subjects.course_id', filters.courseId);
             }
     
+            // Execute query
             const { data, error } = await query;
             if (error) throw error;
             
+            // Filter out classes w NA codes
             const filteredData = data.filter(classItem => classItem.Subjects && classItem.Subjects.code !== 'N/A');
             setClasses(filteredData || []);
         } catch (error) {
@@ -54,13 +59,16 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
+    // Fetch timetable whenever filters change
     useEffect(() => {
         fetchTimetableData();
     }, [filters]);
 
+    // Generate and fetch new timetable
     const generateAndFetchTimetable = async () => {
         setIsLoading(true);
         try {
+            // Invoke Supabase function to generate timetable
             const { data, error } = await supabase.functions.invoke('generate-timetable', {
                 body: JSON.stringify(filters)
             });
@@ -73,24 +81,29 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
+    // When user confirms timetable generation
     const handleConfirmGenerate = () => {
         generateAndFetchTimetable();
         setShowPopup(false);
     };
 
+    // Click to show popup
     const handleGenerateClick = () => {
         setShowPopup(true);
     };
 
     const isGenerateDisabled = filters.campusId || filters.courseId;
 
-    // Export as PDF
+    // Export timetable as PDF
     const handleExportPDF = async () => {
         if (timetableRef.current) {
+
+            // Clone the timetable
             const timetableClone = timetableRef.current.cloneNode(true);
             document.body.appendChild(timetableClone);
             timetableClone.classList.add('pdf-export');
 
+            // Visual changes for pdf
             const classSlots = timetableClone.getElementsByClassName('class-slot');
             Array.from(classSlots).forEach(slot => {
                 const duration = parseInt(slot.style.height);
@@ -136,7 +149,7 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
-    // Export as Excel
+    // Export timetable as Excel
     const handleExportExcel = async () => {
         if (filters.courseId) {
             try {
@@ -158,16 +171,19 @@ const TimetableComponent = ({ filters }) => {
         }
     };
 
+    // Store geenerated colours for class codes
     const colorMap = {};
     const getClassColor = (subjectCode) => {
         if (!subjectCode || subjectCode === 'N/A') return '#FFFFFF';
         if (!colorMap[subjectCode]) {
+            // Unique colour per subject
             const hue = subjectCode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) * 137.508;
             colorMap[subjectCode] = `hsl(${hue % 360}, 70%, 85%)`;
         }
         return colorMap[subjectCode];
     };
 
+    // Render each class in the correct time slot
     const renderTimeSlot = (halfHourIndex, dayIndex) => {
         const dbTime = dayIndex * 48 + halfHourIndex + 16;
         const classesInSlot = classes.filter(c => c.start_time === dbTime);
@@ -202,6 +218,7 @@ const TimetableComponent = ({ filters }) => {
         });
     };    
 
+    // Render timetable for the week
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const timeSlots = Array.from({ length: 25 }, (_, i) => i);
 
@@ -211,6 +228,7 @@ const TimetableComponent = ({ filters }) => {
         return `${hour.toString().padStart(2, '0')}:${minute}`;
     };
 
+    // Render main component
     return (
         <div className="timetable-section">
             {showPopup && (

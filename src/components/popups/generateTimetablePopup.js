@@ -3,7 +3,7 @@ import '../../styles/popup.css';
 
 const GenerateTimetablePopup = ({ onClose, onConfirm }) => {
 
-    // Add an event listener to handle "Escape" key press to close the popup
+    // Event listener to handle "Escape" key press to close popup
     useEffect(() => {
         const handleEsc = (event) => {
             if (event.key === 'Escape') {

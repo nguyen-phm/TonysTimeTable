@@ -18,10 +18,12 @@ import '../styles/timetablePage.css';
 import VITLogo from '../assets/VIT_White.png';
 
 const AdminPage = () => {
+    // Manage active tab in sidebar
     const [activeTab, setActiveTab] = useState('home');
     const [timetableFilters, setTimetableFilters] = useState({ campusId: null, courseId: null });
     const navigate = useNavigate();
 
+    // Handle user sign out
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
@@ -31,10 +33,12 @@ const AdminPage = () => {
         }
     };
 
+    // Handle changes in timetable filters
     const handleTimetableFilterChange = (filters) => {
         setTimetableFilters(filters);
     };
 
+    // Render content based on active tab
     const renderContent = () => {
         switch (activeTab) {
             case 'campuses':
@@ -60,17 +64,23 @@ const AdminPage = () => {
         }
     };
 
+    // Render sidebar with filters based on active tab
     const renderSidebar = () => {
+
+        // Timetable filter on Home page
         if (activeTab === 'home') {
             return (
-                <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />
+                <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} /> 
             );
         } 
-        if (activeTab === 'assistant') {
+
+        //No Filter on AI page
+        if (activeTab === 'assistant') { 
             return;
         }
 
-        return (
+        // General filter on other tabs
+        return ( 
             <div className='filters-border'>
                 <div className="filters-title">FILTERS</div>
                 <hr className="filters-divider" />
@@ -148,6 +158,7 @@ const AdminPage = () => {
     );
 };
 
+// Sidebar link component
 const SidebarLink = ({ Icon, label, onClick, active }) => (
     <button onClick={onClick} className={`sidebar-link ${active ? 'active' : ''}`}>
         <Icon className="sidebar-link-icon" />
@@ -155,23 +166,11 @@ const SidebarLink = ({ Icon, label, onClick, active }) => (
     </button>
 );
 
+// Filter section component for each filter
 const FilterSection = ({ label }) => (
     <div className="filter-section">
         <label className="filter-label">{label}</label>
         <input type="text" className="filter-input" placeholder="All" />
-    </div>
-);
-
-// Content components with dummy data
-const AccountContent = () => (
-    <div className="admin-section">
-        <div className="account-box">
-            <p><span className="font-semibold">Name:</span> Michelle Gu</p>
-            <p><span className="font-semibold">Email:</span> mich@elle.gu</p>
-            <p><span className="font-semibold">Role:</span> Administrator</p>
-            <p><span className="font-semibold">Last Login:</span> 2023-09-24 14:30:00</p>
-            <p><span className="font-semibold">Account Status:</span> Active</p>
-        </div>
     </div>
 );
 

@@ -3,6 +3,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* Flexbox utility classes */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .h-screen { height: 100vh; }
@@ -15,6 +16,7 @@
   position: fixed;
 }
 
+/* Sidebar styles */
 .sidebar {
   width: 16rem;
   display: flex;
@@ -25,6 +27,7 @@
   height: 100vh;
 }
 
+/* Logo styles */
 .vit-logo {
   width: 100px;
   height: auto;
@@ -35,8 +38,7 @@
   border-bottom: 2px solid #DB8686;
 }
 
-
-/* Add animation for backflip */
+/* Animation for logo backflip */
 @keyframes backflip {
   0% {
     transform: rotateY(0);
@@ -50,6 +52,7 @@
   animation: backflip 1s ease-in-out;
 }
 
+/* Main content area styles */
 .main-content {
   margin-left: 16rem; 
   flex-grow: 1;
@@ -57,6 +60,7 @@
   flex-direction: column;
 }
 
+/* Navigation section styles */
 .nav-section {
   padding: 0.5rem 0;
   border-bottom: 2px solid #DB8686;

@@ -5,7 +5,7 @@ import { supabase } from '../components/supabaseClient';
 import { act } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 
-// Mocking
+// Mocking Supabase client
 jest.mock('../components/supabaseClient', () => ({
     supabase: {
         auth: {
@@ -31,9 +31,9 @@ const renderWithRouter = (component) => {
     );
 };
 
+// Before each test, clear prev mocks and set up mock return values
 beforeEach(() => {
     jest.clearAllMocks();
-    // Mock return value for campuses data
     supabase.from.mockImplementation((table) => {
         if (table === 'campuses') {
             return {
@@ -58,7 +58,7 @@ beforeEach(() => {
         };
     });
 
-    // Mock auth signOut success
+    // Mock auth sign out success
     supabase.auth.signOut.mockResolvedValue({ error: null });
 });
 
@@ -72,7 +72,6 @@ describe('AdminPage', () => {
         await act(async () => {
             renderWithRouter(<AdminPage />);
         });
-        
         expect(screen.getByRole('button', { name: /Loading.../i })).toBeInTheDocument();
     });
 

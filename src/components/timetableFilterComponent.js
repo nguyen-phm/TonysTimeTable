@@ -11,6 +11,7 @@ const TimetableFilterComponent = ({ onFilterChange }) => {
         fetchCampuses();
     }, []);
 
+    // Fetch courses whenever filters change
     useEffect(() => {
         if (selectedCampus === 'all') {
             fetchCourses('all');
@@ -21,6 +22,7 @@ const TimetableFilterComponent = ({ onFilterChange }) => {
         }
     }, [selectedCampus]);
 
+    // Function for fetching campsues from Supabase
     const fetchCampuses = async () => {
         const { data, error } = await supabase
             .from('Campuses')
@@ -29,6 +31,7 @@ const TimetableFilterComponent = ({ onFilterChange }) => {
         else setCampuses(data);
     };
 
+    // Fetching based on selected campus
     const fetchCourses = async (campusId) => {
         if (campusId === 'all') {
             const { data, error } = await supabase
@@ -46,6 +49,7 @@ const TimetableFilterComponent = ({ onFilterChange }) => {
         }
     };
 
+    // Handles campus selection change
     const handleCampusChange = (e) => {
         const campusId = e.target.value;
         setSelectedCampus(campusId);
@@ -56,11 +60,13 @@ const TimetableFilterComponent = ({ onFilterChange }) => {
         }
     };
 
+    // Handles course selection change
     const handleCourseChange = (e) => {
         const courseId = e.target.value;
         setSelectedCourse(courseId);
     };
 
+    // Applies selected filters
     const handleApply = () => {
         onFilterChange({
             campusId: selectedCampus === 'all' ? null : selectedCampus,

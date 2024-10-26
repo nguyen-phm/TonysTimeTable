@@ -11,7 +11,10 @@
 
 - **User Authentication:** Login and registration functionality using Supabase.
 - **Course Management:** Admins can create, update, and delete course schedules.
-- **Courses on Display** Admins can view the active timetable of ongoing courses.
+- **People Management:** Admins can create, update, and delete staff/students.
+- **Generate Timetable** Admins can automatically generate new timetables for courses.
+- **Export Timetable** Admins can view the active timetable of ongoing courses and export as PDF/Excel.
+- **AI Assistant:** Admins can ask the bulit-in AI assistant for help with functionality.
 - **Responsive Design:** This is a webpage optimized for Desktop users.
 
 ## Screenshots
@@ -20,11 +23,14 @@
 
 ![Login Page](./src/assets/LoginPage.png)
 
-#### Registration Page
-![Registration Page](./src/assets/RegistrationPage.png)
-
 #### Display Timetable
 ![TimeTable Page](./src/assets/TimeTablePage.png)
+
+#### Students Page
+![Registration Page](./src/assets/StudentsPage.png)
+
+#### AI Assistant Page
+![Registration Page](./src/assets/AIPage.png)
 ---
 
 ## Getting Started!
@@ -72,11 +78,17 @@
 
 2. This will bundle the application into the build/ folder, ready for deployment.
 
+## Deployment
+
+The application is deployed on Vercel and can be accessed at the following link:
+
+[Tony's Timetable - Live Demo](https://vit-tt.vercel.app/)
+
+Vercel provides automatic deployment on pushes to the main branch of the repository. The deployment process is handled seamlessly through GitHub integration.
+
 ## Usage
 
-Provide information on how the app works, such as:
-
-Admin: Log in to create or update courses.
+Admin: Log in to create or update courses, students, staff. Generate and view timetables. 
 
 ## Project Structuture
 * /src/assets: Contains all image assets.
@@ -84,15 +96,6 @@ Admin: Log in to create or update courses.
 * /src/pages: Contains the different pages of the app.
 * /src/styles: Contains CSS files for the page layout design.
 * /src/supabaseClient.js: Configures Supabase authentication.
-
-## Contributing
-Contributions are welcome! Please follow these steps:
-
-1. Fork the project.
-2. Create a new branch (git checkout -b feature/3. YourFeature).
-3. Commit your changes (git commit -m 'Add some feature').
-4. Push to the branch (git push origin feature/YourFeature).
-5. Open a Pull Request.
 
 ## Authors and Contact
 

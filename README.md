@@ -27,7 +27,7 @@
 ![TimeTable Page](./src/assets/TimeTablePage.png)
 ---
 
-## Getting Started
+## Getting Started!
 
 ### Prerequisites
 

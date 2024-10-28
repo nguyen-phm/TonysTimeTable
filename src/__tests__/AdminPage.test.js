@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AdminPage from '../pages/adminPage';
-import { supabase } from '../components/supabaseClient';
+import { supabase } from '../utils/supabaseClient';
 import { act } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 
 // Mocking Supabase client
-jest.mock('../components/supabaseClient', () => ({
+jest.mock('../utils/supabaseClient', () => ({
     supabase: {
         auth: {
             signInWithPassword: jest.fn(),

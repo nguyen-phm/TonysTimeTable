@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import AddClassPopup from './popups/addClassPopup';
-import EditClassPopup from './popups/editClassPopup';
-import RemovePopup from './popups/removePopup'; // Import the RemovePopup
-import { supabase } from './supabaseClient';
+import AddClassPopup from '../popups/addClassPopup';
+import EditClassPopup from '../popups/editClassPopup';
+import RemovePopup from '../popups/removePopup'; // Import the RemovePopup
+import { supabase } from '../../utils/supabaseClient';
 
 const ClassComponent = () => {
     const [classrooms, setClassrooms] = useState([]);

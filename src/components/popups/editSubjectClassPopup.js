@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import '../../styles/scrollablePopup.css';
 import '../../styles/popup.css';
 import '../../styles/adminPage.css';

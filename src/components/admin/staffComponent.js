@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import AddStaffPopup from './popups/addStaffPopup';
-import EditStaffPopup from './popups/editStaffPopup';
-import RemovePopup from './popups/removePopup'; // Import the RemovePopup component
-import { supabase } from './supabaseClient';
-import '../styles/adminPage.css';
+import AddStaffPopup from '../popups/addStaffPopup';
+import EditStaffPopup from '../popups/editStaffPopup';
+import RemovePopup from '../popups/removePopup'; // Import the RemovePopup component
+import { supabase } from '../../utils/supabaseClient';
+import '../../styles/adminPage.css';
 
 const StaffComponent = () => {
     const [staff, setStaff] = useState([]);

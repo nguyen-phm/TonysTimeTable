@@ -21,16 +21,16 @@
 
 #### Login Page
 
-![Login Page](./src/assets/LoginPage.png)
+![Login Page](./public/LoginPage.png)
 
 #### Display Timetable
-![TimeTable Page](./src/assets/TimeTablePage.png)
+![TimeTable Page](./public/TimeTablePage.png)
 
 #### Students Page
-![Registration Page](./src/assets/StudentsPage.png)
+![Registration Page](./public/StudentsPage.png)
 
 #### AI Assistant Page
-![Registration Page](./src/assets/AIPage.png)
+![Registration Page](./public/AIPage.png)
 ---
 
 ## Getting Started!

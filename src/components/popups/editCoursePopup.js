@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import '../../styles/popup.css';
 
 const EditCoursePopup = ({ course, onClose, onSubmit }) => {

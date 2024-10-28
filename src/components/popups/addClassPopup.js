@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MultiSelect } from 'primereact/multiselect'; // Import PrimeReact MultiSelect
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import '../../styles/popup.css';
 import 'primereact/resources/themes/saga-blue/theme.css'; // PrimeReact theme
 import 'primereact/resources/primereact.min.css'; // PrimeReact core CSS

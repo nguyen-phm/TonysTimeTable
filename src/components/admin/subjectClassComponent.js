@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import EditSubjectClassPopup from './popups/editSubjectClassPopup'; // Import the new popup
-import '../styles/adminPage.css';
+import { supabase } from '../../utils/supabaseClient';
+import EditSubjectClassPopup from '../popups/editSubjectClassPopup'; // Import the new popup
+import '../../styles/adminPage.css';
 
 const SubjectListComponent = () => {
     const [courses, setCourses] = useState([]);

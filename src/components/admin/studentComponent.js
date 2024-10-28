@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import AddStudentPopup from './popups/addStudentPopup'; 
-import EditStudentPopup from './popups/editStudentPopup'; 
-import RemovePopup from './popups/removePopup';
-import ErrorPopup from './popups/errorPopup'; 
-import { supabase } from './supabaseClient';
-import { handleFileUpload } from './csvFileHandle'; 
-import '../styles/adminPage.css';
-import '../styles/courseComponent.css';
+import AddStudentPopup from '../popups/addStudentPopup'; 
+import EditStudentPopup from '../popups/editStudentPopup'; 
+import RemovePopup from '../popups/removePopup';
+import ErrorPopup from '../popups/errorPopup'; 
+import { supabase } from '../../utils/supabaseClient';
+import { handleFileUpload } from '../../utils/csvFileHandle'; 
+import '../../styles/adminPage.css';
+import '../../styles/courseComponent.css';
 
 const StudentComponent = () => {
     const [students, setStudents] = useState([]);

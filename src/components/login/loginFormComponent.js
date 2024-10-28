@@ -1,18 +1,9 @@
-import '../styles/loginFormComponent.css';
-import VITLogo from '../assets/VITLogo.png'
+import '../../styles/loginFormComponent.css';
+import VITLogo from '../../assets/VITLogo.png'
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from './supabaseClient';
-
-/*
-<div className="login-sign-up">
-<p>Don't have an account?</p>
-<Link to="/sign-up">
-    {"Register"}
-</Link>
-</div>
-*/
+import { supabase } from '../../utils/supabaseClient';
 
 const LoginFormComponent = () => {
     const [email, setEmail] = useState('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { MultiSelect } from 'primereact/multiselect';
 import '../../styles/popup.css';
 

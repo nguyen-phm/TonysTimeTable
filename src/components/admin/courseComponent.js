@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import AddCoursePopup from './popups/addCoursePopup';
-import EditCoursePopup from './popups/editCoursePopup';
-import RemovePopup from './popups/removePopup'; // Import RemovePopup
-import { supabase } from './supabaseClient';
-import '../styles/adminPage.css';
+import AddCoursePopup from '../popups/addCoursePopup';
+import EditCoursePopup from '../popups/editCoursePopup';
+import RemovePopup from '../popups/removePopup'; // Import RemovePopup
+import { supabase } from '../../utils/supabaseClient';
+import '../../styles/adminPage.css';
 
 const CourseComponent = () => {
     const [courses, setCourses] = useState([]);

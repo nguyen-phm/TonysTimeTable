@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from './supabaseClient';
-import '../styles/timetablePage.css';
-import GenerateTimetablePopup from './popups/generateTimetablePopup';
-import CourseSelectionPopup from './popups/courseSelectionPopup';
+import { supabase } from '../../utils/supabaseClient';
+import '../../styles/timetablePage.css';
+import GenerateTimetablePopup from '../popups/generateTimetablePopup';
+import CourseSelectionPopup from '../popups/courseSelectionPopup';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import exportTimetable from './exportTimetable';
+import exportTimetable from '../../utils/exportTimetable';
 
 const TimetableComponent = ({ filters }) => {
     const [classes, setClasses] = useState([]);

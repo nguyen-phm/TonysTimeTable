@@ -1,4 +1,4 @@
-import RecoveryComponent from "../components/recoveryComponent";
+import RecoveryComponent from "../components/login/recoveryComponent";
 
 function recoveryPage() {
     return (

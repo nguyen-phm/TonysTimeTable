@@ -1,6 +1,6 @@
-import '../styles/forgotPasswordFormComponent.css'
+import '../../styles/forgotPasswordFormComponent.css'
 import { useState } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 const RecoveryComponent = () => {

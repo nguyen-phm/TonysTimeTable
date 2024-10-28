@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Send, Paperclip } from 'lucide-react';
-import '../styles/gpt.css';
+import '../../styles/gpt.css';
 
 const GPTAssist = () => {
   const [query, setQuery] = useState(''); // State to store user input query

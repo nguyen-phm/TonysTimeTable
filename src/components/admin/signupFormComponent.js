@@ -1,8 +1,8 @@
-import '../styles/signupFormComponent.css';
+import '../../styles/signupFormComponent.css';
 import 'boxicons'
 import { useState } from 'react';
-import { supabase } from './supabaseClient';
-import VITLogo from '../assets/VITLogo.png'
+import { supabase } from '../../utils/supabaseClient';
+import VITLogo from '../../assets/VITLogo.png'
 
 const SignupFormComponent = () => {
     const [email, setEmail] = useState('');

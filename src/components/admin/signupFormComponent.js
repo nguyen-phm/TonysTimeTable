@@ -38,12 +38,7 @@ const SignupFormComponent = () => {
         <div className="signup-form-container">
 
             <div className='signup-logo-border'>
-                <div className="signup-hero-image">
-                    <img src={VITLogo} alt="VIT Logo" />
-                </div>
-
                 <div className="signup-form">
-
                     <form onSubmit={handleSignup}>
                         <h1>Create Your Account</h1>
 

@@ -43,7 +43,7 @@ const AdminPage = () => {
         switch (activeTab) {
             case 'campuses':
                 return <CampusComponent />;
-            case 'account':
+            case 'register':
                 return <SignupFormComponent />;
             case 'courses':
                 return <CourseComponent />;
@@ -98,8 +98,8 @@ const AdminPage = () => {
     return (
         <div className="flex h-screen">
             {/* Sidebar */}
-            <div className='sidebar-wrapper'>
-                <div className="sidebar">
+            <div className='admin-sidebar-wrapper'>
+                <div className="admin-sidebar">
                     {/* Logo section */}
                     <div className="sidebar-logo">
                         <img src={VITLogo} alt="VIT Logo" className="h-15" />
@@ -124,7 +124,7 @@ const AdminPage = () => {
                         </div>
                         <div className="nav-section">
                             <SidebarLink Icon={MessageSquareMore} label="AI Assistant" onClick={() => setActiveTab('assistant')} active={activeTab === 'assistant'} />
-                            <SidebarLink Icon={Settings} label="Account" onClick={() => setActiveTab('account')} active={activeTab === 'account'} />
+                            <SidebarLink Icon={Settings} label="Register" onClick={() => setActiveTab('register')} active={activeTab === 'register'} />
                         </div>
                     </nav>
 

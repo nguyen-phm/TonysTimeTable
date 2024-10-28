@@ -1,10 +1,14 @@
+// Automatically generate the timetable using simulated annealing
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { corsHeaders } from '../_shared/cors.ts'
 
-const MIN_HOUR = 8-1; // earliest a class can start (0-23)
-const MAX_HOUR = 20-1; // latest a class can finish
-const IDEAL_HOUR = 13-1;
+const MIN_HOUR = 8; // Earliest a class can start
+const MAX_HOUR = 20; // Latest a class can finish
+
+const IDEAL_HOUR = 13; // Ideal time for a class to start
+const K_MAX = 1000; // Number of iterations for simulated annealing
+const INIT_TEMP = 100; // Initial temperature for simulated annealing
 
 const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!, 
@@ -28,7 +32,6 @@ Deno.serve(async (req) => {
         // This ensures that classes are only assigned rooms in the correct campus
         if (campuses) {
             for (const campus of campuses) { 
-                console.log('NEW CAMPUS  -----')
                 const data = await fetchData(campus.id);
                 let timetable = await getInitialState(data);
                 timetable = runSimulatedAnnealing(timetable, data);
@@ -48,12 +51,13 @@ Deno.serve(async (req) => {
       });
 });
 
+// Checks if a class can be allocated to a given room at a given time
 function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
-    // Make sure class isn't allocated too early
+    // Make sure the class isn't allocated too early
     if (time % 48 < MIN_HOUR*2) return false;
 
     for (let i = 0; i < data.classes[classIndex].duration_30mins; i++) {
-        // Make sure class isn't allocated too late
+        // Make sure the class isn't allocated too late
         if ((time + i) % 48 >= MAX_HOUR*2) return false;
 
         // Check if another class is already allocated to this room at this time
@@ -68,7 +72,7 @@ function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
     return true;
 }
 
-
+// Fetch class data from the database and determine which classes clash
 async function fetchData(campusId) {
     const { data: rooms, roomsError } = await supabase
         .from('Locations')
@@ -122,6 +126,7 @@ async function fetchData(campusId) {
     return { rooms: rooms, classes: classes, clashes: clashes }
 }
 
+// Randomly generate an initial timetable
 function getInitialState(data) {
     const timetable = Array.from({ length: 24*2*5 }, () => new Array(data.rooms.length).fill(null));
     // Attempt to randomly allocate each class.
@@ -141,6 +146,7 @@ function getInitialState(data) {
     return timetable;
 }
 
+// Update the the database with the final timetable
 async function updateDatabase(timetable, data) {
     for (let roomIndex = 0; roomIndex < data.rooms.length; roomIndex++) {
         for (let time = 0; time < timetable.length; time++) {
@@ -162,7 +168,7 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-// Generates a neighbouring state by randomly deallocating and then reallocating K classes
+// Generates a neighbouring state by randomly deallocating and then reallocating classes
 function getNeighbour(timetable, data) {
     const K = Math.ceil(data.classes.length * 0.2)
     const neighbour = JSON.parse(JSON.stringify(timetable));
@@ -198,43 +204,38 @@ function getNeighbour(timetable, data) {
     return neighbour;
 }
 
+// Calculate the energy for a proposed timetable
 function getEnergy(timetable, data) {
     let energy = 0;
     for (let roomIndex = 0; roomIndex < data.rooms.length; roomIndex++) {
         for (let time = 0; time < timetable.length; time++) {
             const classIndex = timetable[time][roomIndex];
             if (classIndex === null) continue;
-            if (time % 2 == 1) energy += 100;
-            energy += Math.abs(time % 48 - IDEAL_HOUR*2);
+            if (time % 2 == 1) energy += 100; // Prefer to start at a whole hour
+            energy += Math.abs(time % 48 - IDEAL_HOUR*2); // Prefer to start close to the ideal hour
             time += data.classes[classIndex].duration_30mins - 1;
         }
     }
     return energy;
 }
 
-const K_MAX = 1000;
+// Optimise the timetable using simulated annealing
 function runSimulatedAnnealing(initialState, data) {
     let currState = initialState;
     let currEnergy = getEnergy(currState, data);
     for (let k = 0; k < K_MAX; k++) {
-        const temperature = 100 * (1 - (k+1)/K_MAX);
+        const temperature = INIT_TEMP * (1 - (k + 1) / K_MAX);
         const newState = getNeighbour(currState, data);
         const newEnergy = getEnergy(newState, data);
-        // console.log('temp', temperature);
-        // console.log('curr energy', currEnergy)
-        // console.log('new energy', newEnergy)
-        // console.log('P=', acceptanceProbaility(currEnergy, newEnergy, temperature));
         if (acceptanceProbaility(currEnergy, newEnergy, temperature) > Math.random()) {
-            // console.log('accepted move');
             currState = newState;
             currEnergy = newEnergy;
-        } else {
-            // console.log('rejected move');
         }
     }
     return currState;
 }
 
+// Calculate the probability of moving from the current timetable to a proposed timetable
 function acceptanceProbaility(currEnergy, newEnergy, temperature) {
     if (newEnergy < currEnergy) {
         // Always move to a lower energy state

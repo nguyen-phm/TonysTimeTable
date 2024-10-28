@@ -4,36 +4,37 @@ import { supabase } from '../../utils/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 const RecoveryComponent = () => {
-        const [password, setPassword] = useState('');
-        const [confirmPassword, setConfirmPassword] = useState('');
-        const [message, setMessage] = useState('');
-        const [error, setError] = useState('');
-        const navigate = useNavigate();
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-        const navigateHome = () => navigate('/');
-      
-        const handlePasswordUpdate = async (e) => {
-          e.preventDefault();
+    const navigateHome = () => navigate('/');
+    
+    // Updates Auth table on Database
+    const handlePasswordUpdate = async (e) => {
+        e.preventDefault();
 
-          if (password !== confirmPassword) {
-            setError('Passwords do not match.');
-            return; 
+        if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        return; 
+    }
+    
+        const { error } = await supabase.auth.updateUser({
+        password: password,
+        });
+    
+        if (error) {
+        setError(error.message);
+        setMessage('');
+        } else {
+        setMessage('Your password has been updated successfully.');
+        setError('');
+        setPassword(''); 
+        setConfirmPassword('');
         }
-      
-          const { error } = await supabase.auth.updateUser({
-            password: password,
-          });
-      
-          if (error) {
-            setError(error.message);
-            setMessage('');
-          } else {
-            setMessage('Your password has been updated successfully.');
-            setError('');
-            setPassword(''); 
-            setConfirmPassword('');
-          }
-        };
+    };
 
     return (
         <div className="forgot-password-container">

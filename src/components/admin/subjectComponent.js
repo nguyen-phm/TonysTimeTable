@@ -80,6 +80,7 @@ const SubjectComponent = () => {
         return 'Unknown Campus';
     };
 
+    // Handles subject insertion into database
     const addSubject = async (subjectData) => {
         try {
             const { data, error } = await supabase
@@ -97,6 +98,7 @@ const SubjectComponent = () => {
         }
     };
 
+    // Handles subject removal from database
     const handleDeleteSubject = async (subjectId) => {
         try {
             const { error: subjectRelationError } = await supabase
@@ -134,6 +136,7 @@ const SubjectComponent = () => {
         }
     };
 
+    // Popup handling (edit and remove)
     const handleEditSubject = (subject) => {
         setSelectedSubject(subject);
         setShowEditSubjectPopup(true);
@@ -149,6 +152,7 @@ const SubjectComponent = () => {
         setShowRemovePopup(true);
     };
 
+    // Updates subjects on page without refresh
     const updateSubject = (updatedSubject) => {
         setSubjects(subjects.map((subject) => (subject.id === updatedSubject.id ? updatedSubject : subject)));
     };

@@ -35,10 +35,12 @@ const StaffComponent = () => {
         fetchStaff();
     }, []);
 
+    // Adds staff to state
     const addStaff = (newStaff) => {
         setStaff([...staff, newStaff]); // Add new staff to the list
     };
 
+    // Handles staff removal from database
     const handleDeleteStaff = async (staffId) => {
         try {
             // Step 1: Nullify the staff_id in the Classes table where the staff member is referenced
@@ -70,6 +72,7 @@ const StaffComponent = () => {
         }
     };
 
+    // Popup Handling
     const handleEditStaff = (staff) => {
         setSelectedStaff(staff); // Store the selected staff
         setShowEditStaffPopup(true); // Show the edit popup

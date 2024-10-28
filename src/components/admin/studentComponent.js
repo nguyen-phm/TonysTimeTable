@@ -18,6 +18,7 @@ const StudentComponent = () => {
     const [errorMessages, setErrorMessages] = useState([]); 
     const [showRemovePopup, setShowRemovePopup] = useState(false);
 
+    // Fetch student from Supabase when the component mounts
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -52,10 +53,12 @@ const StudentComponent = () => {
         fetchStudents();
     }, []);
 
+    // Adds student data to state
     const addStudent = (studentData) => {
         setStudents(prevStudents => [...prevStudents, studentData]);
     };
 
+    // Updates students on page
     const updateStudentList = (updatedStudent) => {
         setStudents((prevStudents) => 
             prevStudents.map((student) => 
@@ -78,10 +81,12 @@ const StudentComponent = () => {
         });
     };
 
+    // Gets CSV file on button click
     const handleUploadButtonClick = () => {
         document.getElementById('file-input').click();
     };
 
+    // Handles student removal from database
     const handleDeleteStudent = async (studentId) => {
         try {
             const { error: joinTableError } = await supabase
@@ -109,6 +114,7 @@ const StudentComponent = () => {
         }
     };
     
+    // Popup Handling
     const handleEditStudent = (student) => {
         setSelectedStudent(student); 
         setShowEditStudentPopup(true); 

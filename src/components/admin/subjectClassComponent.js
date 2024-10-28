@@ -11,6 +11,7 @@ const SubjectListComponent = () => {
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [showEditPopup, setShowEditPopup] = useState(false);
 
+    // Fetch subject classes from Supabase when the component mounts
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -57,11 +58,13 @@ const SubjectListComponent = () => {
         fetchData();
     }, []);
 
+    // Finds course name from courseID
     const getCourseName = (courseId) => {
         const course = courses.find((course) => course.id === courseId);
         return course ? course.name : 'Unknown Course';
     };
 
+    // Finds campus name from courseID
     const getCampusName = (courseId) => {
         const course = courses.find((course) => course.id === courseId);
         if (course) {
@@ -71,6 +74,7 @@ const SubjectListComponent = () => {
         return 'Unknown Campus';
     };
 
+    // Shows edit popup
     const handleEditSubject = (subject) => {
         setSelectedSubject(subject);
         setShowEditPopup(true);

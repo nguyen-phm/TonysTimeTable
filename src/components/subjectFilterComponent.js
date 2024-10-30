@@ -79,9 +79,9 @@ const SubjectFilterComponent = ({ onFilterChange }) => {
 
     const handleApply = () => {
         onFilterChange({
-            campusName: selectedCampus === 'all' ? null : campuses.find(campus => campus.id === selectedCampus)?.name, // Set campus name
-            courseId: selectedCourse === 'all' ? null : selectedCourse,
-            unitId: selectedUnit === 'all' ? null : selectedUnit
+            campusId: selectedCampus === 'all' ? null : Number(selectedCampus),
+            courseId: selectedCourse === 'all' ? null : Number(selectedCourse),
+            subjectCode: selectedUnit === 'all' ? null : Number(selectedUnit)
         });
     };
 

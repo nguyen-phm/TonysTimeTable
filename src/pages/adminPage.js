@@ -44,6 +44,7 @@ const AdminPage = () => {
 
     const handleCourseFilterChange = (filters) => {
         setCourseFilters(filters);
+        // console.log("admin page", filters);
     };
 
     const renderContent = () => {

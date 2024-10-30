@@ -55,9 +55,15 @@ const CourseFilterComponent = ({ onFilterChange }) => {
     };
 
     const handleApply = () => {
+        // console.log("Applying filters:", {
+        //     campusName: selectedCampus,
+        //     courseId: selectedCourse
+        //     // subjectCode: selectedUnit
+        // });
+        
         onFilterChange({
-            campusName: selectedCampus === 'all' ? null : campuses.find(campus => campus.id === selectedCampus)?.name, // Set campus name
-            courseId: selectedCourse === 'all' ? null : selectedCourse
+            // campusName: selectedCampus === 'all' ? null : campuses.find(campus => campus.id === Number(selectedCampus))?.name, // Set campus name
+            courseId: selectedCourse === 'all' ? null : Number(selectedCourse)
         });
     };
 

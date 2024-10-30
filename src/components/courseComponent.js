@@ -1,4 +1,3 @@
-// Work on correctly fetching from the database. (Filter function doesnt work yet fully)
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from './popups/addCoursePopup';
 import EditCoursePopup from './popups/editCoursePopup';
@@ -7,13 +6,13 @@ import '../styles/adminPage.css';
 
 const CourseComponent = ({ filters }) => {
     const [courses, setCourses] = useState([]);
-    const [campuses, setCampuses] = useState([]); // Store campus data
+    const [campuses, setCampuses] = useState([]); 
     const [isLoading, setIsLoading] = useState(true);
+    const [filtered_course, setFilteredCourses] = useState([]);
     const [showAddCoursePopup, setShowAddCoursePopup] = useState(false);
     const [showEditCoursePopup, setShowEditCoursePopup] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
 
-    // Fetch courses and campuses from Supabase when the component mounts
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -47,6 +46,21 @@ const CourseComponent = ({ filters }) => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const filtered_course = courses.filter(courses => {
+            const matchesCourse = filters.courseId? courses.id === filters.courseId : true;
+            // console.log("Matches Course: ",matchesCourse)
+            // console.log("Filters.courseID: ", filters.courseId)
+            // console.log("courses.id: ", courses.id)
+            return matchesCourse
+        });
+
+
+        setFilteredCourses(filtered_course); // Set filtered subjects to a new state
+
+    }, [filters, courses]); // Update when filters or subjects change
+
 
     const addCourse = (newCourse) => {
         setCourses([...courses, newCourse]); // Add new course to the list
@@ -107,7 +121,7 @@ const CourseComponent = ({ filters }) => {
             ) : (
                 <>
                     <div className="courses-list">
-                        {courses.map((course, index) => (
+                        {filtered_course.map((course, index) => (
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{course.name}</div>

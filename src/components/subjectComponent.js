@@ -44,9 +44,16 @@ const SubjectComponent = ({ filters }) => {
                 // Fetch subjects with campus_name
                 const { data: subjectsData, error: subjectsError } = await supabase
                     .from('Subjects')
+                    // .select(`
+                    //     *,
+                    //     Courses (campus_id, Campuses (name))
+                    // `);
                     .select(`
-                        *,
-                        Courses (campus_id, Campuses (name))
+                        id, code, name, course_id,
+                        Courses!inner (
+                            campus_id,
+                            Campuses!inner (name)
+                        )
                     `);
 
                 if (subjectsError) {
@@ -68,9 +75,9 @@ const SubjectComponent = ({ filters }) => {
     useEffect(() => {
         // Filter subjects based on selected filters
         const filtered = subjects.filter(subject => {
-            const matchesCampus = filters.campusName ? subject.campus_name === filters.campusName : true;
             const matchesCourse = filters.courseId ? subject.course_id === filters.courseId : true;
-            return matchesCampus && matchesCourse;
+            const matchesSubjectCode = filters.subjectCode ? subject.id === filters.subjectCode : true;
+            return matchesCourse &&  matchesSubjectCode;
         });
         setFilteredSubjects(filtered); // Set filtered subjects to a new state
     }, [filters, subjects]); // Update when filters or subjects change

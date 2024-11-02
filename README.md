@@ -40,9 +40,6 @@
 - Node.js (v14 or later)
 - npm (v6 or later)
 - Supabase project (for authentication and database)
-- Docker (for supabase edge function testing)
-- Deno
-- Supabase CLI
 
 ### Installation
 
@@ -88,6 +85,37 @@ The application is deployed on Vercel and can be accessed at the following link:
 [Tony's Timetable - Live Demo](https://vit-tt.vercel.app/)
 
 Vercel provides automatic deployment on pushes to the main branch of the repository. The deployment process is handled seamlessly through GitHub integration.
+
+## Backend Development with Supabase
+
+### Prerequistes
+- Supabase CLI
+- Docker Desktop
+- Deno
+
+### Connect to the Supabase Project
+```
+supabase start
+supabase login
+supabase link --project-ref <project-id>
+# project id can be found in the project's dashboard URL
+supabase db pull
+```
+
+### Create a New Edge Function
+```
+supabase functions new <function-name>
+```
+
+### Run Edge Function Locally
+```
+supabase functions serve <function-name>
+```
+
+### Deploy Edge Function
+```
+supabase functions deploy <function-name>
+```
 
 ## Usage
 

@@ -107,3 +107,7 @@ Admin: Log in to create or update courses, students, staff. Generate and view ti
 - **Michelle Gu** - [mmgu@student.unimelb.edu.au](mailto:mmgu@student.unimelb.edu.au)
 - **Nick Muir** - [nmuir@student.unimelb.edu.au ](mailto:nmuir@student.unimelb.edu.au )
 - **Jason Suen** - [manchits@student.unimelb.edu.au](mailto:manchits@student.unimelb.edu.au)
+
+## licensing agreements
+
+OpenAI API used in /supabase/functions/api, open account with OpenAI and include key to use the function, switch to another AI model (i.e. Claude, Grok) upon your wish

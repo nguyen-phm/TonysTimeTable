@@ -1,118 +1,163 @@
 import React, { useState, useEffect } from 'react';
 import AddCoursePopup from '../popups/addCoursePopup';
 import EditCoursePopup from '../popups/editCoursePopup';
-import RemovePopup from '../popups/removePopup'; // Import RemovePopup
+import RemovePopup from '../popups/removePopup'; // Import RemovePopup for delete confirmation
 import { supabase } from '../../utils/supabaseClient';
 import '../../styles/adminPage.css';
 
-const CourseComponent = () => {
-    const [courses, setCourses] = useState([]);
-    const [campuses, setCampuses] = useState([]); // Store campus data
-    const [isLoading, setIsLoading] = useState(true);
-    const [showAddCoursePopup, setShowAddCoursePopup] = useState(false);
-    const [showEditCoursePopup, setShowEditCoursePopup] = useState(false);
-    const [showRemovePopup, setShowRemovePopup] = useState(false); // Control remove popup
-    const [selectedCourse, setSelectedCourse] = useState(null);
-    const [courseToRemove, setCourseToRemove] = useState(null); // Store the course to be removed
+/**
+ * CourseComponent - A component to display, add, edit, and remove courses.
+ * It fetches courses and campus data from Supabase, and applies filters based on props.
+ */
+const CourseComponent = ({ filters }) => {
+    // State hooks
+    const [courses, setCourses] = useState([]);               // List of courses
+    const [campuses, setCampuses] = useState([]);             // List of campuses
+    const [isLoading, setIsLoading] = useState(true);         // Loading indicator
+    const [filtered_course, setFilteredCourses] = useState([]); // Filtered list of courses
+    const [showAddCoursePopup, setShowAddCoursePopup] = useState(false); // Control Add popup visibility
+    const [showEditCoursePopup, setShowEditCoursePopup] = useState(false); // Control Edit popup visibility
+    const [showRemovePopup, setShowRemovePopup] = useState(false); // Control Remove popup visibility
+    const [selectedCourse, setSelectedCourse] = useState(null);   // Currently selected course for editing
+    const [courseToRemove, setCourseToRemove] = useState(null);   // Course selected for removal
 
-    // Fetch courses and campuses from Supabase when the component mounts
+    /**
+     * useEffect hook - Fetches courses and campuses data from Supabase when the component mounts.
+     */
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
 
-                // Fetch courses
+                // Fetch courses data from Supabase
                 const { data: coursesData, error: coursesError } = await supabase
                     .from('Courses')
                     .select('*');
-
                 if (coursesError) {
                     console.error('Error fetching courses:', coursesError);
                 }
 
-                // Fetch campuses
+                // Fetch campuses data from Supabase
                 const { data: campusesData, error: campusesError } = await supabase
                     .from('Campuses')
                     .select('*');
-
                 if (campusesError) {
                     console.error('Error fetching campuses:', campusesError);
                 }
 
-                // Store the courses and campuses data
+                // Store fetched data in state
                 setCourses(coursesData || []);
                 setCampuses(campusesData || []);
             } finally {
-                setIsLoading(false);
+                setIsLoading(false); // Set loading state to false once data is fetched
             }
         };
 
-        fetchData();
+        fetchData(); // Trigger the fetch data function
     }, []);
 
+    /**
+     * useEffect hook - Filters courses based on provided filters.
+     * Updates filtered_course state whenever filters or courses change.
+     */
+    useEffect(() => {
+        const filtered_course = courses.filter(course => {
+            const matchesCourse = filters.courseId ? course.id === filters.courseId : true;
+            return matchesCourse;
+        });
+
+        setFilteredCourses(filtered_course); // Update the filtered courses state
+    }, [filters, courses]);
+
+    /**
+     * addCourse - Adds a new course to the courses state.
+     * @param {Object} newCourse - The new course object to be added.
+     */
     const addCourse = (newCourse) => {
-        setCourses([...courses, newCourse]); // Add new course to the list
+        setCourses([...courses, newCourse]);
     };
 
+    /**
+     * handleDeleteCourse - Deletes a course and associated subjects from Supabase.
+     * Updates the state to remove the deleted course from the list.
+     * @param {string} courseId - The ID of the course to be deleted.
+     */
     const handleDeleteCourse = async (courseId) => {
         try {
-            // Step 1: Remove any subjects associated with this course
+            // Step 1: Delete associated subjects
             const { error: subjectsError } = await supabase
                 .from('Subjects')
                 .delete()
-                .eq('course_id', courseId); // Delete subjects where course_id matches
-
+                .eq('course_id', courseId);
             if (subjectsError) {
                 console.error('Error deleting subjects related to course:', subjectsError);
                 return;
             }
 
-            // Step 2: Delete the course record
+            // Step 2: Delete the course
             const { error: deleteError } = await supabase
                 .from('Courses')
                 .delete()
                 .eq('id', courseId);
-
             if (deleteError) {
                 console.error('Error deleting course:', deleteError);
             } else {
-                setCourses(courses.filter((course) => course.id !== courseId)); // Remove course from the list
+                setCourses(courses.filter((course) => course.id !== courseId)); // Update state to remove course
             }
         } catch (error) {
             console.error('Error deleting course:', error);
         }
     };
 
+    /**
+     * handleEditCourse - Sets the selected course and shows the Edit popup.
+     * @param {Object} course - The course to be edited.
+     */
     const handleEditCourse = (course) => {
-        setSelectedCourse(course); // Store the selected course
-        setShowEditCoursePopup(true); // Show the edit popup
+        setSelectedCourse(course);
+        setShowEditCoursePopup(true);
     };
 
+    /**
+     * updateCourse - Updates the course in the courses state.
+     * @param {Object} updatedCourse - The updated course object.
+     */
     const updateCourse = (updatedCourse) => {
         setCourses(courses.map((course) => (course.id === updatedCourse.id ? updatedCourse : course)));
     };
 
-    // Find campus name by campus_id
+    /**
+     * getCampusName - Finds and returns the campus name based on campus ID.
+     * @param {string} campusId - The ID of the campus.
+     * @returns {string} - The name of the campus or 'Unknown Campus' if not found.
+     */
     const getCampusName = (campusId) => {
         const campus = campuses.find((campus) => campus.id === campusId);
-        return campus ? campus.name : 'Unknown Campus'; // Return the campus name or 'Unknown'
+        return campus ? campus.name : 'Unknown Campus';
     };
 
-    // Show remove popup and set course to be removed
+    /**
+     * handleRemoveClick - Sets the course to be removed and shows the Remove popup.
+     * @param {Object} course - The course to be removed.
+     */
     const handleRemoveClick = (course) => {
         setCourseToRemove(course);
-        setShowRemovePopup(true); // Show remove confirmation popup
+        setShowRemovePopup(true);
     };
 
-    // Confirm deletion from RemovePopup
+    /**
+     * confirmRemoveCourse - Confirms and deletes the selected course.
+     * Calls handleDeleteCourse and hides the Remove popup.
+     */
     const confirmRemoveCourse = () => {
-        handleDeleteCourse(courseToRemove.id); // Delete the course
-        setShowRemovePopup(false); // Close the popup after deletion
+        handleDeleteCourse(courseToRemove.id);
+        setShowRemovePopup(false);
     };
 
     return (
         <div className="admin-section">
             {isLoading ? (
+                // Display loading indicator while data is being fetched
                 <div className='courses-list'>   
                     <div className='course-row'>
                         <p>Loading Courses</p>
@@ -121,7 +166,7 @@ const CourseComponent = () => {
             ) : (
                 <>
                     <div className="courses-list">
-                        {courses.map((course, index) => (
+                        {filtered_course.map((course, index) => (
                             <div key={index} className="course-row">
                                 <div className="course-info">
                                     <div className="course-name">{course.name}</div>
@@ -146,10 +191,12 @@ const CourseComponent = () => {
 
             <br />
 
+            {/* Button to open the Add Course popup */}
             <button className="more-options" type="button" onClick={() => setShowAddCoursePopup(true)}>
                 Add Course
             </button>
 
+            {/* Popups */}
             {showAddCoursePopup && (
                 <AddCoursePopup
                     onClose={() => setShowAddCoursePopup(false)}

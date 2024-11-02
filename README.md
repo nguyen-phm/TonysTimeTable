@@ -40,6 +40,9 @@
 - Node.js (v14 or later)
 - npm (v6 or later)
 - Supabase project (for authentication and database)
+- Docker (for supabase edge function testing)
+- Deno
+- Supabase CLI
 
 ### Installation
 

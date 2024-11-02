@@ -56,6 +56,9 @@ function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
     // Make sure the class isn't allocated too early
     if (time % 48 < MIN_HOUR*2) return false;
 
+    // Make sure room is of the same type as the class
+    if (!data.rooms[roomIndex].class_types.includes(data.classes[classIndex].class_type)) return false;
+
     for (let i = 0; i < data.classes[classIndex].duration_30mins; i++) {
         // Make sure the class isn't allocated too late
         if ((time + i) % 48 >= MAX_HOUR*2) return false;
@@ -76,7 +79,7 @@ function canAllocate(classIndex, roomIndex, time, timetable, data): boolean {
 async function fetchData(campusId) {
     const { data: rooms, roomsError } = await supabase
         .from('Locations')
-        .select(`id, campus_id`)
+        .select(`id, campus_id, class_types`)
         .eq('campus_id', campusId);
 
     if (roomsError) throw new Error(`Error fetching rooms: ${roomsError.message}`);

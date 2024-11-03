@@ -3,12 +3,15 @@ import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settin
 import CampusComponent from '../components/admin/campusComponent';
 import SignupFormComponent from '../components/admin/signupFormComponent';
 import CourseComponent from '../components/admin/courseComponent';
+import CourseFilterComponent from '../components/admin/courseFilterComponent';
 import StudentComponent from '../components/admin/studentComponent';
+import StudentFilterComponent from '../components/admin/studentFilterComponent';
 import TimetableComponent from '../components/timetable/timetableComponent';
 import TimetableFilterComponent from '../components/timetable/timetableFilterComponent';
 import ClassComponent from '../components/admin/classComponent';
 import StaffComponent from '../components/admin/staffComponent';
 import SubjectComponent from '../components/admin/subjectComponent';
+import SubjectFilterComponent from '../components/admin/subjectFilterComponent';
 import GPTAssist from '../components/admin/gptAssist';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
@@ -17,13 +20,22 @@ import '../styles/filterComponent.css';
 import '../styles/timetablePage.css';
 import VITLogo from '../assets/VIT_White.png';
 
+/**
+ * AdminPage - The main page component for the admin dashboard.
+ * Manages the state of the active tab, applies filters, and displays content.
+ */
 const AdminPage = () => {
-    // Manage active tab in sidebar
-    const [activeTab, setActiveTab] = useState('home');
+    // State hooks
+    const [activeTab, setActiveTab] = useState('home'); // Active tab for sidebar
     const [timetableFilters, setTimetableFilters] = useState({ campusId: null, courseId: null });
+    const [courseFilters, setCourseFilters] = useState({ campusId: null, courseId: null });
+    const [studentFilters, setStudentFilters] = useState({ campusId: null, courseId: null });
+    const [subjectFilters, setSubjectFilters] = useState({ campusId: null, courseId: null, unitId: null });
     const navigate = useNavigate();
 
-    // Handle user sign out
+    /**
+     * handleSignOut - Signs out the user and redirects to the home page.
+     */
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
@@ -33,12 +45,18 @@ const AdminPage = () => {
         }
     };
 
-    // Handle changes in timetable filters
-    const handleTimetableFilterChange = (filters) => {
-        setTimetableFilters(filters);
-    };
+    /**
+     * Filter handlers - Update the filters for various sections.
+     */
+    const handleTimetableFilterChange = (filters) => setTimetableFilters(filters);
+    const handleCourseFilterChange = (filters) => setCourseFilters(filters);
+    const handleSubjectFilterChange = (filters) => setSubjectFilters(filters);
+    const handleStudentFilterChange = (filters) => setStudentFilters(filters);
 
-    // Render content based on active tab
+    /**
+     * renderContent - Conditionally renders the main content based on activeTab.
+     * @returns {JSX.Element} - Component for the selected tab.
+     */
     const renderContent = () => {
         switch (activeTab) {
             case 'campuses':
@@ -46,11 +64,11 @@ const AdminPage = () => {
             case 'register':
                 return <SignupFormComponent />;
             case 'courses':
-                return <CourseComponent />;
+                return <CourseComponent filters={courseFilters} />;
             case 'units':
-                return <SubjectComponent />;
+                return <SubjectComponent filters={subjectFilters} />;
             case 'students':
-                return <StudentComponent />;
+                return <StudentComponent filters={studentFilters} />;
             case 'staff':
                 return <StaffComponent />;
             case 'classrooms':
@@ -64,23 +82,29 @@ const AdminPage = () => {
         }
     };
 
-    // Render sidebar with filters based on active tab
+    /**
+     * renderSidebar - Renders the sidebar filters based on activeTab.
+     * @returns {JSX.Element} - The sidebar filter component.
+     */
     const renderSidebar = () => {
-
-        // Timetable filter on Home page
         if (activeTab === 'home') {
-            return (
-                <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} /> 
-            );
-        } 
-
-        //No Filter on AI page
-        if (activeTab === 'assistant') { 
-            return;
+            return <TimetableFilterComponent onFilterChange={handleTimetableFilterChange} />;
+        }
+        if (activeTab === 'assistant') {
+            return null;
+        }
+        if (activeTab === 'courses') {
+            return <CourseFilterComponent onFilterChange={handleCourseFilterChange} />;
+        }
+        if (activeTab === 'units') {
+            return <SubjectFilterComponent onFilterChange={handleSubjectFilterChange} />;
+        }
+        if (activeTab === 'students') {
+            return <StudentFilterComponent onFilterChange={handleStudentFilterChange} />;
         }
 
-        // General filter on other tabs
-        return ( 
+        // General filter UI for other tabs
+        return (
             <div className='filters-border'>
                 <div className="filters-title">FILTERS</div>
                 <hr className="filters-divider" />
@@ -100,12 +124,12 @@ const AdminPage = () => {
             {/* Sidebar */}
             <div className='admin-sidebar-wrapper'>
                 <div className="admin-sidebar">
-                    {/* Logo section */}
+                    {/* Logo */}
                     <div className="sidebar-logo">
                         <img src={VITLogo} alt="VIT Logo" className="h-15" />
                     </div>
 
-                    {/* Home link - separated */}
+                    {/* Home link */}
                     <div className="nav-section">
                         <SidebarLink Icon={Home} label="Home" onClick={() => setActiveTab('home')} active={activeTab === 'home'} />
                     </div>
@@ -128,9 +152,7 @@ const AdminPage = () => {
                         </div>
                     </nav>
 
-                    <button onClick={handleSignOut} className="signout-button">
-                        SIGN OUT
-                    </button>
+                    <button onClick={handleSignOut} className="signout-button">SIGN OUT</button>
                 </div>
             </div>
             

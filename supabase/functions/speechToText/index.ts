@@ -9,7 +9,7 @@ const corsHeaders = {
 // Fetch the OpenAI API Key from the environment variables
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 
-// Serve the edge function
+// Receive audio file from frontend and fetch to OpenAI SpeechToText api and return with text transformed
 serve(async (req) => {
   // Handle preflight OPTIONS request for CORS
   if (req.method === "OPTIONS") {

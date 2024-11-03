@@ -1,70 +1,142 @@
-# Getting Started with Create React App
+# Tony's Timetable
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<!-- [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) -->
 
-## Available Scripts
+## Description
+ This project is a **Timetable Management System** designed for teachers and administrators to efficiently create and manage timetables. The platform allows users to enter course and student details, enabling the automated generation of timetables. Built with React and leveraging Supabase for authentication and database management, this system is optimized for administrative use in educational institutions.
 
-In the project directory, you can run:
+## Purpose
+The purpose of this project is to deliver an efficient and reliable timetable management system tailored for educational institutions. The platform is designed to support teachers and administrators by streamlining the creation, management, and distribution of schedules. By automating key aspects of timetable management, this system aims to minimize manual scheduling efforts, reduce errors, and enhance overall operational efficiency within academic settings
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **User Authentication:** Login and registration functionality using Supabase.
+- **Course Management:** Admins can create, update, and delete course schedules.
+- **People Management:** Admins can create, update, and delete staff/students.
+- **Generate Timetable** Admins can automatically generate new timetables for courses.
+- **Export Timetable** Admins can view the active timetable of ongoing courses and export as PDF/Excel.
+- **AI Assistant:** Admins can ask the bulit-in AI assistant for help with functionality.
+- **Responsive Design:** This is a webpage optimized for Desktop users.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Screenshots
 
-### `npm test`
+#### Login Page
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![Login Page](./public/LoginPage.png)
 
-### `npm run build`
+#### Display Timetable
+![TimeTable Page](./public/TimeTablePage.png)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### Students Page
+![Registration Page](./public/StudentsPage.png)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### AI Assistant Page
+![Registration Page](./public/AIPage.png)
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Getting Started!
 
-### `npm run eject`
+### Prerequisites
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Node.js (v14 or later)
+- npm (v6 or later)
+- Supabase project (for authentication and database)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Installation
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/your-project.git
+    cd your-project
+    ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+2. Install Depdencies:
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3. Set up your environment variables: Create a .env file in the root directory and add your Supabase credentials:
+    ```bash
+    REACT_APP_SUPABASE_URL=your-supabase-url
+    REACT_APP_SUPABASE_ANON_KEY=your-supabase-key
+    ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Running the Project
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. To start the development server:
+    ```bash
+    npm start
+    ```
 
-### Code Splitting
+2. The app will be running at http://localhost:3000.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Building for Production
 
-### Analyzing the Bundle Size
+1. To create a production build:
+    ```bash
+    npm run build
+    ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+2. This will bundle the application into the build/ folder, ready for deployment.
 
-### Making a Progressive Web App
+## Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The application is deployed on Vercel and can be accessed at the following link:
 
-### Advanced Configuration
+[Tony's Timetable - Live Demo](https://vit-tt.vercel.app/)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Vercel provides automatic deployment on pushes to the main branch of the repository. The deployment process is handled seamlessly through GitHub integration.
 
-### Deployment
+## Backend Development with Supabase
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Prerequistes
+- Supabase CLI
+- Docker Desktop
+- Deno
 
-### `npm run build` fails to minify
+### Connect to the Supabase Project
+```
+supabase start
+supabase login
+supabase link --project-ref <project-id>
+# project id can be found in the project's dashboard URL
+supabase db pull
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Create a New Edge Function
+```
+supabase functions new <function-name>
+```
+
+### Run Edge Function Locally
+```
+supabase functions serve <function-name>
+```
+
+### Deploy Edge Function
+```
+supabase functions deploy <function-name>
+```
+
+## Usage
+
+Admin: Log in to create or update courses, students, staff. Generate and view timetables. 
+
+## Project Structuture
+* /src/assets: Contains all image assets.
+* /src/components: Contains React components.
+* /src/pages: Contains the different pages of the app.
+* /src/styles: Contains CSS files for the page layout design.
+* /src/supabaseClient.js: Configures Supabase authentication.
+
+## Authors and Contact
+
+- **Will Kang** - [juneushk@student.unimelb.edu.au](mailto:juneushk@student.unimelb.edu.au)
+- **Dave Gill** - [gillsd@student.unimelb.edu.au](mailto:gillsd@student.unimelb.edu.au)
+- **Michelle Gu** - [mmgu@student.unimelb.edu.au](mailto:mmgu@student.unimelb.edu.au)
+- **Nick Muir** - [nmuir@student.unimelb.edu.au ](mailto:nmuir@student.unimelb.edu.au )
+- **Jason Suen** - [manchits@student.unimelb.edu.au](mailto:manchits@student.unimelb.edu.au)
+
+## licensing agreements
+
+OpenAI API used in /supabase/functions/api, open account with OpenAI and include key to use the function, switch to another AI model (i.e. Claude, Grok) upon your wish

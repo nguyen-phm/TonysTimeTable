@@ -7,4 +7,5 @@
   ],
   "deno.lint": true,
   "deno.unstable": true,
+  "deno.enable": true
 }

@@ -10,11 +10,8 @@
     "bootstrap": "^5.3.3",
     "boxicons": "^2.1.4",
     "exceljs": "^4.4.0",
-<<<<<<< HEAD
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
-=======
->>>>>>> 79a98ae3b56dde14bb84fa06faf2173554d334a9
     "jsr": "^0.13.2",
     "lucide-react": "^0.445.0",
     "papaparse": "^5.4.1",

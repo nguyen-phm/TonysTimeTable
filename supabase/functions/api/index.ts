@@ -1,3 +1,4 @@
+// Receive query from user, send to OpenAI api and carry out CRUD operation
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.16.0?target=deno";
 
@@ -9,9 +10,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-/**
- * receive query from frontend and fetch to OpenAI api, handling database information retrieve and CRUD operation
- */
 serve(async (req) => {
   try {
     // Handle preflight CORS requests

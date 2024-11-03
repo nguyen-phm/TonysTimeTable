@@ -1,3 +1,4 @@
+// Implement text to speech functionality for AI assistant
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 
 const corsHeaders = {
@@ -9,7 +10,6 @@ const corsHeaders = {
 // Fetch the OpenAI API Key from the environment variables
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 
-// Receive audio file from frontend and fetch to OpenAI SpeechToText api and return with text transformed
 serve(async (req) => {
   // Handle preflight OPTIONS request for CORS
   if (req.method === "OPTIONS") {

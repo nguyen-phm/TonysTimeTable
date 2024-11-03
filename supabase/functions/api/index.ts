@@ -9,7 +9,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-// Edge function handler
+/**
+ * receive query from frontend and fetch to OpenAI api, handling database information retrieve and CRUD operation
+ */
 serve(async (req) => {
   try {
     // Handle preflight CORS requests

@@ -5,7 +5,8 @@
 ## Description
  This project is a **Timetable Management System** designed for teachers and administrators to efficiently create and manage timetables. The platform allows users to enter course and student details, enabling the automated generation of timetables. Built with React and leveraging Supabase for authentication and database management, this system is optimized for administrative use in educational institutions.
 
-
+## Purpose
+The purpose of this project is to deliver an efficient and reliable timetable management system tailored for educational institutions. The platform is designed to support teachers and administrators by streamlining the creation, management, and distribution of schedules. By automating key aspects of timetable management, this system aims to minimize manual scheduling efforts, reduce errors, and enhance overall operational efficiency within academic settings
 
 ## Features
 

@@ -1,5 +1,5 @@
 import '../../styles/loginFormComponent.css';
-import VITLogo from '../../assets/VITLogo.png'
+import VITLogo from '../../assets/VITLogo.png';
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,6 @@ const LoginFormComponent = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     // Load remembered email when component mounts
@@ -24,7 +23,7 @@ const LoginFormComponent = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         
-        // remembering me
+        // Remember email if "Remember me" is checked
         if (rememberMe) {
             localStorage.setItem('rememberedEmail', email);
         } else {
@@ -37,7 +36,7 @@ const LoginFormComponent = () => {
         });
         
         if (error) {
-            setError(error.message);
+            alert(error.message); // Display error message in default popup
         } else {
             navigate('/admin');
         }

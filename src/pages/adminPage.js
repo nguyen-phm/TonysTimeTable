@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Home, School, BookCopy, BookOpenText, User, Presentation, Users, Settings, MessageSquareMore } from 'lucide-react';
 import CampusComponent from '../components/admin/campusComponent';
-import SignupFormComponent from '../components/admin/signupFormComponent';
+import SignupPage from './signupPage';
 import CourseComponent from '../components/admin/courseComponent';
 import CourseFilterComponent from '../components/admin/courseFilterComponent';
 import StudentComponent from '../components/admin/studentComponent';
@@ -61,8 +61,6 @@ const AdminPage = () => {
         switch (activeTab) {
             case 'campuses':
                 return <CampusComponent />;
-            case 'register':
-                return <SignupFormComponent />;
             case 'courses':
                 return <CourseComponent filters={courseFilters} />;
             case 'units':
@@ -148,7 +146,12 @@ const AdminPage = () => {
                         </div>
                         <div className="nav-section">
                             <SidebarLink Icon={MessageSquareMore} label="AI Assistant" onClick={() => setActiveTab('assistant')} active={activeTab === 'assistant'} />
-                            <SidebarLink Icon={Settings} label="Register" onClick={() => setActiveTab('register')} active={activeTab === 'register'} />
+                            <SidebarLink 
+                                Icon={Settings} 
+                                label="Register" 
+                                onClick={() => navigate('/signup')} // Navigate to /signup
+                                active={false} 
+                            />
                         </div>
                     </nav>
 

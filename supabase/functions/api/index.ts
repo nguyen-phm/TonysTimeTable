@@ -1,14 +1,9 @@
 // Receive query from user, send to OpenAI api and carry out CRUD operation
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.16.0?target=deno";
+import { corsHeaders } from '../_shared/cors.ts'
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-// CORS headers configuration
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Replace "*" with your frontend domain in production
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
 
 serve(async (req) => {
   try {
